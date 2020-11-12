@@ -1,0 +1,242 @@
+﻿@inject ApplicationDbContext _db
+@inject IDDLHelper _ddlhelper
+@{
+    ViewData["Title"] = "OrderByAdmin";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+
+    var DateT = ViewBag.Date == null ? DateTime.Now : Convert.ToDateTime(ViewBag.Date);
+
+    var setMenu = new List<SetMenu>();
+    if (ViewBag.Result != null)
+    {
+        setMenu = ViewBag.Result;
+    }
+
+
+}
+
+
+<div class="container-fluid">
+
+    <div class="row">
+        <div class="col-12">
+            <form asp-action="OrderByAdmin" method="get">
+                <input type="date" name="LoadOrderDate" value="@DateT.ToString("yyyy-MM-dd")" />
+                <button type="submit" class="btn btn-success btn-sm">Load</button>
+            </form>
+            <hr />
+        </div>
+    </div>
+
+
+
+    <div class="row d-flex justify-content-start">
+
+        @if (setMenu.Count > 0)
+        {
+            <form>
+                <div class="row">
+
+                    <input type="hidden" id="selectedDate" value="@DateT.ToString("yyyy-MM-dd")" />
+
+                    <div class="col-sm-1">
+                        <label>User:</label>
+                    </div>
+                    <div class="col-sm-6">
+                        @*<select id="userId" class="" asp-items="@{new SelectList(_ddlhelper.GetAllUsersList().Prepend(new KeyValuePair<string, string>("0","-- Select User --")),"Key","Value","")}"></select>*@
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-12">
+
+                        @{
+                            var currentDateTime = DateTime.Now; var selectedDateTime = DateT; var isVisible = ""; var isChecked = "";
+                            var dateTimeCompare = DateTime.Compare(selectedDateTime, currentDateTime);
+                            if (dateTimeCompare > 0)
+                            {
+                                isVisible = "disabled";
+                                isChecked = "checked";
+                            }
+                            else
+                            {
+                                isVisible = "disabled";
+                                isChecked = "";
+                            }
+                        }
+
+                        <div class="custom-control custom-checkbox">
+                            <input type="checkbox" class="custom-control-input" id="isPreorderChecked" @isVisible @isChecked>
+                            <label class="custom-control-label" for="defaultChecked2">Pre Order</label>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    @foreach (var gr in setMenu.GroupBy(x => x.MealType))
+                    {
+
+                        <div class="p-3">
+                            <div class="row small" id="@gr.Key.Id-OrderMessages">
+
+                            </div>
+                            <div class="card">
+                                <div class="card-header">
+                                    <span>@gr.Key.Name</span>
+                                    <a class="btn btn-success btn-sm" onclick="SaveOrder(@gr.Key.Id, @gr.FirstOrDefault().Id)">Order</a> <br />
+                                    <span>Set-Menu Item</span> <br />
+                                    <span class="badge badge-secondary">TK. @gr.FirstOrDefault().SetMenuPrice</span>
+                                    <input type="hidden" value="@gr.FirstOrDefault().Id" id="SetMenuId" />
+                                    <input type="number" min="0.00" id="@gr.Key.Id-mealType" name="setMenuAmount" value="0" />
+                                    <br />
+                                    @{ var i = 0; }
+                                    @if (gr.FirstOrDefault().SetMenuDetailsList.Count > 0)
+                                    {
+                                        @foreach (var smd in gr.FirstOrDefault().SetMenuDetailsList.ToList())
+                                        {
+                                            i = i + 1;
+                                            var smdt = _db.SetMenuDetails.Include(x => x.StoreOutItem).Where(x => x.Id == smd.Id).FirstOrDefault();
+                                            <span class="badge badge-primary">@i. @smdt.StoreOutItem.Name</span>
+                                        }
+                                    }
+                                </div>
+                                <div class="card-body">
+                                    <span>Extra Item</span> <br />
+                                    @if (gr.FirstOrDefault().ExtraItemList.Count > 0)
+                                    {
+                                        <table class="table-striped table-bordered">
+                                            <thead class="grey lighten-2">
+                                                <tr>
+                                                    <th scope="col">#</th>
+                                                    <th scope="col">Name</th>
+                                                    <th scope="col">Amount</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                @{ int j = 1; }
+                                                @foreach (var ei in gr.FirstOrDefault().ExtraItemList.ToList())
+                                                {
+                                                    var eit = _db.StoreOutItem.Where(x => x.Id == ei.StoreOutItemId).FirstOrDefault();
+                                                    <tr>
+                                                        <th scope="row">@(j++)</th>
+                                                        <td>@eit.Name <span class="badge badge-default">Tk. @ei.Price</span></td>
+                                                        <td>
+                                                            <input class="" type="number" name="@gr.Key.Id-extraItemAmount" id="@ei.Id" value="0.00" min="0.00" />
+                                                        </td>
+                                                    </tr>
+                                                }
+
+                                            </tbody>
+                                        </table>
+                                    }
+
+                                </div>
+                            </div>
+                        </div>
+
+                    }
+                </div>
+            </form>
+        }
+
+
+    </div>
+
+
+</div>
+
+
+
+
+@section Scripts {
+
+
+    <script>
+
+        function SaveOrder(mealtypeid, setmenuid) {
+
+            $('#' + mealtypeid + '-OrderMessages').children().remove();
+
+            var selectedDateT = $('#selectedDate').val();
+            var userId = $('#userId :selected').val();
+            var isPreorder = $('#isPreorderChecked').is(":checked");
+            var setMenuId = $('#SetMenuId').val();
+            var setMenuUnitOrdered = $('#' + mealtypeid + '-mealType').val();
+            var extraItemInputList = $('input[name=' + mealtypeid + '-extraItemAmount]');
+
+            var setMenuUnitOrderedF = 0;
+            if (setMenuUnitOrdered > 0) {
+
+                setMenuUnitOrderedF = setMenuUnitOrdered;
+
+                $.post("/mms/api/admin/dashboard/SaveOrderHistory?SelectedDateT=" + selectedDateT + "&UserId=" + userId + "&IsPreorder=" + isPreorder + "&Mealtypeid=" + mealtypeid + "&SetMenuId=" + setMenuId + "&ExtraItemId=&UnitOrdered=" + setMenuUnitOrderedF)
+                    .done(function (d) {
+                        if (!d.hasError) {
+                            $('#' + mealtypeid + '-OrderMessages').append('<span class="alert alert-success py-0 px-2">Set-Menu order successful</span>');
+                            $('#' + mealtypeid + '-mealType').val(0);
+                        } else {
+                            $('#' + mealtypeid + '-OrderMessages').append('<span class="alert alert-danger py-0 px-2">Set-Menu order failed to update : ' + d.errorList[0].message + '</span>');
+                            $('#' + mealtypeid + '-mealType').val(0);
+                        }
+                    }).fail(function (e) {
+                        $('#' + mealtypeid + '-OrderMessages').append('<span class="alert alert-danger py-0 px-2">something went wrong : ' + e.responseText + '</span>');
+                        $('#' + mealtypeid + '-mealType').val(0);
+                    });
+            }
+
+
+
+            $.each(extraItemInputList, function () {
+                //alert(this.id + '>' + this.value)
+
+                var eatraItemId = this.id;
+                var eatraItemIdF = null;
+
+                var extraItemUnitOrdered = this.value;
+                var extraItemUnitOrderedF = 0;
+
+                if (extraItemUnitOrdered > 0) {
+
+                    extraItemUnitOrderedF = extraItemUnitOrdered;
+                    eatraItemIdF = eatraItemId;
+
+                    $.post("/mms/api/admin/dashboard/SaveOrderHistory?SelectedDateT=" + selectedDateT + "&UserId=" + userId + "&IsPreorder=" + isPreorder + "&Mealtypeid=" + mealtypeid + "&SetMenuId=" + setMenuId + "&ExtraItemId=" + eatraItemIdF + "&UnitOrdered=" + extraItemUnitOrderedF)
+                        .done(function (d) {
+                            if (!d.hasError) {
+                                $('#' + mealtypeid + '-OrderMessages').append('<span class="alert alert-success py-0 px-2">Extra Item order successful</span>');
+                                $('#' + eatraItemIdF).val(0);
+                            } else {
+                                $('#' + mealtypeid + '-OrderMessages').append('<span class="alert alert-danger py-0 px-2">Extra Item order failed to update : ' + d.errorList[0].message + '</span>');
+                                $('#' + eatraItemIdF).val(0);
+                            }
+                        }).fail(function (e) {
+                            $('#' + mealtypeid + '-OrderMessages').append('<span class="alert alert-danger py-0 px-2">something went wrong : ' + e.responseText + '</span>');
+                            $('#' + eatraItemIdF).val(0);
+                        });
+                }
+
+
+            });
+
+            //alert(selectedDateT);
+            //alert(userId);
+            //alert(isPreorder);
+            //alert(mealtypeid);
+            //alert(setmenuid);
+
+
+
+
+
+        }
+
+
+
+    </script>
+
+
+
+
+
+
+}
+

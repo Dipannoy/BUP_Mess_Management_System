@@ -1,0 +1,370 @@
+﻿
+@{
+    ViewData["Title"] = "SaveUpdateWareHouseStorage";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<h2>Create</h2>
+
+<h4>Warehouse Storage</h4>
+<hr />
+
+
+
+
+
+
+
+
+
+<form id="form1">
+    <div>
+        <div>
+            <label style="display: inline-block; width: 100px;" class="control-label">Stored Date</label>
+            <input type="date" id="txtStoredDate" style="width: 200px;" class="form-control" />
+        </div>
+
+        <div style="margin-top: 10px;">
+            <label ID="Label1" style="display: inline-block; width: 100px;" class="control-label">IsStoreOut</label>
+            <input type="checkbox" id="cboxIsStoreOut" style="width: 200px;" class="form-control" />
+        </div>
+
+        <div style="margin-top: 10px;">
+            <input class="clearHiddenFieldValue" id="hdCounsellingHoursRowCount" type="hidden" value="1" />
+            <table id="CounsellingHoursTable" class="table table-hover">
+
+                <thead>
+                    <tr class="trVisibleAlways">
+                        <th class="LebelFieldCounsellingHoursHeader">#SL</th>
+                        <th>Item Name</th>
+                        <th>Amount</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr id="CounsellingHoursRow1">
+                        <td class="LebelFieldCounsellingHoursHeader"><label id="lblCounsellingHours1">1</label></td>
+                        <td>
+                            <select id="ddlCounsellingHoursDay1" class="margin-zero dropDownList3 initialDropdownValue DropDownFieldCounsellingHours form-control" />
+                            <input type="hidden" id="hdCounsellingHours1" value="0" />
+                        </td>
+                        <td><input class="inputFieldforAddmoreInput initialTextValue TextFieldCounsellingHours form-control" type="text" id="txtCounsellingHoursTime1" /></td>
+                        <td>
+                            <input type="button" id="btnDeleteCounsellingHours1" class="ButtonFieldCounsellingHours btn btn-danger btn-sm" value="Delete" onclick="DeleteCounsellingHours(1)" /> |
+                            <input type="button" id="btnAddAboveCounsellingHours1" class="ButtonFieldCounsellingHours btn btn-warning btn-sm" value="Add Above" onclick="AddMoreCounsellingHours(1);" />
+                        </td>
+                        <td><label id="lblCounsellingHoursMsg1" class="lblCounsellingHoursMsg MessageBox"></label></td>
+                    </tr>
+                    <tr class="trVisibleAlways">
+                        <td colspan="2"><input type="button" id="btnAddCounsellingHours" class="ButtonFieldCounsellingHours btn btn-info btn-sm" value="Add More" onclick="AddMoreCounsellingHours(0);" /></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                </tbody>
+
+            </table>
+        </div>
+
+        <div class="form-group">
+            <br />
+            <div class="col-sm-offset-1 col-sm-10">
+
+                <input type="button" id="btnSaveUpdateCounsellingHours" value="Submit" onclick="ButtonSaveUpdateCounsellingHours();"  class="btn btn-success btn-sm" /> |
+                <a asp-controller="StorageManagement" asp-action="Index" class="btn btn-default btn-sm">Back to Store List</a>
+            </div>
+        </div>
+
+
+    </div>
+
+</form>
+
+
+
+
+<script src="https://ajax.aspnetcdn.com/ajax/jquery/jquery-3.3.1.min.js"
+        asp-fallback-src="~/lib/jquery/dist/jquery.min.js"
+        asp-fallback-test="window.jQuery"
+        crossorigin="anonymous"
+        integrity="sha384-tsQFqpEReu7ZLhBV2VZlAu7zcOV+rXbYlF2cqB8txI/8aZajjp4Bqd+V6D5IgvKT">
+</script>
+
+<script>
+    var date = new Date();
+
+    var day = date.getDate();
+    var month = date.getMonth() + 1;
+    var year = date.getFullYear();
+
+    if (month < 10) month = "0" + month;
+    if (day < 10) day = "0" + day;
+
+    var today = year + "-" + month + "-" + day;
+
+
+    document.getElementById('txtStoredDate').value = today;
+</script>
+
+
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        //var CounsellingHoursDayComboBox = "<option value='0'>-Select-</option>" + "<option value='1'>Saturday</option>" + "<option value='2'>Sunday</option>" + "<option value='3'>Monday</option>" + "<option value='4'>Tuesday</option>" + "<option value='5'>Wednesday</option>" + "<option value='6'>Thursday</option>" + "<option value='7'>Friday</option>";
+
+
+        //alert("In the document...!!");
+
+        var CounsellingHoursDayComboBox = '<option value="-1">-Select-</option>';
+
+        $.ajax({
+            type: "GET",
+            url: '@Url.Action("GetStoreItems", "StorageManagement")',
+            data: "{}",
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (data) {
+
+                for (var i = 0; i < data.length; i++) {
+                    CounsellingHoursDayComboBox += '<option value="' + data[i].value + '">' + data[i].text + '</option>';
+                }
+
+
+                $('#ddlCounsellingHoursDay1').append(CounsellingHoursDayComboBox);
+            }
+        });
+
+
+
+
+    });
+
+    function AddSlNoCounsellingHours() {
+        var counter = $("#CounsellingHoursTable tr").length;
+        var x = 1;
+        for (var i = counter - 1; i >= 2; i--) {
+            var rowPositionId = $('#CounsellingHoursTable tr:nth-last-child(' + (i) + ')').attr('id');
+            var rowNumber = rowPositionId.replace("CounsellingHoursRow", "");
+
+            //alert(rowPositionId);
+
+            $('#lblCounsellingHours' + rowNumber).text(x);
+            x = x + 1;
+        }
+    }
+
+    function AddMoreCounsellingHours(rowSerial) {
+        //var counter = $("#CounsellingHoursTable tr").length;
+        //var rowPositionId = $('#CounsellingHoursTable tr:nth-last-child(' + (2) + ')').attr('id');
+        //var rowNumber = rowPositionId.replace("CounsellingHoursRow", "");
+        var rowNumber = $('#hdCounsellingHoursRowCount').val();
+        var rowNumberInt = parseInt(rowNumber) + 1;
+
+        var row = "<tr id='CounsellingHoursRow" + rowNumberInt.toString() + "'>"
+            + "<td class='LebelFieldCounsellingHoursHeader'><label id='lblCounsellingHours" + rowNumberInt.toString() + "'>1</label></td>"
+            + "<td><select id='ddlCounsellingHoursDay" + rowNumberInt.toString() + "' class='margin-zero dropDownList3 DropDownFieldCounsellingHours form-control' />"
+            + "<input type='hidden' id='hdCounsellingHours" + rowNumberInt.toString() + "' value='0' /></td>"
+            + "<td><input id='txtCounsellingHoursTime" + rowNumberInt.toString() + "' class='inputFieldforAddmoreInput TextFieldCounsellingHours form-control' type='text' /></td>"
+            + "<td>"
+            + "<input type='button' value='Delete' class='ButtonFieldCounsellingHours btn btn-danger btn-sm' onclick='DeleteCounsellingHours(" + rowNumberInt.toString() + ")' /> | "
+            + "<input type='button' class='ButtonFieldCounsellingHours btn btn-warning btn-sm' value='Add Above' onclick='AddMoreCounsellingHours(" + rowNumberInt.toString() + ")' />"
+            + "</td>"
+            + "<td><label id='lblCounsellingHoursMsg" + rowNumberInt.toString() + "' class='lblCounsellingHoursMsg MessageBox'></label></td>"
+            + "</tr>";
+
+
+        //+ "<td><input type='button' value='Delete' class='ButtonFieldCounsellingHours btn btn-danger' onclick='DeleteCounsellingHours(" + rowNumberInt.toString() + ")' /></td>"
+        //    + "<td><input type='button' class='ButtonFieldCounsellingHours btn btn-info' value='Add Above' onclick='AddMoreCounsellingHours(" + rowNumberInt.toString() + ")' /></td>"
+
+        //$('#CounsellingHoursTable tr:last').before(row);
+        if (rowSerial == '0')
+            $('#CounsellingHoursTable tr:last').before(row);
+        else
+            $('#CounsellingHoursRow' + rowSerial).before(row);
+
+        $('#hdCounsellingHoursRowCount').val(rowNumberInt);
+
+        AddSlNoCounsellingHours();
+
+        CounsellingHoursComboBoxLoad(rowNumberInt);
+    }
+
+    function CounsellingHoursComboBoxLoad(rowNumberInt) {
+        //var CounsellingHoursDayComboBox = "<option value='0'>-Select-</option>" + "<option value='1'>Saturday</option>" + "<option value='2'>Sunday</option>" + "<option value='3'>Monday</option>" + "<option value='4'>Tuesday</option>" + "<option value='5'>Wednesday</option>" + "<option value='6'>Thursday</option>" + "<option value='7'>Friday</option>";
+        //$("#ddlCounsellingHoursDay" + rowNumberInt.toString() + "").append(CounsellingHoursDayComboBox);
+
+
+        //alert("After Click Add More Button Load DropdownList...!!");
+
+        var CounsellingHoursDayComboBox = '<option value="-1">-Select-</option>';
+
+        $.ajax({
+            type: "GET",
+            url: '@Url.Action("GetStoreItems", "StorageManagement")',
+            data: "{}",
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (data) {
+
+                for (var i = 0; i < data.length; i++) {
+                    CounsellingHoursDayComboBox += '<option value="' + data[i].value + '">' + data[i].text + '</option>';
+                }
+
+
+                $("#ddlCounsellingHoursDay" + rowNumberInt.toString() + "").append(CounsellingHoursDayComboBox);
+            }
+        });
+
+
+    }
+
+    function DeleteCounsellingHours(number) {
+        var counter = $("#CounsellingHoursTable tr").length;
+        var hdCounsellingHours = '#hdCounsellingHours' + number;
+
+        if ($(hdCounsellingHours).val() == '0' && counter > 3) {
+            var rowNumber = 'CounsellingHoursRow' + number;
+            var row = document.getElementById(rowNumber);
+            row.parentNode.removeChild(row);
+
+            AddSlNoCounsellingHours();
+        }
+        else {
+            if (confirm('Do you want to delete ?')) {
+                if (counter == 3) {
+                    alert("Not possible to delete last data.");
+                }
+                else {
+
+                    $.ajax({
+                        type: "POST",
+                        url: "CourseSyllabusFormV2.aspx/DeleteCounsellingHours",
+                        data: "{id : '" + $(hdCounsellingHours).val() + "'}",
+                        contentType: "application/json; charset=utf-8",
+                        dataType: "json",
+                        success: function (msg) {
+
+                            var counsellingHours = msg.d;
+
+                            if (counsellingHours == 'Error') alert('Error: Counselling Hours (Delete)');
+                            else if (counsellingHours == 'True') {
+
+                                var rowNumber = 'CounsellingHoursRow' + number;
+                                var row = document.getElementById(rowNumber);
+                                row.parentNode.removeChild(row);
+
+                                AddSlNoCounsellingHours();
+
+                                alert('Successful: Counselling Hours (Delete)');
+                            }
+                            else alert('Fail: Counselling Hours (Delete)');
+
+
+                        },
+                        error: function () {
+
+                            alert("System Error: Counselling Hours (Delete)");
+
+                        }
+                    });
+                }
+            }
+        }
+    }
+
+    function ButtonSaveUpdateCounsellingHours() {
+        //alert("ok");
+        var storedDate = $('#txtStoredDate').val();
+        //var ChallanNo = $('#txtChallanNo').val();
+        var isstoreout = $('#cboxIsStoreOut').is(':checked');
+
+        //$('#btnSaveUpdateCounsellingHours').hide();
+
+        var counter = $("#CounsellingHoursTable tr").length;
+        for (var i = counter - 1; i >= 2; i--) {
+            var rowPositionId = $('#CounsellingHoursTable tr:nth-last-child(' + (i) + ')').attr('id');
+            var rowNumber = rowPositionId.replace("CounsellingHoursRow", "");
+
+            var id = $('#hdCounsellingHours' + rowNumber).val();
+            var itemNameId = $('#ddlCounsellingHoursDay' + rowNumber + ' option:selected').val();
+            var amount = $('#txtCounsellingHoursTime' + rowNumber).val();
+            //var perunitQuantityPrice = $('#txtPerunitQuantityPrice' + rowNumber).val();
+            //var totalPrice = $('#txtTotalPrice' + rowNumber).val();
+            var serialNo = $('#lblCounsellingHours' + rowNumber).text();
+
+            //if (time.length == 0) {
+            //    if (i != counter - 1) {
+            //        //alert("work");
+            //        DeleteCounsellingHours(rowNumber)
+            //    }
+            //}
+            //else
+            SaveUpdateCounsellingHours(rowNumber, storedDate, isstoreout, itemNameId, amount); // id, serialNo, == id, serialNo,
+        }
+    }
+
+    function SaveUpdateCounsellingHours(rowNumber, storedDate, isstoreout, itemNameId, amount) {
+
+        var storeInArray = [];
+        var obj = {
+            Date: storedDate,
+            IsStoreOut: isstoreout,
+            StoreInItemId: itemNameId,
+            Amount: amount
+        };
+        storeInArray.push(obj);
+
+        //"{storedDate: '" + storedDate.toString() + "', ChallanNo: '" + ChallanNo.toString() + "', itemNameId: '" + itemNameId.toString() + "', unitQuantity: '" + unitQuantity.toString() + "', perunitQuantityPrice: '" + perunitQuantityPrice.toString() + "', totalPrice: '" + totalPrice.toString() + "'}"
+
+        var tempStoreInArray = JSON.stringify(storeInArray);
+
+        //contentType: "application/json; charset=utf-8",
+        //    dataType: "json",
+
+        $.ajax({
+            type: "POST",
+            url: '@Url.Action("SaveUpdateCounsellingHours", "Home")',
+            data: { StoreInList: tempStoreInArray},
+            success: function (msg) {
+
+                var counsellingHours = msg; //.d;
+
+                if (counsellingHours == 'false') {
+                    $('#lblCounsellingHoursMsg' + rowNumber).text('Fail: Update');
+                    document.getElementById('lblCounsellingHoursMsg' + rowNumber).style.color = "Red";
+                    //alert('Fail: Counselling Hours Update');
+                }
+                else if (counsellingHours == 'true') {
+                    $('#lblCounsellingHoursMsg' + rowNumber).text('Successful: Update');
+                    document.getElementById('lblCounsellingHoursMsg' + rowNumber).style.color = "Green";
+                    //alert('Successful: Counselling Hours Update');
+                }
+                else if (counsellingHours == "Error") {
+                    $('#lblCounsellingHoursMsg' + rowNumber).text('Error: Save/Update');
+                    document.getElementById('lblCounsellingHoursMsg' + rowNumber).style.color = "Red";
+                    //alert('Error: Counselling Hours Save/Update');
+                }
+                else if (counsellingHours == "0") {
+                    $('#lblCounsellingHoursMsg' + rowNumber).text('Fail: Save');
+                    document.getElementById('lblCounsellingHoursMsg' + rowNumber).style.color = "Red";
+                    //alert('Fail: Counselling Hours Save');
+                }
+                else {
+                    $('#lblCounsellingHoursMsg' + rowNumber).text('Successful: Save');
+                    document.getElementById('lblCounsellingHoursMsg' + rowNumber).style.color = "Green";
+                    //alert('Successful: Counselling Hours Save');
+                }
+            },
+            error: function () {
+
+                $('#lblCounsellingHoursMsg' + rowNumber).text('System Error: Save/Update');
+                document.getElementById('lblCounsellingHoursMsg' + rowNumber).style.color = "Red";
+                //alert("System Error: Counselling Hours Save/Update");
+            }
+        });
+    }
+</script>
+
+

@@ -1,0 +1,94 @@
+﻿
+@{
+    ViewData["Title"] = "IndexHome";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    var message = "";
+    if (TempData["Message"] != null)
+    {
+        message =TempData["Message"] as string;
+   }
+}
+
+    @*<head>
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
+    </head>*@
+
+
+    <div class="container-fluid">
+
+       
+
+        <span class="h1 center text-center">Mess Management</span>
+
+
+
+        <div class="row">
+
+            <div class="d-flex flex-row ">
+                <a asp-controller="ConsumerDashboard" asp-action="Index" class="btn btn-sm purple-gradient text-white">Consumer Dashboard</a>
+                <a asp-controller="UnitType" asp-action="Index" class="btn btn-sm btn-info">Unit Type</a>
+                <a asp-controller="MealType" asp-action="Index" class="btn btn-sm btn-info">Meal Type</a>
+                <a asp-controller="Role" asp-action="Index" class="btn btn-sm  btn-info">Role</a>
+                <a asp-controller="Admin" asp-action="Index" class="btn btn-sm btn-info">Users</a>
+                <a asp-controller="AdminOrder" asp-action="UserBill" class="btn btn-sm btn-info">UserBill</a>
+
+                <a asp-controller="UnitType" asp-action="Index" class="btn btn-sm btn-info">Unit Type</a>
+
+                <a asp-area="Identity" asp-page="/Account/Register" class="btn btn-sm btn-info">Create User By Admin</a>
+            </div>
+
+        </div>
+
+
+
+
+        <div class="row">
+            <div class="col-4">
+                <h4>Warehouse</h4>
+                <hr />
+                <div class="row container-fluid text-center">
+                    <a asp-controller="StorageManagement" asp-action="Index" class="btn btn-sm mx-auto w-100 btn-deep-orange">Dashboard</a>
+                    <a asp-controller="StorageManagement" asp-action="WarehouseStorageIn" class="btn btn-sm mx-auto w-100 btn-deep-orange">Raw Material In</a>
+                    <a asp-controller="StorageManagement" asp-action="WarehouseStorageOut" class="btn btn-sm mx-auto w-100 btn-deep-orange">Raw Material Out</a>
+
+                    <a asp-controller="StoreInItemCategory" asp-action="Index" class="btn btn-sm  mx-auto w-100 btn-deep-orange">Raw Material Category</a>
+                    <a asp-controller="StoreInItem" asp-action="Index" class="btn btn-sm mx-auto w-100 btn-deep-orange">Raw Material</a>
+                </div>
+            </div>
+            <div class="col-4">
+                <h4>Kitchen</h4>
+                <hr />
+                <div class="row container-fluid text-center">
+                    <a asp-controller="PreOrderAnalysis" asp-action="Index" class="btn btn-sm  mx-auto w-100 btn-purple">Pre-Order Analysis</a>
+                    <a asp-controller="StoreOutItemCategory" asp-action="Index" class="btn btn-sm mx-auto w-100  btn-purple">Store-Out Category</a>
+                    <a asp-controller="StoreOutItem" asp-action="Index" class="btn btn-sm  mx-auto w-100 btn-purple">Store-Out Items</a>
+                    <a asp-controller="StoreOutItemRecipe" asp-action="Index" class="btn btn-sm mx-auto w-100 btn-purple">Store-Out Recipe</a>
+                </div>
+            </div>
+            <div class="col-4">
+                <h4>Dining</h4>
+                <hr />
+                <div class="row container-fluid text-center">
+                    <a asp-controller="SetMenu" asp-action="Index" class="btn btn-sm mx-auto w-100  btn-pink">Set Menu</a>
+                    <a asp-controller="AdminOrder" asp-action="OrderByAdmin" class="btn btn-sm mx-auto w-100 btn-pink">Order By Admin</a>
+                    <a asp-controller="AdminOrder" asp-action="Index" class="btn btn-sm  mx-auto w-100 btn-pink">Bill Dashboard</a>
+                    <a asp-controller="AdminOrder" asp-action="ProcessBill" class="btn btn-sm  mx-auto w-100 btn-pink">Process Order</a>
+                    <a asp-controller="AdminOrder" asp-action="ProcessMaintenanceBill" class="btn btn-sm  mx-auto w-100 btn-pink">Process Maintenance Bill</a>
+                    <a asp-controller="AdminOrder" asp-action="BillEdit" class="btn btn-sm  mx-auto w-100 btn-pink">Edit Bill</a>
+                    <a asp-controller="AdminOrder" asp-action="CreatePreOrderSchedule" class="btn btn-sm  mx-auto w-100 btn-pink">Create Tomorrow's Preorder Schedule</a>
+
+
+                </div>
+                <div>
+                    @message
+                </div>
+            </div>
+
+        </div>
+
+
+    </div>
+

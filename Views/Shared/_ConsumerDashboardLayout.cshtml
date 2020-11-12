@@ -1,0 +1,233 @@
+﻿@using Microsoft.AspNetCore.Identity
+@using Mess_Management_System_Alpha_V2.Data
+@inject SignInManager<ApplicationUser> SignInManager
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+
+    <title>@ViewData["Title"] - Mess Management</title>
+
+    <link rel="icon" type="image/png" href="~/images/favicon.png">
+
+    <link href="https://fonts.googleapis.com/css?family=Roboto:400,700&subset=latin,cyrillic-ext" rel="stylesheet" type="text/css" />
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" type="text/css" />
+
+
+
+
+
+
+
+
+    <link href="~/ConsumerDashboard/plugins/bootstrap/bootstrap.css" rel="stylesheet" />
+    <link href="~/ConsumerDashboard/plugins/node-waves/waves.css" rel="stylesheet" />
+    <link href="~/ConsumerDashboard/plugins/jquery-datatable/dataTables.css" rel="stylesheet" />
+    <link href="~/ConsumerDashboard/plugins/bootstrap-material-datetimepicker/bootstrap-material-datetimepicker.css" rel="stylesheet" />
+    <link href="~/ConsumerDashboard/plugins/jquery-spinner/bootstrap-spinner.css" rel="stylesheet" />
+    <link href="~/ConsumerDashboard/css/style.css" rel="stylesheet" />
+    <link href="~/ConsumerDashboard/css/themes/all-themes.css" rel="stylesheet" />
+
+
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
+
+
+    @*</environment>*@
+
+
+</head>
+<body class="theme-teal">
+
+
+    <!-- Page Loader -->
+    <div class="page-loader-wrapper">
+        <div class="loader">
+            <div class="preloader">
+                <div class="spinner-layer pl-red">
+                    <div class="circle-clipper left">
+                        <div class="circle"></div>
+                    </div>
+                    <div class="circle-clipper right">
+                        <div class="circle"></div>
+                    </div>
+                </div>
+            </div>
+            <p>Please wait...</p>
+        </div>
+    </div>
+    <!-- #END# Page Loader -->
+    <!-- Top Bar -->
+    <nav class="navbar" style="position:fixed;">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <a href="javascript:void(0);" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar-collapse" aria-expanded="false"></a>
+                <a href="javascript:void(0);" class="bars"></a>
+                <a class="navbar-brand" href="javascript:void(0);"><p style="font-size:22px;font-weight:bold">Consumer Dashboard</p></a>
+            </div>
+
+        </div>
+    </nav>
+    <!-- #Top Bar -->
+    <section>
+        <!-- Left Sidebar -->
+        <aside id="leftsidebar" class="sidebar">
+            <!-- User Info -->
+            <div class="user-info">
+                <div class="image">
+                    <img src="~/ConsumerDashboard/images/user.png" width="48" height="48" alt="User" />
+                </div>
+                <div class="info-container">
+
+                    @if (ViewBag.FullName != null)
+                    {
+                        <div class="name" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">@ViewBag.FullName</div>
+                    }
+
+                    @if (ViewBag.Email != null)
+                    {
+                        <div class="email">@ViewBag.Email</div>
+                    }
+
+                       
+                        @*<a class="dropdown-item" href="#">Log out</a>*@
+
+
+
+                    <div class="btn-group user-helper-dropdown">
+                        <i class="material-icons" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">keyboard_arrow_down</i>
+
+                        <ul class="dropdown-menu pull-right">
+                            @*<li><a href="javascript:void(0);"><i class="material-icons">person</i>Profile</a></li>*@
+                            <li>
+                                <a class="dropdown-item" asp-action="Signout" asp-controller="AdminShowOrder">LogOut</a>
+
+
+                                @*@if (SignInManager.IsSignedIn(User))
+                                {
+                                    <form asp-action="Signout" asp-controller="Consumer" method="post" novalidate="novalidate">
+                                        <button type="submit" class="btn btn-light" style="color: #666;width: 100%;text-align: left;font-size: 14px;background-color: white;"><i class="material-icons" style="padding-right: 9%;">input</i>Sign Out</button>
+
+                                    </form>
+                                }*@
+                            </li>
+                            <li>
+                                <a class="nav-link" style="font-size:18px;font-weight:bold;" asp-controller="AdminShowOrder" asp-action="GoUCAM">
+                                    UCAM
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <!-- #User Info -->
+            <!-- Menu -->
+            <div class="menu">
+                <ul class="list">
+                    <li class="header">MAIN NAVIGATION</li>
+                    <li class="active">
+                        <a asp-action="Index" asp-controller="Consumer">
+                            <i class="material-icons">home</i>
+                            <span>Home</span>
+                        </a>
+                    </li>
+                    <li>
+                        @*<a asp-action="PaymentHistory" asp-controller="Consumer">
+                            <i class="material-icons">credit_card</i>
+                            <span>Payment history</span>
+                        </a>*@
+                    </li>
+
+
+                </ul>
+            </div>
+            <!-- #Menu -->
+            <!-- Footer -->
+            <div class="legal">
+
+                <div class="version">
+                    <b>Version: </b> 1.0.5
+                </div>
+            </div>
+            <!-- #Footer -->
+        </aside>
+        <!-- #END# Left Sidebar -->
+
+
+    </section>
+    <br />
+    <br />
+    <br />
+
+    <br />
+
+    <br />
+
+    <br />
+
+    @RenderBody()
+
+
+
+
+    @*<div>*@
+    @*</div>*@
+
+
+    @*<environment include="Development">*@
+
+
+    <!-- Jquery Core Js -->
+    <script src="~/ConsumerDashboard/plugins/jquery/jquery.js"></script>
+
+    <!-- Bootstrap Core Js -->
+    <script src="~/ConsumerDashboard/plugins/bootstrap/bootstrap.js"></script>
+
+
+    <!-- Select Plugin Js -->
+    <script src="~/ConsumerDashboard/plugins/bootstrap-select/bootstrap-select.js"></script>
+
+
+    <!-- Slimscroll Plugin Js -->
+    <script src="~/ConsumerDashboard/plugins/jquery-slimscroll/jquerySlimscroll.js"></script>
+
+    <!-- Waves Effect Plugin Js -->
+    <script src="~/ConsumerDashboard/plugins/node-waves/waves.js"></script>
+
+    <!-- Autosize Plugin Js -->
+    <script src="~/ConsumerDashboard/plugins/autosize/autosize.js"></script>
+    @*<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>*@
+
+    @*---------------Clock Picker is working here -------------------------------*@
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.0/jquery-ui.min.js"></script>
+    @*------------------------------------------------------------------*@
+
+    @*<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.0.0/jquery.min.js"></script>*@
+
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.js"></script>
+
+
+
+
+    <!-- Moment Plugin Js -->
+    <script src="~/ConsumerDashboard/plugins/momentjs/moment.js"></script>
+
+    <!-- Bootstrap Material Datetime Picker Plugin Js -->
+    <script src="~/ConsumerDashboard/plugins/bootstrap-material-datetimepicker/bootstrap-material-datetimepicker.js"></script>
+
+
+    <!-- Custom Js -->
+    <script src="~/ConsumerDashboard/js/admin.js"></script>
+    <script src="~/ConsumerDashboard/js/pages/forms/basic-form-elements.js"></script>
+
+    <!-- Demo Js -->
+    <script src="~/ConsumerDashboard/js/demo.js"></script>
+
+    @*</environment>*@
+
+
+</body>
+</html>

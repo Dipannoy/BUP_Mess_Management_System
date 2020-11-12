@@ -1,0 +1,240 @@
+﻿@inject ApplicationDbContext _context
+@inject Microsoft.AspNetCore.Identity.UserManager<ApplicationUser> _userManager
+@inject ApplicationDbContext _db
+@inject IDDLHelper _ddlHelper
+
+@inject IDDLHelper _ddlhelper
+@{
+    ViewData["Title"] = "BillProcess";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    var from = this.Context.Request.Query["from"];
+    var to = this.Context.Request.Query["to"];
+    var UserId = this.Context.Request.Query["UserId"];
+
+
+    var user = await _userManager.GetUserAsync(User);
+    var preOrderScheduleList = _db.PreOrderSchedule.Include(x => x.MealType).Include(x => x.ApplicationUser).ToList();
+    var setMenuList = _db.SetMenu.Include(x => x.SetMenuDetailsList).Include(a => a.MealType).Where(x => x.SetMenuDate.ToShortDateString() == DateTime.Now.ToShortDateString()).ToList();
+
+    var allMeals = _db.MealType.Where(x => x.Id > 0).ToList();
+    string dateinput = "";
+
+    if (ViewBag.Date != null)
+    {
+        dateinput = ViewBag.Date.ToShortDateString();
+    }
+    else
+    {
+        dateinput = DateTime.Today.ToShortDateString();
+
+
+    }
+
+
+
+
+
+}
+
+
+<div class="container-fluid">
+
+
+    <h2>Pre-Order Schedule</h2>
+    <hr />
+
+
+
+    <div class="row">
+        <div id="messageUp"></div>
+    </div>
+
+    <div class="container-fluid">
+
+        <div class="row">
+            <div class="col-md-auto">
+                <label for="sel1">Meal Type:</label>
+
+            </div>
+            <div class="col-md-3">
+                <div class="form-group">
+                    <select id="DDLCategory" class="form-control border-radius-none" asp-items="@(new SelectList(_ddlHelper.GetMealType().Prepend(new KeyValuePair<string, string>("-1","-- Select Meal Type --")),"Key","Value",""))"></select>
+
+                </div>
+            </div>
+            <div class="col-md-3">
+                <button class="btn btn-sm btn-primary" onclick="CreateOrderHistoryOfSetMenu()" style="margin-left: 0px;"> BillProcess </button> |
+
+            </div>
+        </div>
+
+
+        @*<form asp-controller="UserBill" asp-action="CreateOrderHistoryOfSetMenu" method="post">
+                <select id="ddl" asp-for="@allMeals" asp-items="@(new SelectList(allMeals,"Id","Name",@allMeals))" class="form-control"></select>
+                <input type="submit" value="Bill Process" />
+            </form>*@
+
+    </div>
+    <div class="row">
+
+        <form asp-action="DateFetch2" method="post" class="d-lg-inline-flex">
+
+            <div class="form-group">
+                <label class="control-label">Date:</label>
+                <input type="date" name="date2" value="@dateinput" id="Date2" class="col-sm-5" />
+                <button class="btn btn-sm btn-primary" type="submit" style="margin-left: 0px;"> Load </button> |
+
+            </div>
+
+        </form>
+    </div>
+
+</div>
+
+<br />
+<div class="row">
+    Number of bills generated on @dateinput
+</div>
+
+
+<table class="table">
+    <thead>
+
+
+        <tr>
+
+            @foreach (var item in preOrderScheduleList.Select(a => a.MealType).Distinct().OrderBy(a => a.Serial).ToList())
+            {
+
+                <th>
+                    @item.Name
+                </th>
+            }
+
+
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            @{
+                var user2 = await _userManager.GetUserAsync(User);
+                var userID = user2.Id;
+            }
+
+            @foreach (var item in preOrderScheduleList.Select(a => a.MealType).Distinct().OrderBy(a => a.Serial).ToList())
+            {
+
+
+                var setMenuList2 = _context.SetMenu.Include(x => x.SetMenuDetailsList).Include(b => b.MealType).Where(x => x.SetMenuDate.ToShortDateString() == dateinput).ToList();
+
+                var setMenuOnMeal = setMenuList2.Where(x => x.MealTypeId == item.Id).FirstOrDefault();
+
+                var existingEntry = setMenuOnMeal != null ? _context.OrderHistory.Where(y => y.CreatedBy == userID && y.CreatedDate.ToShortDateString() == dateinput && y.MealTypeId == item.Id && y.SetMenuId == setMenuOnMeal.Id).ToList() : null;
+
+                //var existingEntry = _context.OrderHistory.Where(y => y.CreatedBy == userID && y.CreatedDate.ToShortDateString() == dateinput && y.MealTypeId == item.Id && y.SetMenuId == setMenuOnMeal.Id).ToList();
+
+
+                <td>
+                    @if (existingEntry != null)
+                    {
+                        @existingEntry.Count()
+                    }
+                    else
+                    {
+                        <p>SetMenu is not defined for this meal on the day.</p>
+                    }
+
+                </td>
+            }
+        </tr>
+
+
+    </tbody>
+</table>
+</div>
+
+
+
+
+
+<script src="https://ajax.aspnetcdn.com/ajax/jquery/jquery-3.3.1.min.js"
+        asp-fallback-src="~/lib/jquery/dist/jquery.min.js"
+        asp-fallback-test="window.jQuery"
+        crossorigin="anonymous"
+        integrity="sha384-tsQFqpEReu7ZLhBV2VZlAu7zcOV+rXbYlF2cqB8txI/8aZajjp4Bqd+V6D5IgvKT">
+</script>
+
+
+
+<script>
+      var date = new Date();
+    var date2 = new Date();
+
+
+    var day = date.getDate();
+    var month = date.getMonth() + 1;
+    var year = date.getFullYear();
+
+    var day2 = date2.getDate();
+    var month2 = date2.getMonth() + 1;
+    var year2 = date2.getFullYear();
+
+    if (month < 10) month = "0" + month;
+    if (day < 10) day = "0" + day;
+
+    if (month2 < 10) month2 = "0" + month2;
+    if (day2 < 10) day2 = "0" + day2;
+
+    var today = year + "-" + month + "-" + day;
+    var today2 = year2 + "-" + month2 + "-" + day2;
+
+
+
+
+    document.getElementById('textStoreDate').value = today;
+    document.getElementById('Date2').value = today2;
+
+    function CreateOrderHistoryOfSetMenu() {
+
+
+
+
+
+
+        var ddlCategory = document.getElementById("DDLCategory");
+        var categoryId = ddlCategory.options[ddlCategory.selectedIndex].value.toString();
+        console.log(categoryId);
+
+
+        if (categoryId == "-1") {
+            alert("Please Select Category..!!");
+            document.getElementById('DDLCategory').style.borderColor = "red";
+            return false;
+        }
+
+    $.ajax({
+
+        url: '@Url.Action("CreateOrderHistoryOfSetMenu", "UserBill")',
+        type: "POST",
+        data: { MealTypeId: categoryId },
+        success: function (response) {
+            if (response.success) {
+
+               //jQuery("#messageUp").append('<div class="alert alert-success" role="alert"><b>"' + response.responseText + '"</b></div>');
+
+                window.alert(response.responseText);
+                        //jQuery("#messageUp").append('<div class="alert alert-success" role="alert"><b>"' + response.responseText + '"</b></div>');
+                window.location.reload(true);
+
+
+            } else {
+                // DoSomethingElse()
+                //alert(response.responseText);
+            }
+        }
+
+
+    })
+}
+</script>
+

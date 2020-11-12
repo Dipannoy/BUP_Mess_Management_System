@@ -1,0 +1,114 @@
+﻿@model Mess_Management_System_Alpha_V2.Models.MessModels.StoreOutItemRecipe
+@inject IDDLHelper _ddlHelper
+@{
+    ViewData["Title"] = "Edit";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<h2>Edit</h2>
+
+<h4>StoreOut Item Recipe</h4>
+<hr />
+
+<div class="row">
+    <div class="col-md-4">
+        <a asp-controller="StorageManagement" asp-action="WarehouseStorageIn" class="btn btn-primary btn-lg btn-block btn-huge">Store In</a>
+    </div>
+    <div class="col-md-4">
+        <a asp-controller="StorageManagement" asp-action="WarehouseStorageOut" class="btn btn-primary btn-lg btn-block btn-huge">Store Out</a>
+    </div>
+    <div class="col-md-4">
+        <a asp-controller="StoreOutItemRecipe" asp-action="Index" class="btn btn-primary btn-lg btn-block btn-huge">Store Out Recipe</a>
+    </div>
+
+
+
+</div>
+
+<hr />
+
+
+
+
+<div class="row">
+    <div class="col-md-2">
+    </div>
+
+    <div class="col-md-8">
+        <form asp-action="Edit" class="form-horizontal">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+
+            <div class="form-group">
+                <label asp-for="StoreOutItem" class="control-label col-sm-2"></label>
+                <div class="col-sm-10">
+                    <select asp-for="StoreOutItemId" class="form-control border-radius-none" asp-items="@(new SelectList(_ddlHelper.GetStoreOutItem().Prepend(new KeyValuePair<string, string>("0","-- Select Item Category --")),"Key","Value",""))"></select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label asp-for="StoreInItem" class="control-label col-sm-2"></label>
+                <div class="col-sm-10">
+                    <select asp-for="StoreInItemId" class="form-control border-radius-none" asp-items="@(new SelectList(_ddlHelper.GetStoreInItem().Prepend(new KeyValuePair<string, string>("0","-- Select Item Category --")),"Key","Value",""))"></select>
+                </div>
+            </div>
+
+
+            @*<div class="form-group">
+                <label asp-for="MinimumStoreOutUnit" class="control-label col-sm-2"></label>
+                <div class="col-sm-10">
+                    <input asp-for="MinimumStoreOutUnit" type="text" class="form-control" placeholder="Enter Name">
+                    <span asp-validation-for="MinimumStoreOutUnit" class="text-danger"></span>
+                </div>
+            </div>*@
+
+
+
+            <div class="form-group">
+                <label asp-for="RequiredStoreInUnit" class="control-label col-sm-2"></label>
+                <div class="col-sm-10">
+                    <div style="display:inline-flex">
+                    <input asp-for="RequiredStoreInUnit" type="text" class="form-control col-sm-5" placeholder="Enter Quantity">
+                    &nbsp;&nbsp;
+                    @{ 
+                        @Model.StoreInItem.UnitType.Name
+                    }
+                    </div>
+
+                    @*<span class="actions">  </span>*@
+
+                    <span asp-validation-for="RequiredStoreInUnit" class="text-danger"></span>
+                </div>
+            </div>
+
+
+
+            @*<input type="hidden" asp-for="Id" class="col-sm-5" />*@
+            <div class="form-group">
+                <br />
+                <div class="col-sm-offset-2 col-sm-10">
+                    <input type="submit" value="Update" class="btn btn-info" /> |
+                    <a asp-action="Index" class="btn btn-default">Back to List</a>
+                </div>
+            </div>
+
+
+        </form>
+    </div>
+    <div class="col-md-2">
+    </div>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+    @section Scripts {
+        @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    }

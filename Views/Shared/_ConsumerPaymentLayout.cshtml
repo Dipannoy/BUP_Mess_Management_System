@@ -1,0 +1,186 @@
+﻿@using Microsoft.AspNetCore.Identity
+@using Mess_Management_System_Alpha_V2.Data
+@inject SignInManager<ApplicationUser> SignInManager
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
+
+    <title>@ViewData["Title"] - Mess Management</title>
+
+    <link rel="icon" type="image/png" href="~/images/favicon.png">
+
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css?family=Roboto:400,700&subset=latin,cyrillic-ext" rel="stylesheet" type="text/css" />
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" type="text/css" />
+
+
+    @*<environment include="Development">*@
+
+    <!-- Bootstrap Core Css -->
+    <link href="~/ConsumerDashboard/plugins/bootstrap/bootstrap.css" rel="stylesheet" />
+    <link href="~/ConsumerDashboard/plugins/node-waves/waves.css" rel="stylesheet" />
+    <link href="~/ConsumerDashboard/plugins/jquery-datatable/dataTables.css" rel="stylesheet" />
+
+    <link href="~/ConsumerDashboard/css/style.css" rel="stylesheet" />
+    <link href="~/ConsumerDashboard/css/themes/all-themes.css" rel="stylesheet" />
+
+    @*</environment>*@
+
+
+</head>
+<body class="theme-teal">
+
+
+    <!-- Page Loader -->
+    <div class="page-loader-wrapper">
+        <div class="loader">
+            <div class="preloader">
+                <div class="spinner-layer pl-red">
+                    <div class="circle-clipper left">
+                        <div class="circle"></div>
+                    </div>
+                    <div class="circle-clipper right">
+                        <div class="circle"></div>
+                    </div>
+                </div>
+            </div>
+            <p>Please wait...</p>
+        </div>
+    </div>
+    <!-- #END# Page Loader -->
+    <!-- Top Bar -->
+    <nav class="navbar">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <a href="javascript:void(0);" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar-collapse" aria-expanded="false"></a>
+                <a href="javascript:void(0);" class="bars"></a>
+                <a class="navbar-brand" href="javascript:void(0);"> Consumer </a>
+            </div>
+
+        </div>
+    </nav>
+    <!-- #Top Bar -->
+    <section>
+        <!-- Left Sidebar -->
+        <aside id="leftsidebar" class="sidebar">
+            <!-- User Info -->
+            <div class="user-info">
+                <div class="image">
+                    <img src="~/ConsumerDashboard/images/user.png" width="48" height="48" alt="User" />
+                </div>
+                <div class="info-container">
+                    @if (ViewBag.FullName != null)
+                    {
+                        <div class="name" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">@ViewBag.FullName</div>
+                    }
+
+                    @if (ViewBag.Email != null)
+                    {
+                        <div class="email">@ViewBag.Email</div>
+                    }
+                    <div class="btn-group user-helper-dropdown">
+                        <i class="material-icons" data-toggle="dropdown" aria-haspopup="true" aria-expanded="true">keyboard_arrow_down</i>
+                        <ul class="dropdown-menu pull-right">
+                            <li><a href="javascript:void(0);"><i class="material-icons">person</i>Profile</a></li>
+                            <li>
+                                @if (SignInManager.IsSignedIn(User))
+                                {
+                                    <form asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="@Url.Action("Index", "Home", new { area = "" })" method="post" id="logoutForm">
+                                        <button type="submit" class="btn btn-light" style="color: #666;width: 100%;text-align: left;font-size: 14px;background-color: white;"><i class="material-icons" style="padding-right: 9%;">input</i>Sign Out</button>
+
+                                    </form>
+                                }
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <!-- #User Info -->
+            <!-- Menu -->
+            <div class="menu">
+                <ul class="list">
+                    <li class="header">MAIN NAVIGATION</li>
+                    <li>
+                        <a asp-action="Index" asp-controller="Consumer">
+                            <i class="material-icons">home</i>
+                            <span>Home</span>
+                        </a>
+                    </li>
+                    <li class="active">
+                        <a asp-action="PaymentHistory" asp-controller="Consumer">
+                            <i class="material-icons">credit_card</i>
+                            <span>Paymen history</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+            <!-- #Menu -->
+            <!-- Footer -->
+            <div class="legal">
+
+                <div class="version">
+                    <b>Version: </b> 1.0.5
+                </div>
+            </div>
+            <!-- #Footer -->
+        </aside>
+
+    </section>
+
+
+
+
+    @*<div>*@
+    @RenderBody()
+    @*</div>*@
+
+
+    @*<environment include="Development">*@
+
+
+    <!-- Jquery Core Js -->
+    <script src="~/ConsumerDashboard/plugins/jquery/jquery.js"></script>
+
+    <!-- Bootstrap Core Js -->
+    <script src="~/ConsumerDashboard/plugins/bootstrap/bootstrap.js"></script>
+
+
+    <!-- Select Plugin Js -->
+    <script src="~/ConsumerDashboard/plugins/bootstrap-select/bootstrap-select.js"></script>
+
+
+    <!-- Slimscroll Plugin Js -->
+    <script src="~/ConsumerDashboard/plugins/jquery-slimscroll/jquerySlimscroll.js"></script>
+
+
+    <!-- Waves Effect Plugin Js -->
+    <script src="~/ConsumerDashboard/plugins/node-waves/waves.js"></script>
+
+
+    <!-- Jquery DataTable Plugin Js -->
+    <script src="~/ConsumerDashboard/plugins/jquery-datatable/jquerydataTables.js"></script>
+    <script src="~/ConsumerDashboard/plugins/jquery-datatable/dataTables_bootstrap.js"></script>
+    <script src="~/ConsumerDashboard/plugins/jquery-datatable/dataTables_buttons_min.js"></script>
+    <script src="~/ConsumerDashboard/plugins/jquery-datatable/buttons_flash_min.js"></script>
+    <script src="~/ConsumerDashboard/plugins/jquery-datatable/jszip_min.js"></script>
+    <script src="~/ConsumerDashboard/plugins/jquery-datatable/pdfmake_min.js"></script>
+    <script src="~/ConsumerDashboard/plugins/jquery-datatable/vfs_fonts.js"></script>
+    <script src="~/ConsumerDashboard/plugins/jquery-datatable/buttons_html5_min.js"></script>
+    <script src="~/ConsumerDashboard/plugins/jquery-datatable/buttons_print_min.js"></script>
+
+
+    <!-- Custom Js -->
+    <script src="~/ConsumerDashboard/js/admin.js"></script>
+    <script src="~/ConsumerDashboard/js/pages/tables/jquery-datatable.js"></script>
+
+    <!-- Demo Js -->
+    <script src="~/ConsumerDashboard/js/demo.js"></script>
+
+    @*</environment>*@
+
+
+</body>
+</html>

@@ -1,0 +1,1303 @@
+﻿@inject ApplicationDbContext _context
+@inject Microsoft.AspNetCore.Identity.UserManager<ApplicationUser> _userManager
+@inject IDDLHelper _ddlhelper
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    var activeMealTypes = _context.MealType.Where(a => a.IsAvailableForPreOrder).ToList();
+
+    var todaysMenuSet = _context.SetMenu.Include(a => a.SetMenuDetailsList).Include(x => x.ExtraItemList).Include(x => x.OrderHistoryList)
+        .Where(a => a.SetMenuDate.ToShortDateString() == DateTime.Now.ToShortDateString());
+
+    var DayOneMenuSet = _context.SetMenu.Include(a => a.SetMenuDetailsList).Include(x => x.ExtraItemList).Include(x => x.OrderHistoryList)
+        .Where(a => a.SetMenuDate.ToShortDateString() == DateTime.Now.AddDays(1).ToShortDateString());
+    var DayTwoMenuSet = _context.SetMenu.Include(a => a.SetMenuDetailsList).Include(x => x.ExtraItemList).Include(x => x.OrderHistoryList)
+        .Where(a => a.SetMenuDate.ToShortDateString() == DateTime.Now.AddDays(2).ToShortDateString());
+    var DayThreeMenuSet = _context.SetMenu.Include(a => a.SetMenuDetailsList).Include(x => x.ExtraItemList).Include(x => x.OrderHistoryList)
+        .Where(a => a.SetMenuDate.ToShortDateString() == DateTime.Now.AddDays(3).ToShortDateString());
+    var DayFourMenuSet = _context.SetMenu.Include(a => a.SetMenuDetailsList).Include(x => x.ExtraItemList).Include(x => x.OrderHistoryList)
+        .Where(a => a.SetMenuDate.ToShortDateString() == DateTime.Now.AddDays(4).ToShortDateString());
+    var DayFiveMenuSet = _context.SetMenu.Include(a => a.SetMenuDetailsList).Include(x => x.ExtraItemList).Include(x => x.OrderHistoryList)
+        .Where(a => a.SetMenuDate.ToShortDateString() == DateTime.Now.AddDays(5).ToShortDateString());
+    var DaySixMenuSet = _context.SetMenu.Include(a => a.SetMenuDetailsList).Include(x => x.ExtraItemList).Include(x => x.OrderHistoryList)
+        .Where(a => a.SetMenuDate.ToShortDateString() == DateTime.Now.AddDays(6).ToShortDateString());
+    //var DaySevenMenuSet = _context.SetMenu.Include(a => a.SetMenuDetailsList).Include(x => x.ExtraItemList).Include(x => x.OrderHistoryList)
+    //    .Where(a => a.SetMenuDate.ToShortDateString() == DateTime.Now.AddDays(6).ToShortDateString());
+
+    var cusr = await _userManager.GetUserAsync(User);
+    var preConfig = new List<PreOrderSchedule>();
+    var preConfigForTomorrow = new List<PreOrderSchedule>();
+
+    if (cusr != null)
+    {
+        preConfig = _context.PreOrderSchedule.Where(a => a.UserId == cusr.Id).ToList();
+      preConfigForTomorrow = _context.PreOrderSchedule.Where(a => a.UserId == cusr.Id && a.LastModifiedDate.ToShortDateString() == DateTime.Now.AddDays(-1).ToShortDateString()).ToList();
+
+    }
+
+    var user = await _userManager.GetUserAsync(User);
+}
+
+<style>
+    .switch {
+        position: relative;
+        display: inline-block;
+        width: 60px;
+        height: 34px;
+    }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+    .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #ccc;
+        -webkit-transition: .4s;
+        transition: .4s;
+    }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            -webkit-transition: .4s;
+            transition: .4s;
+        }
+
+    input:checked + .slider {
+        background-color: #2196F3;
+    }
+
+    input:focus + .slider {
+        box-shadow: 0 0 1px #2196F3;
+    }
+
+    input:checked + .slider:before {
+        -webkit-transform: translateX(26px);
+        -ms-transform: translateX(26px);
+        transform: translateX(26px);
+    }
+
+    /* Rounded sliders */
+    .slider.round {
+        border-radius: 34px;
+    }
+
+        .slider.round:before {
+            border-radius: 50%;
+        }
+</style>
+
+<div class="container-fluid">
+    <h2>Consumer Dashboard</h2>
+    <hr />
+
+    <div class="row">
+        <div class="col-md-12">
+            @if (ViewBag.msg == null)
+            {
+
+            }
+            else if (ViewBag.msg == "Failed")
+            {
+                <div class="alert alert-danger" role="alert">
+                    Order Failed!
+                </div>
+            }
+
+        </div>
+    </div>
+
+
+
+
+    @*=============================================================================================*@
+    @*=============================================================================================*@
+    @*=============================================================================================*@
+    @*=============================================================================================*@
+
+
+
+
+    <span class="badge badge-success">Today's Schedule (@DateTime.Now.ToLongDateString())</span>
+    <div class="container-fluid">
+        <div class="row">
+            @foreach (var m in activeMealTypes.OrderBy(a => a.Serial))
+            {
+                //var checkedTag = "";
+                //if (preConfig != null && preConfig.Where(b => b.MealTypeId == m.Id).FirstOrDefault() != null && preConfig.Where(b => b.MealTypeId == m.Id).FirstOrDefault().IsPreOrderSet)
+                //{
+                //    checkedTag = "checked";
+                //}
+
+                <div class="col-md-4" style="border:1px solid black; padding:2em;">
+                    <div class="row">
+                        <div class="col-md-6 font-weight-bolder">@m.Name</div>
+                        @*<div class="col-md-6">
+            <label class="switch">
+                <input type="checkbox" id="checkboxBreakfastOnOffId_@m.Id" onchange="UpdatePreOrderSchedule(this.id,this.value,@m.Id)" @checkedTag>
+                <span class="slider round"></span>
+            </label>
+
+        </div>*@
+                    @*<div class="col-md-6">
+                      @{ 
+                          var setmnu1 = todaysMenuSet.Where(a => a.MealTypeId == m.Id).FirstOrDefault();
+                          var setmnuId1 = setmnu1 != null ? setmnu1.Id : 0;
+                      }
+                       
+                            <button asp-action="SaveExtraSetMenu(@setmnuId1,@m.Id)" asp-controller="ConsumerDashboard" class="btn btn-sm btn-danger px-0 mx-0 col-3 my-0"><i class=" fas fa-plus"></i></button>
+
+
+                    </div>*@
+                        </div>
+                        <div class="row">
+                            <div class="container-fluid">
+                                @if (todaysMenuSet.Where(a => a.MealTypeId == m.Id).FirstOrDefault() != null)
+                                {
+                                    <strong>Tk. @todaysMenuSet.Where(a => a.MealTypeId == m.Id).FirstOrDefault().SetMenuPrice</strong>
+                                    <div class="container-fluid">
+                                        @{ var i = 0; }
+
+                                        @foreach (var mi in todaysMenuSet.Where(a => a.MealTypeId == m.Id).FirstOrDefault().SetMenuDetailsList)
+                                        {
+                                            i = i + 1;
+                                            var soi = _context.StoreOutItem.Find(mi.StoreOutItemId);
+                                            <span class="badge badge-primary">@i. @soi.Name</span>
+                                        }
+
+                                    </div>
+                                }
+                            </div>
+                        </div>
+                        <hr />
+
+                        @*============= Todays Extra Items Order System ================*@
+                <div class="row">
+                    <div class="container-fluid">
+
+                        @*===== Showing Extra Order Items =====*@
+
+                        @{
+                            var setmenu1 = todaysMenuSet.Where(a => a.MealTypeId == m.Id).FirstOrDefault();
+                            var setmenuId1 = setmenu1 != null ? setmenu1.Id : 0;
+                            var mealTypeId1 = setmenu1 != null ? setmenu1.MealTypeId : 0;
+                            var orderHistoryList = _context.OrderHistory.Include(x => x.SetMenu).Include(x => x.StoreOutItem)
+                                .Where(x => x.SetMenuId == setmenuId1 && x.OrderDate.ToShortDateString() == DateTime.Today.ToShortDateString() && x.MealTypeId == mealTypeId1 && x.UserId == user.Id && x.StoreOutItemId != null).ToList();
+                              var orderHistoryListSetMenu = _context.OrderHistory.Include(x => x.SetMenu).Include(x => x.StoreOutItem)
+                                .Where(x => x.SetMenuId == setmenuId1 && x.OrderDate.ToShortDateString() == DateTime.Today.ToShortDateString() && x.MealTypeId == mealTypeId1 && x.UserId == user.Id && x.StoreOutItemId == null).ToList();
+
+              
+                        }
+
+                        <strong> Ordered Exrea Items ( @orderHistoryList.Sum(x => x.OrderAmount) Tk. )</strong>
+                        @if (orderHistoryList != null && orderHistoryList.Count > 0 && setmenuId1 > 0 && mealTypeId1 > 0)
+                        {
+                            <div class="container-fluid">
+                                @{ var i = 0; }
+
+                                @foreach (var ohl in orderHistoryList)
+                                {
+                                    i = i + 1;
+                                    var exitprice = @ohl.SetMenu.ExtraItemList.Where(x => x.SetMenuId == setmenuId1 && x.StoreOutItemId == ohl.StoreOutItemId).FirstOrDefault();
+                                    double pr = 0;
+                                    if (exitprice == null)
+                                    {
+                                        pr = 1;
+                                    }
+                                    else
+                                    {
+                                        pr = exitprice.Price;
+                                    }
+                                        <span class="badge badge-primary">
+                                            @i. @ohl.StoreOutItem.Name @@Tk.@pr, @ohl.UnitOrdered<small>pc</small> = Tk. @(ohl.UnitOrdered * pr)
+                                            @*<input type="hidden" value="@ohl.Id" name="OrderHistoryId" />*@
+                                            @*<button type="submit" style="padding: 0px;margin: 0px;">
+                                                <span class="badge badge-danger">
+                                                    <i class="fas fa-times"></i>
+                                                </span>*@
+                                            @*</button>*@
+                                        </span>
+                                    @*</form>*@
+                                }
+                            </div>
+                        }
+                    </div>
+
+                    <hr />
+
+                    <div class="container-fluid">
+                        @*===== Ordering Extra Items =====*@
+
+                        @{
+                            var setmenu = todaysMenuSet.Where(a => a.MealTypeId == m.Id).FirstOrDefault();
+                            var setmenuId = setmenu != null ? setmenu.Id : 0;
+                            var mealTypeId = setmenu != null ? setmenu.MealTypeId : 0;
+                            var extraDDL = _ddlhelper.GetExtraItemList(setmenuId, mealTypeId);
+                        }
+                        <form asp-action="SaveExtraOrderItems" asp-controller="ConsumerDashboard">
+                            <strong> Extra Order  </strong>
+                            <input type="hidden" value="@setmenuId" name="SetMenuId" />
+                            <input type="hidden" value="@mealTypeId" name="MealTypeId" />
+                            @*<div class="row">
+                                <select class="col-6 form-control-sm" id="DDLExtraItems" name="ExtraItemId">
+                                    <option>-- Select --</option>
+                                    @if (extraDDL.Count > 0)
+                                    {
+                                        foreach (var ei in extraDDL)
+                                        {
+                                            <option value="@ei.Key"> @ei.Value</option>
+                                        }
+                                    }
+
+                                </select>
+                                <input type="number" value="1" name="ExtraItemOrderQuantity" class="col-3 form-control-sm" required />
+                                <button type="submit" class="btn btn-sm btn-info px-0 mx-0 col-3 my-0"><i class=" fas fa-plus"></i></button>
+
+                            </div>*@
+                        </form>
+                    </div>
+
+                    <hr />
+                    @if (orderHistoryList != null && orderHistoryList.Count > 0 && setmenuId1 > 0 && mealTypeId1 > 0)
+                    {
+                <div class="container-fluid">
+
+                    @{ var i = 0;
+                        foreach (var o in orderHistoryListSetMenu)
+                        {
+                            i++;
+
+                            @*<form asp-action="DeleteOrderHistory" asp-controller="ConsumerDashboard">*@
+                                <span class="badge badge-primary">
+                                    @i.  @@Tk.@o.SetMenu.SetMenuPrice, @o.UnitOrdered<small>pc</small> = Tk. @(o.OrderAmount)
+                                    @*<input type="hidden" value="@o.Id" name="OrderHistoryId" />
+                                    <button type="submit" style="padding: 0px;margin: 0px;">
+                                        <span class="badge badge-danger">
+                                            <i class="fas fa-times"></i>
+                                        </span>
+                                    </button>*@
+                                </span>
+                            @*</form>*@
+
+                        }
+
+                        //var ttlQuantity = orderHistoryList.FindAll(x => (x.StoreOutItemId == null)).FirstOrDefault();
+
+                        //var ttlPrice = orderHistoryList.Where(x => x.StoreOutItemId == null).FirstOrDefault().OrderAmount;
+                    }
+
+                    @*@ttlQuantity.UnitOrdered*@
+                </div>
+                    }
+                    <div class="container-fluid">
+                        @*===== Ordering Extra Items =====*@
+
+                        @{
+                            var setmenu2 = todaysMenuSet.Where(a => a.MealTypeId == m.Id).FirstOrDefault();
+                            var setmenuId2 = setmenu2 != null ? setmenu2.Id : 0;
+                            var mealTypeId2 = setmenu2 != null ? setmenu2.MealTypeId : 0;
+                        }
+                        @*<form asp-action="SaveExtraOrderSetMenu" asp-controller="ConsumerDashboard">
+                            <strong> Extra SetMenu Order  </strong>
+                            <input type="hidden" value="@setmenuId" name="SetMenuId" />
+                            <input type="hidden" value="@mealTypeId" name="MealTypeId" />
+                            <div class="row">
+
+                                <input type="number" value="1" name="ExtraSetMenuOrderQuantity" class="col-3 form-control-sm" required />
+                                <button type="submit" class="btn btn-sm btn-danger px-0 mx-0 col-3 my-0"><i class=" fas fa-plus"></i></button>
+
+                            </div>
+                        </form>*@
+                    </div>
+                </div>
+                        @*============= END Todays Extra Items Order System ================*@
+
+                    </div>
+
+            }
+
+        </div>
+    </div>
+
+    <hr />
+
+
+
+
+
+
+
+
+
+
+    @*=================================================================================================*@
+    @*=================================================================================================*@
+    @*=================================================================================================*@
+    @*=================================================================================================*@
+
+
+
+    <span class="badge badge-danger">@DateTime.Now.AddDays(1).ToLongDateString()</span>
+    <div class="container-fluid">
+        <div class="row">
+            @foreach (var m in activeMealTypes.OrderBy(a => a.Serial))
+            {
+                var checkedTag = "";
+            
+                @if (preConfigForTomorrow != null && preConfigForTomorrow.Where(b => b.MealTypeId == m.Id).FirstOrDefault() != null && preConfigForTomorrow.Where(b => b.MealTypeId == m.Id).FirstOrDefault().IsPreOrderSet)
+                {
+                    checkedTag = "checked";
+                }
+
+
+                <div class="col-md-4" style="border:1px solid black; padding:2em;">
+                    <div class="row">
+                        <div class="col-md-6 font-weight-bolder">@m.Name</div>
+                    
+                        <div class="col-md-6">
+
+                            @if (System.DateTime.Now.Hour < 22)
+
+                            {
+                                <label class="switch">
+                                    <input  type="checkbox" id="checkboxBreakfastOnOffId_@m.Id" onchange="UpdatePreOrderSchedule(this.id,this.value,@m.Id)" @checkedTag />
+                                    <span class="slider round"></span>
+                                </label>
+                            }
+                            else
+                            {
+                                <span class="badge badge-warning">Order Time Up</span>
+
+                            }
+
+
+
+                        </div>
+                        </div>
+                    <div class="row">
+                        <div class="container-fluid">
+                            @if (DayOneMenuSet.Where(a => a.MealTypeId == m.Id).FirstOrDefault() != null)
+                            {
+                                <strong>Tk. @DayOneMenuSet.Where(a => a.MealTypeId == m.Id).FirstOrDefault().SetMenuPrice</strong>
+                                <div class="container-fluid">
+                                    @{ var i = 0; }
+
+                                    @foreach (var mi in DayOneMenuSet.Where(a => a.MealTypeId == m.Id).FirstOrDefault().SetMenuDetailsList)
+                                    {
+                                        i = i + 1;
+                                        var soi = _context.StoreOutItem.Find(mi.StoreOutItemId);
+                                        <span class="badge badge-primary">@i. @soi.Name</span>
+                                    }
+
+                                </div>
+                            }
+                        </div>
+                    </div>
+                    <hr />
+
+                    @*============= Todays Extra Items Order System ================*@
+                <div class="row">
+                    <div class="container-fluid">
+
+                        @*===== Showing Extra Order Items =====*@
+
+                        @{
+                            var setmenu1 = DayOneMenuSet.Where(a => a.MealTypeId == m.Id).FirstOrDefault();
+                            var setmenuId1 = setmenu1 != null ? setmenu1.Id : 0;
+                            var mealTypeId1 = setmenu1 != null ? setmenu1.MealTypeId : 0;
+                            var orderHistoryList = _context.OrderHistory.Include(x => x.SetMenu).Include(x => x.StoreOutItem)
+                                .Where(x => x.SetMenuId == setmenuId1 && x.OrderDate.ToShortDateString() == DateTime.Now.AddDays(1).ToShortDateString() && x.MealTypeId == mealTypeId1 && x.UserId == user.Id && x.StoreOutItemId != null).ToList();
+                            var orderHistoryListSetMenu = _context.OrderHistory.Include(x => x.SetMenu).Include(x => x.StoreOutItem)
+                         .Where(x => x.SetMenuId == setmenuId1 && x.OrderDate.ToShortDateString() == DateTime.Now.AddDays(1).ToShortDateString() && x.MealTypeId == mealTypeId1 && x.UserId == user.Id && x.StoreOutItemId == null).ToList();
+
+
+                        }
+
+                        <strong> Ordered Extra Items ( @orderHistoryList.Sum(x => x.OrderAmount) Tk. )</strong>
+                        @if (orderHistoryList != null && orderHistoryList.Count > 0 && setmenuId1 > 0 && mealTypeId1 > 0)
+                        {
+                            <div class="container-fluid">
+                                @{ var i = 0; }
+
+                                @foreach (var ohl in orderHistoryList)
+                                {
+                                    i = i + 1;
+                                    var exitprice = @ohl.SetMenu.ExtraItemList.Where(x => x.SetMenuId == setmenuId1 && x.StoreOutItemId == ohl.StoreOutItemId).FirstOrDefault().Price;
+
+                                    <form asp-action="DeleteOrderHistory" asp-controller="ConsumerDashboard">
+                                        <span class="badge badge-primary">
+                                            @i. @ohl.StoreOutItem.Name @@Tk.@exitprice, @ohl.UnitOrdered<small>pc</small> = Tk. @(ohl.UnitOrdered * exitprice)
+                                            <input type="hidden" value="@ohl.Id" name="OrderHistoryId" />
+                                            <button type="submit" style="padding: 0px;margin: 0px;">
+                                                <span class="badge badge-danger">
+                                                    <i class="fas fa-times"></i>
+                                                </span>
+                                            </button>
+                                        </span>
+                                    </form>
+                                }
+                            </div>
+                        }
+                    </div>
+
+                    <hr />
+
+                    <div class="container-fluid">
+                        @*===== Ordering Extra Items =====*@
+
+                        @{
+                            var setmenu = DayOneMenuSet.Where(a => a.MealTypeId == m.Id).FirstOrDefault();
+                            var setmenuId = setmenu != null ? setmenu.Id : 0;
+                            var mealTypeId = setmenu != null ? setmenu.MealTypeId : 0;
+                            var extraDDL = _ddlhelper.GetExtraItemList(setmenuId, mealTypeId);
+                        }
+                        <form asp-action="SaveExtraOrderItems" asp-controller="ConsumerDashboard">
+                            <strong> Extra Order  </strong>
+                            <input type="hidden" value="@setmenuId" name="SetMenuId" />
+                            <input type="hidden" value="@mealTypeId" name="MealTypeId" />
+                            <div class="row">
+                                @if (System.DateTime.Now.Hour < 22)
+
+                                {
+                                    <select class="col-6 form-control-sm" id="DDLExtraItems" name="ExtraItemId">
+                                        <option>-- Select --</option>
+                                        @if (extraDDL.Count > 0)
+                                        {
+                                            foreach (var ei in extraDDL)
+                                            {
+                                                <option value="@ei.Key"> @ei.Value</option>
+                                            }
+                                        }
+
+                                    </select>
+                                    <input type="number" value="1" name="ExtraItemOrderQuantity" class="col-3 form-control-sm" required />
+                                    <button type="submit" class="btn btn-sm btn-info px-0 mx-0 col-3 my-0"><i class=" fas fa-plus"></i></button>
+                                }
+                                else
+                                {
+                                    <div class="col-md-6"></div>
+
+                                    <div class="col-md-6">
+                                        <span class="badge badge-warning">Extra Order Time Up</span>
+                                    </div>
+
+                                }
+
+
+                            </div>
+                        </form>
+                    </div>
+                    @if (orderHistoryList != null && orderHistoryList.Count > 0 && setmenuId1 > 0 && mealTypeId1 > 0)
+                    {
+                        <div class="container-fluid">
+
+                            @{ var i = 0;}
+                              @foreach (var o in orderHistoryListSetMenu)
+                                {
+                                    i++;
+
+                                    <form asp-action="DeleteOrderHistory" asp-controller="ConsumerDashboard">
+                                        <span class="badge badge-primary">
+                                            @i.  @@Tk.@o.SetMenu.SetMenuPrice, @o.UnitOrdered<small>pc</small> = Tk. @(o.OrderAmount)
+                                            <input type="hidden" value="@o.Id" name="OrderHistoryId" />
+                                            <button type="submit" style="padding: 0px;margin: 0px;">
+                                                <span class="badge badge-danger">
+                                                    <i class="fas fa-times"></i>
+                                                </span>
+                                            </button>
+                                        </span>
+                                    </form>
+
+                                }
+                            
+
+                            
+
+                            @*@ttlQuantity.UnitOrdered*@
+                        </div>
+                    }
+                    <div class="container-fluid">
+                        @*===== Ordering Extra Items =====*@
+
+                        @{
+                            var setmenu2 = todaysMenuSet.Where(a => a.MealTypeId == m.Id).FirstOrDefault();
+                            var setmenuId2 = setmenu2 != null ? setmenu2.Id : 0;
+                            var mealTypeId2 = setmenu2 != null ? setmenu2.MealTypeId : 0;
+                        }
+                        <form asp-action="SaveExtraOrderSetMenu" asp-controller="ConsumerDashboard">
+                <strong> Extra SetMenu Order  </strong>
+                <input type="hidden" value="@setmenuId" name="SetMenuId" />
+                <input type="hidden" value="@mealTypeId" name="MealTypeId" />
+                <div class="row">
+
+                    <input type="number" value="1" name="ExtraSetMenuOrderQuantity" class="col-3 form-control-sm" required />
+                    <button type="submit" class="btn btn-sm btn-danger px-0 mx-0 col-3 my-0"><i class=" fas fa-plus"></i></button>
+
+                </div>
+            </form>
+                    </div>
+                </div>
+                    @*============= END Todays Extra Items Order System ================*@
+
+                </div>
+
+            }
+
+        </div>
+    </div>
+
+    <hr />
+    <div class="row">
+        <div class="col-md-4">
+            <span class="badge badge-secondary">@DateTime.Now.AddDays(2).ToLongDateString()</span>
+            @foreach (var m in activeMealTypes.OrderBy(a => a.Serial))
+            {
+                <ul class="list-group">
+                    <li class="list-group-item">
+                        <strong>
+                            @m.Name
+                        </strong>
+                        <hr />
+                        @if (DayTwoMenuSet.Where(a => a.MealTypeId == m.Id).FirstOrDefault() != null)
+                        {
+                            <strong>Tk. @DayTwoMenuSet.Where(a => a.MealTypeId == m.Id).FirstOrDefault().SetMenuPrice</strong>
+                            <div class="container-fluid">
+                                @{ var i = 0; }
+
+                                @foreach (var mi in DayTwoMenuSet.Where(a => a.MealTypeId == m.Id).FirstOrDefault().SetMenuDetailsList)
+                                {
+                                    i = i + 1;
+                                    var soi = _context.StoreOutItem.Find(mi.StoreOutItemId);
+                                    <span class="badge badge-primary">@i. @soi.Name</span>
+                                }
+
+                            </div>
+                        }
+
+                        <hr />
+
+                        @*============= Day-2 Extra Items Order System ================*@
+                    <div class="row">
+                        <div class="container-fluid">
+
+                            @*===== Showing Extra Order Items =====*@
+
+                            @{
+                                var setmenu1 = DayTwoMenuSet.Where(a => a.MealTypeId == m.Id).FirstOrDefault();
+                                var setmenuId1 = setmenu1 != null ? setmenu1.Id : 0;
+                                var mealTypeId1 = setmenu1 != null ? setmenu1.MealTypeId : 0;
+                                var orderHistoryList = _context.OrderHistory.Include(x => x.SetMenu).Include(x => x.StoreOutItem)
+                                    .Where(x => x.SetMenuId == setmenuId1 && x.OrderDate.ToShortDateString() == DateTime.Today.AddDays(1).ToShortDateString() && x.MealTypeId == mealTypeId1 && x.UserId == user.Id && x.StoreOutItemId != null).ToList();
+
+                            }
+
+                            <strong> Ordered Exrea Items ( @orderHistoryList.Sum(x => x.OrderAmount) Tk. )</strong>
+                            @if (orderHistoryList != null && orderHistoryList.Count > 0 && setmenuId1 > 0 && mealTypeId1 > 0)
+                            {
+                                <div class="container-fluid">
+                                    @{ var i = 0; }
+
+                                    @foreach (var ohl in orderHistoryList)
+                                    {
+                                        i = i + 1;
+                                        var exitprice = @ohl.SetMenu.ExtraItemList.Where(x => x.SetMenuId == setmenuId1 && x.StoreOutItemId == ohl.StoreOutItemId).FirstOrDefault().Price;
+
+                                        <form asp-action="DeleteOrderHistory" asp-controller="ConsumerDashboard">
+                                            <span class="badge badge-primary">
+                                                @i. @ohl.StoreOutItem.Name @@Tk.@exitprice, @ohl.UnitOrdered<small>pc</small> = Tk. @(ohl.UnitOrdered * exitprice)
+                                                <input type="hidden" value="@ohl.Id" name="OrderHistoryId" />
+                                                <button type="submit" style="padding: 0px;margin: 0px;">
+                                                    <span class="badge badge-danger">
+                                                        <i class="fas fa-times"></i>
+                                                    </span>
+                                                </button>
+                                            </span>
+                                        </form>
+                                    }
+                                </div>
+                            }
+                        </div>
+
+                        <hr />
+
+                        <div class="container-fluid">
+                            @*===== Ordering Extra Items =====*@
+
+                            @{
+                                var setmenu = DayTwoMenuSet.Where(a => a.MealTypeId == m.Id).FirstOrDefault();
+                                var setmenuId = setmenu != null ? setmenu.Id : 0;
+                                var mealTypeId = setmenu != null ? setmenu.MealTypeId : 0;
+                                var extraDDL = _ddlhelper.GetExtraItemList(setmenuId, mealTypeId);
+                            }
+                            <form asp-action="SaveExtraOrderItems" asp-controller="ConsumerDashboard">
+                                <strong> Extra Order  </strong>
+                                <input type="hidden" value="@setmenuId" name="SetMenuId" />
+                                <input type="hidden" value="@mealTypeId" name="MealTypeId" />
+                                <div class="row">
+
+
+                                    <select class="col-6 form-control-sm" id="DDLExtraItems" name="ExtraItemId">
+                                        <option>-- Select --</option>
+                                        @if (extraDDL.Count > 0)
+                                        {
+                                            foreach (var ei in extraDDL)
+                                            {
+                                                <option value="@ei.Key"> @ei.Value</option>
+                                            }
+                                        }
+
+                                    </select>
+                                    <input type="number" value="1" name="ExtraItemOrderQuantity" class="col-3 form-control-sm" required />
+                                    <button type="submit" class="btn btn-sm btn-info px-0 mx-0 col-3 my-0"><i class=" fas fa-plus"></i></button>
+
+                                </div>
+                            </form>
+                        </div>
+                                           </div>
+                        @*============= END Day-2 Extra Items Order System ================*@
+
+
+                    </li>
+                </ul>
+
+
+
+            }
+
+        </div>
+        <div class="col-md-4">
+            <span class="badge badge-secondary">@DateTime.Now.AddDays(3).ToLongDateString()</span>
+            @foreach (var m in activeMealTypes.OrderBy(a => a.Serial))
+            {
+                <ul class="list-group">
+                    <li class="list-group-item">
+                        <strong>
+                            @m.Name
+                        </strong>
+                        <hr />
+                        @if (DayThreeMenuSet.Where(a => a.MealTypeId == m.Id).FirstOrDefault() != null)
+                        {
+                            <strong>Tk. @DayThreeMenuSet.Where(a => a.MealTypeId == m.Id).FirstOrDefault().SetMenuPrice</strong>
+                            <div class="container-fluid">
+                                @{ var i = 0; }
+
+                                @foreach (var mi in DayThreeMenuSet.Where(a => a.MealTypeId == m.Id).FirstOrDefault().SetMenuDetailsList)
+                                {
+                                    i = i + 1;
+                                    var soi = _context.StoreOutItem.Find(mi.StoreOutItemId);
+                                    <span class="badge badge-primary">@i. @soi.Name</span>
+                                }
+
+                            </div>
+                        }
+
+                        <hr />
+
+                        @*============= Day-3 Extra Items Order System ================*@
+                        <div class="row">
+                            <div class="container-fluid">
+
+                                @*===== Showing Extra Order Items =====*@
+
+                                @{
+                                    var setmenu1 = DayThreeMenuSet.Where(a => a.MealTypeId == m.Id).FirstOrDefault();
+                                    var setmenuId1 = setmenu1 != null ? setmenu1.Id : 0;
+                                    var mealTypeId1 = setmenu1 != null ? setmenu1.MealTypeId : 0;
+                                    var orderHistoryList = _context.OrderHistory.Include(x => x.SetMenu).Include(x => x.StoreOutItem)
+                                        .Where(x => x.SetMenuId == setmenuId1 && x.OrderDate.ToShortDateString() == DateTime.Today.AddDays(2).ToShortDateString() && x.MealTypeId == mealTypeId1 && x.UserId == user.Id && x.StoreOutItemId != null).ToList();
+
+                                }
+
+                                <strong> Ordered Exrea Items ( @orderHistoryList.Sum(x => x.OrderAmount) Tk. )</strong>
+                                @if (orderHistoryList != null && orderHistoryList.Count > 0 && setmenuId1 > 0 && mealTypeId1 > 0)
+                                {
+                                    <div class="container-fluid">
+                                        @{ var i = 0; }
+
+                                        @foreach (var ohl in orderHistoryList)
+                                        {
+                                            i = i + 1;
+                                            var exitprice = @ohl.SetMenu.ExtraItemList.Where(x => x.SetMenuId == setmenuId1 && x.StoreOutItemId == ohl.StoreOutItemId).FirstOrDefault().Price;
+
+                                            <form asp-action="DeleteOrderHistory" asp-controller="ConsumerDashboard">
+                                                <span class="badge badge-primary">
+                                                    @i. @ohl.StoreOutItem.Name @@Tk.@exitprice, @ohl.UnitOrdered<small>pc</small> = Tk. @(ohl.UnitOrdered * exitprice)
+                                                    <input type="hidden" value="@ohl.Id" name="OrderHistoryId" />
+                                                    <button type="submit" style="padding: 0px;margin: 0px;">
+                                                        <span class="badge badge-danger">
+                                                            <i class="fas fa-times"></i>
+                                                        </span>
+                                                    </button>
+                                                </span>
+                                            </form>
+                                        }
+                                    </div>
+                                }
+                            </div>
+
+                            <hr />
+
+                            <div class="container-fluid">
+                                @*===== Ordering Extra Items =====*@
+
+                                @{
+                                    var setmenu = DayThreeMenuSet.Where(a => a.MealTypeId == m.Id).FirstOrDefault();
+                                    var setmenuId = setmenu != null ? setmenu.Id : 0;
+                                    var mealTypeId = setmenu != null ? setmenu.MealTypeId : 0;
+                                    var extraDDL = _ddlhelper.GetExtraItemList(setmenuId, mealTypeId);
+                                }
+                                <form asp-action="SaveExtraOrderItems" asp-controller="ConsumerDashboard">
+                                    <strong> Extra Order  </strong>
+                                    <input type="hidden" value="@setmenuId" name="SetMenuId" />
+                                    <input type="hidden" value="@mealTypeId" name="MealTypeId" />
+                                    <div class="row">
+                                        <select class="col-6 form-control-sm" id="DDLExtraItems" name="ExtraItemId">
+                                            <option>-- Select --</option>
+                                            @if (extraDDL.Count > 0)
+                                            {
+                                                foreach (var ei in extraDDL)
+                                                {
+                                                    <option value="@ei.Key"> @ei.Value</option>
+                                                }
+                                            }
+
+                                        </select>
+                                        <input type="number" value="1" name="ExtraItemOrderQuantity" class="col-3 form-control-sm" required />
+                                        <button type="submit" class="btn btn-sm btn-info px-0 mx-0 col-3 my-0"><i class=" fas fa-plus"></i></button>
+
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                        @*============= END Day-3 Extra Items Order System ================*@
+
+                    </li>
+                </ul>
+
+            }
+        </div>
+        <div class="col-md-4">
+            <span class="badge badge-secondary">@DateTime.Now.AddDays(4).ToLongDateString()</span>
+            @foreach (var m in activeMealTypes.OrderBy(a => a.Serial))
+            {
+
+                <ul class="list-group">
+                    <li class="list-group-item">
+                        <strong>
+                            @m.Name
+                        </strong>
+                        <hr />
+                        @if (DayFourMenuSet.Where(a => a.MealTypeId == m.Id).FirstOrDefault() != null)
+                        {
+                            <strong>Tk. @DayFourMenuSet.Where(a => a.MealTypeId == m.Id).FirstOrDefault().SetMenuPrice</strong>
+                            <div class="container-fluid">
+                                @{ var i = 0; }
+
+                                @foreach (var mi in DayFourMenuSet.Where(a => a.MealTypeId == m.Id).FirstOrDefault().SetMenuDetailsList)
+                                {
+                                    i = i + 1;
+                                    var soi = _context.StoreOutItem.Find(mi.StoreOutItemId);
+                                    <span class="badge badge-primary">@i. @soi.Name</span>
+                                }
+
+                            </div>
+                        }
+
+
+                        <hr />
+
+                        @*============= Day-4 Extra Items Order System ================*@
+                        <div class="row">
+                            <div class="container-fluid">
+
+                                @*===== Showing Extra Order Items =====*@
+
+                                @{
+                                    var setmenu1 = DayFourMenuSet.Where(a => a.MealTypeId == m.Id).FirstOrDefault();
+                                    var setmenuId1 = setmenu1 != null ? setmenu1.Id : 0;
+                                    var mealTypeId1 = setmenu1 != null ? setmenu1.MealTypeId : 0;
+                                    var orderHistoryList = _context.OrderHistory.Include(x => x.SetMenu).Include(x => x.StoreOutItem)
+                                        .Where(x => x.SetMenuId == setmenuId1 && x.OrderDate.ToShortDateString() == DateTime.Today.AddDays(3).ToShortDateString() && x.MealTypeId == mealTypeId1 && x.UserId == user.Id && x.StoreOutItemId != null).ToList();
+
+                                }
+
+                                <strong> Ordered Exrea Items ( @orderHistoryList.Sum(x => x.OrderAmount) Tk. )</strong>
+                                @if (orderHistoryList != null && orderHistoryList.Count > 0 && setmenuId1 > 0 && mealTypeId1 > 0)
+                                {
+                                    <div class="container-fluid">
+                                        @{ var i = 0; }
+
+                                        @foreach (var ohl in orderHistoryList)
+                                        {
+                                            i = i + 1;
+                                            var exitprice = @ohl.SetMenu.ExtraItemList.Where(x => x.SetMenuId == setmenuId1 && x.StoreOutItemId == ohl.StoreOutItemId).FirstOrDefault().Price;
+
+                                            <form asp-action="DeleteOrderHistory" asp-controller="ConsumerDashboard">
+                                                <span class="badge badge-primary">
+                                                    @i. @ohl.StoreOutItem.Name @@Tk.@exitprice, @ohl.UnitOrdered<small>pc</small> = Tk. @(ohl.UnitOrdered * exitprice)
+                                                    <input type="hidden" value="@ohl.Id" name="OrderHistoryId" />
+                                                    <button type="submit" style="padding: 0px;margin: 0px;">
+                                                        <span class="badge badge-danger">
+                                                            <i class="fas fa-times"></i>
+                                                        </span>
+                                                    </button>
+                                                </span>
+                                            </form>
+                                        }
+                                    </div>
+                                }
+                            </div>
+
+                            <hr />
+
+                            <div class="container-fluid">
+                                @*===== Ordering Extra Items =====*@
+
+                                @{
+                                    var setmenu = DayFourMenuSet.Where(a => a.MealTypeId == m.Id).FirstOrDefault();
+                                    var setmenuId = setmenu != null ? setmenu.Id : 0;
+                                    var mealTypeId = setmenu != null ? setmenu.MealTypeId : 0;
+                                    var extraDDL = _ddlhelper.GetExtraItemList(setmenuId, mealTypeId);
+                                }
+                                <form asp-action="SaveExtraOrderItems" asp-controller="ConsumerDashboard">
+                                    <strong> Extra Order  </strong>
+                                    <input type="hidden" value="@setmenuId" name="SetMenuId" />
+                                    <input type="hidden" value="@mealTypeId" name="MealTypeId" />
+                                    <div class="row">
+                                        <select class="col-6 form-control-sm" id="DDLExtraItems" name="ExtraItemId">
+                                            <option>-- Select --</option>
+                                            @if (extraDDL.Count > 0)
+                                            {
+                                                foreach (var ei in extraDDL)
+                                                {
+                                                    <option value="@ei.Key"> @ei.Value</option>
+                                                }
+                                            }
+
+                                        </select>
+                                        <input type="number" value="1" name="ExtraItemOrderQuantity" class="col-3 form-control-sm" required />
+                                        <button type="submit" class="btn btn-sm btn-info px-0 mx-0 col-3 my-0"><i class=" fas fa-plus"></i></button>
+
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                        @*============= END Day-4 Extra Items Order System ================*@
+
+                    </li>
+                </ul>
+
+            }
+        </div>
+
+        <div class="col-md-4">
+            <span class="badge badge-secondary">@DateTime.Now.AddDays(5).ToLongDateString()</span>
+            @foreach (var m in activeMealTypes.OrderBy(a => a.Serial))
+            {
+
+                <ul class="list-group">
+                    <li class="list-group-item">
+                        <strong>
+                            @m.Name
+                        </strong>
+                        <hr />
+                        @if (DayFiveMenuSet.Where(a => a.MealTypeId == m.Id).FirstOrDefault() != null)
+                        {
+                            <strong>Tk. @DayFiveMenuSet.Where(a => a.MealTypeId == m.Id).FirstOrDefault().SetMenuPrice</strong>
+                            <div class="container-fluid">
+                                @{ var i = 0; }
+
+                                @foreach (var mi in DayFiveMenuSet.Where(a => a.MealTypeId == m.Id).FirstOrDefault().SetMenuDetailsList)
+                                {
+                                    i = i + 1;
+                                    var soi = _context.StoreOutItem.Find(mi.StoreOutItemId);
+                                    <span class="badge badge-primary">@i. @soi.Name</span>
+                                }
+
+                            </div>
+                        }
+
+                        <hr />
+                        @*============= Day-5 Extra Items Order System ================*@
+                        <div class="row">
+                            <div class="container-fluid">
+
+                                @*===== Showing Extra Order Items =====*@
+
+                                @{
+                                    var setmenu1 = DayFiveMenuSet.Where(a => a.MealTypeId == m.Id).FirstOrDefault();
+                                    var setmenuId1 = setmenu1 != null ? setmenu1.Id : 0;
+                                    var mealTypeId1 = setmenu1 != null ? setmenu1.MealTypeId : 0;
+                                    var orderHistoryList = _context.OrderHistory.Include(x => x.SetMenu).Include(x => x.StoreOutItem)
+                                        .Where(x => x.SetMenuId == setmenuId1 && x.OrderDate.ToShortDateString() == DateTime.Today.AddDays(4).ToShortDateString() && x.MealTypeId == mealTypeId1 && x.UserId == user.Id && x.StoreOutItemId != null).ToList();
+
+                                }
+
+                                <strong> Ordered Exrea Items ( @orderHistoryList.Sum(x => x.OrderAmount) Tk. )</strong>
+                                @if (orderHistoryList != null && orderHistoryList.Count > 0 && setmenuId1 > 0 && mealTypeId1 > 0)
+                                {
+                                    <div class="container-fluid">
+                                        @{ var i = 0; }
+
+                                        @foreach (var ohl in orderHistoryList)
+                                        {
+                                            i = i + 1;
+                                            var exitprice = @ohl.SetMenu.ExtraItemList.Where(x => x.SetMenuId == setmenuId1 && x.StoreOutItemId == ohl.StoreOutItemId).FirstOrDefault().Price;
+
+                                            <form asp-action="DeleteOrderHistory" asp-controller="ConsumerDashboard">
+                                                <span class="badge badge-primary">
+                                                    @i. @ohl.StoreOutItem.Name @@Tk.@exitprice, @ohl.UnitOrdered<small>pc</small> = Tk. @(ohl.UnitOrdered * exitprice)
+                                                    <input type="hidden" value="@ohl.Id" name="OrderHistoryId" />
+                                                    <button type="submit" style="padding: 0px;margin: 0px;">
+                                                        <span class="badge badge-danger">
+                                                            <i class="fas fa-times"></i>
+                                                        </span>
+                                                    </button>
+                                                </span>
+                                            </form>
+                                        }
+                                    </div>
+                                }
+                            </div>
+
+                            <hr />
+
+                            <div class="container-fluid">
+                                @*===== Ordering Extra Items =====*@
+
+                                @{
+                                    var setmenu = DayFiveMenuSet.Where(a => a.MealTypeId == m.Id).FirstOrDefault();
+                                    var setmenuId = setmenu != null ? setmenu.Id : 0;
+                                    var mealTypeId = setmenu != null ? setmenu.MealTypeId : 0;
+                                    var extraDDL = _ddlhelper.GetExtraItemList(setmenuId, mealTypeId);
+                                }
+                                <form asp-action="SaveExtraOrderItems" asp-controller="ConsumerDashboard">
+                                    <strong> Extra Order  </strong>
+                                    <input type="hidden" value="@setmenuId" name="SetMenuId" />
+                                    <input type="hidden" value="@mealTypeId" name="MealTypeId" />
+                                    <div class="row">
+                                        <select class="col-6 form-control-sm" id="DDLExtraItems" name="ExtraItemId">
+                                            <option>-- Select --</option>
+                                            @if (extraDDL.Count > 0)
+                                            {
+                                                foreach (var ei in extraDDL)
+                                                {
+                                                    <option value="@ei.Key"> @ei.Value</option>
+                                                }
+                                            }
+
+                                        </select>
+                                        <input type="number" value="1" name="ExtraItemOrderQuantity" class="col-3 form-control-sm" required />
+                                        <button type="submit" class="btn btn-sm btn-info px-0 mx-0 col-3 my-0"><i class=" fas fa-plus"></i></button>
+
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                        @*============= END Day-5 Extra Items Order System ================*@
+
+
+                    </li>
+                </ul>
+
+            }
+        </div>
+        <div class="col-md-4">
+            <span class="badge badge-secondary">@DateTime.Now.AddDays(6).ToLongDateString()</span>
+            @foreach (var m in activeMealTypes.OrderBy(a => a.Serial))
+            {
+
+                <ul class="list-group">
+                    <li class="list-group-item">
+                        <strong>
+                            @m.Name
+                        </strong>
+                        <hr />
+                        @if (DaySixMenuSet.Where(a => a.MealTypeId == m.Id).FirstOrDefault() != null)
+                        {
+                            <strong>Tk. @DaySixMenuSet.Where(a => a.MealTypeId == m.Id).FirstOrDefault().SetMenuPrice</strong>
+                            <div class="container-fluid">
+                                @{ var i = 0; }
+
+                                @foreach (var mi in DaySixMenuSet.Where(a => a.MealTypeId == m.Id).FirstOrDefault().SetMenuDetailsList)
+                                {
+                                    i = i + 1;
+                                    var soi = _context.StoreOutItem.Find(mi.StoreOutItemId);
+                                    <span class="badge badge-primary">@i. @soi.Name</span>
+                                }
+
+                            </div>
+                        }
+
+                        <hr />
+                        @*============= Day-6 Extra Items Order System ================*@
+                        <div class="row">
+                            <div class="container-fluid">
+
+                                @*===== Showing Extra Order Items =====*@
+
+                                @{
+                                    var setmenu1 = DaySixMenuSet.Where(a => a.MealTypeId == m.Id).FirstOrDefault();
+                                    var setmenuId1 = setmenu1 != null ? setmenu1.Id : 0;
+                                    var mealTypeId1 = setmenu1 != null ? setmenu1.MealTypeId : 0;
+                                    var orderHistoryList = _context.OrderHistory.Include(x => x.SetMenu).Include(x => x.StoreOutItem)
+                                        .Where(x => x.SetMenuId == setmenuId1 && x.OrderDate.ToShortDateString() == DateTime.Today.AddDays(5).ToShortDateString() && x.MealTypeId == mealTypeId1 && x.UserId == user.Id && x.StoreOutItemId != null).ToList();
+
+                                }
+
+                                <strong> Ordered Exrea Items ( @orderHistoryList.Sum(x => x.OrderAmount) Tk. )</strong>
+                                @if (orderHistoryList != null && orderHistoryList.Count > 0 && setmenuId1 > 0 && mealTypeId1 > 0)
+                                {
+                                    <div class="container-fluid">
+                                        @{ var i = 0; }
+
+                                        @foreach (var ohl in orderHistoryList)
+                                        {
+                                            i = i + 1;
+                                            var exitprice = @ohl.SetMenu.ExtraItemList.Where(x => x.SetMenuId == setmenuId1 && x.StoreOutItemId == ohl.StoreOutItemId).FirstOrDefault().Price;
+
+                                            <form asp-action="DeleteOrderHistory" asp-controller="ConsumerDashboard">
+                                                <span class="badge badge-primary">
+                                                    @i. @ohl.StoreOutItem.Name @@Tk.@exitprice, @ohl.UnitOrdered<small>pc</small> = Tk. @(ohl.UnitOrdered * exitprice)
+                                                    <input type="hidden" value="@ohl.Id" name="OrderHistoryId" />
+                                                    <button type="submit" style="padding: 0px;margin: 0px;">
+                                                        <span class="badge badge-danger">
+                                                            <i class="fas fa-times"></i>
+                                                        </span>
+                                                    </button>
+                                                </span>
+                                            </form>
+                                        }
+                                    </div>
+                                }
+                            </div>
+
+                            <hr />
+
+                            <div class="container-fluid">
+                                @*===== Ordering Extra Items =====*@
+
+                                @{
+                                    var setmenu = DaySixMenuSet.Where(a => a.MealTypeId == m.Id).FirstOrDefault();
+                                    var setmenuId = setmenu != null ? setmenu.Id : 0;
+                                    var mealTypeId = setmenu != null ? setmenu.MealTypeId : 0;
+                                    var extraDDL = _ddlhelper.GetExtraItemList(setmenuId, mealTypeId);
+                                }
+                                <form asp-action="SaveExtraOrderItems" asp-controller="ConsumerDashboard">
+                                    <strong> Extra Order  </strong>
+                                    <input type="hidden" value="@setmenuId" name="SetMenuId" />
+                                    <input type="hidden" value="@mealTypeId" name="MealTypeId" />
+                                    <div class="row">
+                                        <select class="col-6 form-control-sm" id="DDLExtraItems" name="ExtraItemId">
+                                            <option>-- Select --</option>
+                                            @if (extraDDL.Count > 0)
+                                            {
+                                                foreach (var ei in extraDDL)
+                                                {
+                                                    <option value="@ei.Key"> @ei.Value</option>
+                                                }
+                                            }
+
+                                        </select>
+                                        <input type="number" value="1" name="ExtraItemOrderQuantity" class="col-3 form-control-sm" required />
+                                        <button type="submit" class="btn btn-sm btn-info px-0 mx-0 col-3 my-0"><i class=" fas fa-plus"></i></button>
+
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                        @*============= END Day-6 Extra Items Order System ================*@
+                    </li>
+                </ul>
+
+
+            }
+        </div>
+        @*<div class="col-md-4">
+            <span class="badge badge-secondary">@DateTime.Now.AddDays(7).ToLongDateString()</span>
+            @foreach (var m in activeMealTypes.OrderBy(a => a.Serial))
+            {
+
+                <ul class="list-group">
+                    <li class="list-group-item">
+                        <strong>
+                            @m.Name
+                        </strong>
+                        <hr />
+                        @if (DaySevenMenuSet.Where(a => a.MealTypeId == m.Id).FirstOrDefault() != null)
+                        {
+                            <strong>Tk. @DaySevenMenuSet.Where(a => a.MealTypeId == m.Id).FirstOrDefault().SetMenuPrice</strong>
+                            <div class="container-fluid">
+                                @{ var i = 0; }
+
+                                @foreach (var mi in DaySevenMenuSet.Where(a => a.MealTypeId == m.Id).FirstOrDefault().SetMenuDetailsList)
+                                {
+                                    i = i + 1;
+                                    var soi = _context.StoreOutItem.Find(mi.StoreOutItemId);
+                                    <span class="badge badge-primary">@i. @soi.Name</span>
+                                }
+
+                            </div>
+                        }
+
+
+                        <hr />
+                        
+                        <div class="row">
+                            <div class="container-fluid">
+
+                                
+
+                                @{
+                                    var setmenu1 = DaySevenMenuSet.Where(a => a.MealTypeId == m.Id).FirstOrDefault();
+                                    var setmenuId1 = setmenu1 != null ? setmenu1.Id : 0;
+                                    var mealTypeId1 = setmenu1 != null ? setmenu1.MealTypeId : 0;
+                                    var orderHistoryList = _context.OrderHistory.Include(x => x.SetMenu).Include(x => x.StoreOutItem)
+                                        .Where(x => x.SetMenuId == setmenuId1 && x.OrderDate.ToShortDateString() == DateTime.Today.AddDays(6).ToShortDateString() && x.MealTypeId == mealTypeId1 && x.UserId == user.Id && x.StoreOutItemId != null).ToList();
+
+                                }
+
+                                <strong> Ordered Exrea Items ( @orderHistoryList.Sum(x => x.OrderAmount) Tk. )</strong>
+                                @if (orderHistoryList != null && orderHistoryList.Count > 0 && setmenuId1 > 0 && mealTypeId1 > 0)
+                                {
+                                    <div class="container-fluid">
+                                        @{ var i = 0; }
+
+                                        @foreach (var ohl in orderHistoryList)
+                                        {
+                                            i = i + 1;
+                                            var exitprice = @ohl.SetMenu.ExtraItemList.Where(x => x.SetMenuId == setmenuId1 && x.StoreOutItemId == ohl.StoreOutItemId).FirstOrDefault().Price;
+
+                                            <form asp-action="DeleteOrderHistory" asp-controller="ConsumerDashboard">
+                                                <span class="badge badge-primary">
+                                                    @i. @ohl.StoreOutItem.Name @@Tk.@exitprice, @ohl.UnitOrdered<small>pc</small> = Tk. @(ohl.UnitOrdered * exitprice)
+                                                    <input type="hidden" value="@ohl.Id" name="OrderHistoryId" />
+                                                    <button type="submit" style="padding: 0px;margin: 0px;">
+                                                        <span class="badge badge-danger">
+                                                            <i class="fas fa-times"></i>
+                                                        </span>
+                                                    </button>
+                                                </span>
+                                            </form>
+                                        }
+                                    </div>
+                                }
+                            </div>
+
+                            <hr />
+
+                            <div class="container-fluid">
+                                
+
+                                @{
+                                    var setmenu = DaySevenMenuSet.Where(a => a.MealTypeId == m.Id).FirstOrDefault();
+                                    var setmenuId = setmenu != null ? setmenu.Id : 0;
+                                    var mealTypeId = setmenu != null ? setmenu.MealTypeId : 0;
+                                    var extraDDL = _ddlhelper.GetExtraItemList(setmenuId, mealTypeId);
+                                }
+                                <form asp-action="SaveExtraOrderItems" asp-controller="ConsumerDashboard">
+                                    <strong> Extra Order  </strong>
+                                    <input type="hidden" value="@setmenuId" name="SetMenuId" />
+                                    <input type="hidden" value="@mealTypeId" name="MealTypeId" />
+                                    <div class="row">
+                                        <select class="col-6 form-control-sm" id="DDLExtraItems" name="ExtraItemId">
+                                            <option>-- Select --</option>
+                                            @if (extraDDL.Count > 0)
+                                            {
+                                                foreach (var ei in extraDDL)
+                                                {
+                                                    <option value="@ei.Key"> @ei.Value</option>
+                                                }
+                                            }
+
+                                        </select>
+                                        <input type="number" value="1" name="ExtraItemOrderQuantity" class="col-3 form-control-sm" required />
+                                        <button type="submit" class="btn btn-sm btn-info px-0 mx-0 col-3 my-0"><i class=" fas fa-plus"></i></button>
+
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                        
+
+                    </li>
+                </ul>
+
+            }
+        </div>*@
+    </div>
+
+</div>
+
+
+
+
+<script>
+    var date = new Date();
+
+    var day = date.getDate();
+    var month = date.getMonth() + 1;
+    var year = date.getFullYear();
+
+    if (month < 10) month = "0" + month;
+    if (day < 10) day = "0" + day;
+
+    var today = year + "-" + month + "-" + day;
+
+
+    document.getElementById('currentDate').value = today;
+</script>
+
+
+
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+
+            //var a = document.location.host; // "localhost:44383/mms"
+            //var b = a.split("/");
+            //alert(b);
+            //alert(b[1]);
+            //alert(a + "/api/consumer/dashboard/PreOrderConfigUpdate?MealTypeId");
+
+        });
+
+        function UpdatePreOrderSchedule(id, value, mealtypeid) {
+            //alert($("#" + id).is(":checked") + " " + mealtypeid);
+
+            console.log('helllo '+window.location.host);
+
+            if (mealtypeid == null && value == null) {
+                alert("Something went wrong. Please try again !!");
+
+            }
+            else {
+
+                $.post("/api/consumer/dashboard/PreOrderConfigUpdate?MealTypeId=" + mealtypeid + "&value=" + $("#" + id).is(":checked"))
+                    .done(function (d) {
+                        if (d) {
+                            //alert("success : " + d);
+                        } else {
+                            alert("failed to update setup");
+                        }
+                    }).fail(function (e) {
+                        alert("something went wrong" + " " + e.responseText);
+                    });
+            }
+        }
+    </script>
+}

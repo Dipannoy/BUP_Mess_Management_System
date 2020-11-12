@@ -1,0 +1,200 @@
+﻿
+@inject ApplicationDbContext _db
+
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+
+    var preOrderScheduleList = _db.PreOrderSchedule.Include(x => x.MealType).Include(x => x.ApplicationUser).ToList();
+    var setMenuList = _db.SetMenu.Include(x => x.SetMenuDetailsList).Include(a => a.MealType).Where(x => x.SetMenuDate.ToShortDateString() == DateTime.Now.ToShortDateString()).ToList();
+
+}
+
+
+<div class="container-fluid">
+
+
+    <h2>Pre-Order Schedule</h2>
+    <hr />
+
+
+    <div class="container-fluid">
+        <div class="row">
+            @if (setMenuList.Count() > 0)
+            {
+                @foreach (var mtg in setMenuList.OrderBy(a => a.MealType.Serial).GroupBy(a => a.MealType))
+                {
+                    @if (setMenuList.Count(a => a.MealTypeId == mtg.Key.Id) > 0)
+                    {
+                        <div class="col-md-4">
+                            <span class="font-weight-bolder"> @mtg.Key.Name </span> <strong>(@setMenuList.Where(a => a.MealTypeId == mtg.Key.Id).FirstOrDefault().SetMenuPrice Tk.)</strong>
+                            <div class="container-fluid">
+                                @{ var i2 = 0;}
+                                @foreach (var mi in setMenuList.Where(a => a.MealTypeId == mtg.Key.Id).FirstOrDefault().SetMenuDetailsList)
+                                {
+                                    i2 = i2 + 1;
+                                    var soi = _db.StoreOutItem.Find(mi.StoreOutItemId);
+
+                                    <span class="badge badge-primary">@i2. @soi.Name</span>
+                                }
+                            </div>
+                        </div>
+                    }
+                }
+
+            }
+        </div>
+    </div>
+
+    <br />
+    <hr />
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>
+                    #
+                </th>
+                <th>
+                    User
+                </th>
+                @if (preOrderScheduleList.Select(a => a.MealType).Distinct().Count() > 0)
+                {
+                    @foreach (var mt in preOrderScheduleList.Select(a => a.MealType).Distinct().OrderBy(a => a.Serial).ToList())
+                    {
+                        <th>@mt.Name</th>
+                    }
+                }
+            </tr>
+        </thead>
+        <tbody>
+            @{var i = 1;}
+
+            @foreach (var item in preOrderScheduleList.GroupBy(a => a.ApplicationUser))
+            {
+
+                <tr>
+                    <td>
+                        @(i++)
+                    </td>
+                    <td>
+                        @item.Key.BUPFullName
+                    </td>
+
+                    @if (item.Key.PreOrderScheduleList.Select(a => a.MealType).Distinct().Count() > 0)
+                    {
+                        @foreach (var mt in item.Key.PreOrderScheduleList.Select(a => a.MealType).Distinct().OrderBy(a => a.Serial).ToList())
+                        {
+                            var itm = item.Key.PreOrderScheduleList.Where(a => a.MealTypeId == mt.Id && a.UserId == item.Key.Id).FirstOrDefault();
+                            <td>
+                                <div class="row">
+                                    @if (itm != null && itm.IsPreOrderSet == true)
+                                    {
+                                        <span class="badge badge-success" style="padding: 3% 8%;">On</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge badge-danger" style="padding: 3% 8%;">Off</span>
+                                    }
+                                </div>
+
+                            </td>
+                        }
+                    }
+                </tr>
+            }
+
+            <tr style="background-color:lightgray;">
+                <td colspan="2" class="font-bold">Total: </td>
+                @if (preOrderScheduleList.Select(a => a.MealType).Distinct().Count() > 0)
+                {
+                    @foreach (var mt in preOrderScheduleList.Select(a => a.MealType).Distinct().OrderBy(a => a.Serial).ToList())
+                    {
+                        <th>@mt.PreOrderScheduleList.Count(a => a.IsPreOrderSet)</th>
+                    }
+                }
+            </tr>
+
+        </tbody>
+    </table>
+
+
+    <br />
+    <hr />
+    <h3>Amount Analysis</h3>
+    <div class="container-fluid">
+        <div class="row">
+            @if (setMenuList.Count() > 0)
+            {
+                @foreach (var mtg in setMenuList.OrderBy(a => a.MealType.Serial).GroupBy(a => a.MealType))
+                {
+                    @if (setMenuList.Count(a => a.MealTypeId == mtg.Key.Id) > 0)
+                    {
+                        var totalOrderCount = preOrderScheduleList.FirstOrDefault(a => a.MealTypeId == mtg.Key.Id).MealType.PreOrderScheduleList.Count(a => a.IsPreOrderSet);
+                        var ItemCountDictionaray = new Dictionary<string, double>();
+                        <div class="col-md-4">
+                            <h3>Details</h3>
+                            @mtg.Key.Name
+                            <strong>(@setMenuList.Where(a => a.MealTypeId == mtg.Key.Id).FirstOrDefault().SetMenuPrice Tk.)</strong>
+                            <span class="badge badge-secondary">total order issued: <b>@totalOrderCount</b></span>
+                            <div class="container-fluid list-group">
+                                @{ var i2 = 0;}
+                                @foreach (var mi in setMenuList.Where(a => a.MealTypeId == mtg.Key.Id).FirstOrDefault().SetMenuDetailsList)
+                                {
+                                    i2 = i2 + 1;
+                                    var soi = _db.StoreOutItem.Find(mi.StoreOutItemId);
+
+                                    <div class=" list-group-item">
+                                        <span class="">@i2. @soi.Name</span>
+                                        @{
+                                            var recipeItems = new List<StoreOutItemRecipe>();
+                                            recipeItems = _db.StoreOutItemRecipe.Include(x => x.StoreInItem).Include(a=>a.StoreInItem.UnitType).Where(a => a.StoreOutItemId == mi.StoreOutItemId).ToList();
+                                            @if (recipeItems.Count() > 0)
+                                            {
+                                                <div class="list-group">
+                                                    @{ var i3 = 0;}
+                                                    @foreach (var re in recipeItems)
+                                                    {
+                                                        if (ItemCountDictionaray.Where(a => a.Key == re.StoreInItem.Name).Count() > 0)
+                                                        {
+                                                            ItemCountDictionaray[re.StoreInItem.Name] += re.RequiredStoreInUnit;
+                                                        }
+                                                        else
+                                                        {
+                                                            ItemCountDictionaray.Add(re.StoreInItem.Name, re.RequiredStoreInUnit);
+                                                        }
+                                                        var totalRequiredUnit = re.RequiredStoreInUnit * totalOrderCount;
+                                                        i3 = i3 + 1;
+                                                        <div class="list-group-item">
+                                                            @i3. @re.StoreInItem.Name - @re.RequiredStoreInUnit x <span style="background-color:royalblue; color:white; font-weight:bolder; padding:0 5px; border-radius:7px;">@totalOrderCount</span> = @totalRequiredUnit  @re.StoreInItem.UnitType.ShortName
+                                                        </div>
+                                                    }
+
+                                                </div>
+                                            }
+                                        }
+                                    </div>
+                                }
+                            </div>
+                            <div class="container-fluid list-group">
+                                <h3>Summary</h3>
+                                @foreach (var itm in ItemCountDictionaray)
+                                {
+                                    var totalRequired = totalOrderCount * itm.Value;
+                                    <div class="list-group-item">
+                                        @itm.Key - @itm.Value x @totalOrderCount = <span class="badge badge-primary">@totalRequired</span>
+                                    </div>
+                                }
+                                <div class="list-group-item list-group-item-info">
+                                    <b>Total :</b> <span class="badge badge-primary"> @ItemCountDictionaray.Sum(a => a.Value * totalOrderCount)</span>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                }
+
+            }
+        </div>
+    </div>
+
+</div>

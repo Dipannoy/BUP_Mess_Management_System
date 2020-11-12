@@ -1,0 +1,1046 @@
+﻿@inject ApplicationDbContext _context
+@inject Microsoft.AspNetCore.Identity.UserManager<ApplicationUser> _userManager
+@inject ApplicationDbContext _db
+@inject IDDLHelper _ddlHelper
+
+@inject IDDLHelper _ddlhelper
+@{
+    ViewData["Title"] = "home";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    var from = this.Context.Request.Query["from"];
+    var person = this.Context.Request.Query["searchInput"];
+    int day = 0;
+    string userName = "";
+
+    string OrderDate = "";
+    //OrderDate = DateTime.Now.ToShortDateString();
+    string UserId = "";
+    if (ViewBag.OrderDate != null)
+    {
+        day = (int)ViewBag.OrderDate.DayOfWeek;
+
+        OrderDate = ViewBag.OrderDate.ToShortDateString();
+    }
+    else
+    {
+        OrderDate = DateTime.Now.ToShortDateString();
+        from = DateTime.Now.ToShortDateString();
+    }
+    if (ViewBag.UserId != null)
+    {
+        UserId = ViewBag.UserId;
+        userName = _userManager.Users.Where(x => x.Id == UserId).FirstOrDefault().BUPFullName;
+    }
+    else
+    {
+        UserId = "95365f6d-0665-4630-a3ef-2b62642c8f40";
+        userName = _userManager.Users.Where(x => x.Id == UserId).FirstOrDefault().BUPFullName;
+
+    }
+
+    DateTime t = DateTime.Now;
+
+
+
+    var user = await _userManager.GetUserAsync(User);
+    var ItemForBreakFast = _db.ExtraItem.Where(x => x.MenuDate.ToShortDateString() == DateTime.Today.ToShortDateString() && x.MealTypeId == 1).ToList();
+    var ItemForLunch = _db.ExtraItem.Where(x => x.MenuDate.ToShortDateString() == DateTime.Today.ToShortDateString() && x.MealTypeId == 2).ToList();
+    var ItemForTeaBreak = _db.ExtraItem.Where(x => x.MenuDate.ToShortDateString() == DateTime.Today.ToShortDateString() && x.MealTypeId == 3).ToList();
+    var allItemForTheDay = _db.ExtraItem.Where(x => x.MenuDate.ToShortDateString() == DateTime.Today.ToShortDateString()).Select(x => x.StoreOutItemId).Distinct().ToList();
+    var PreOrderSetMenuDetailListBreakfast = _db.PreOrderSchedule.Include(x => x.SetMenu).Where(x => x.LastModifiedDate.ToShortDateString() == DateTime.Today.AddDays(-1).ToShortDateString() && x.MealTypeId == 1 && x.UserId == UserId).FirstOrDefault();
+    var PreOrderSetMenuDetailListLunch = _db.PreOrderSchedule.Include(x => x.SetMenu).Where(x => x.LastModifiedDate.ToShortDateString() == DateTime.Today.AddDays(-1).ToShortDateString() && x.MealTypeId == 2 && x.UserId == UserId).FirstOrDefault();
+    var OnSpotorderList = _db.OrderHistory.Where(x => x.OrderDate.ToShortDateString() == OrderDate && x.SetMenuId == null && x.UserId == UserId).ToList();
+    //var PreOrderSetMenuDetailListTeabreak = _db.PreOrderSchedule.Include(x => x.SetMenu).Where(x => x.LastModifiedDate.ToShortDateString() == DateTime.Today.AddDays(-1).ToShortDateString() && x.MealTypeId == 3);
+
+    //    var setmenu = _db.SetMenu.Where(x=>x.SetMenuDate.ToShortDateString() == DateTime.Today.ToShortDateString())
+    //var BillOfUser = _db.OrderHistory.Where(x => x.UserId == user.Id);
+
+    //DateTime ToDate = DateTime.Now.AddDays(20);
+    //DateTime FromDate = DateTime.Now.AddDays(20);
+    //Boolean DateCheck = false;
+    ////IQueryable<OrderHistory> theInfo = Enumerable.Empty<OrderHistory>().AsQueryable();
+    //var theInfo = _db.OrderHistory.Where(x => x.UserId == user.Id && x.OrderDate >= FromDate && x.OrderDate <= ToDate).ToList();
+
+    //List<OrderHistory> theInfo = new List<OrderHistory>();
+
+
+
+
+
+
+
+}
+
+
+@*<head>
+        <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.0/themes/smoothness/jquery-ui.css" />
+        <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+        <script src="https://code.jquery.com/ui/1.12.0/jquery-ui.min.js"></script>
+    </head>*@
+
+<style>
+    .list-group {
+        max-height: 300px;
+        margin-bottom: 10px;
+        overflow: scroll;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .text {
+        padding-left: 20px;
+    }
+
+    .date {
+        padding-left: 10px;
+    }
+
+     .btnn {
+  padding: 0px 0px;
+  font-size: 12px;
+  cursor: pointer;
+    margin:0;
+    color:green;
+}
+
+    .meal {
+        padding-left: 20px;
+    }
+
+    .qn {
+        padding-left: 0px;
+    }
+
+    .bgg {
+        /* The image used */
+        background-image: url("https://www.tibits.co.uk/assets/images/8/Autumn%20table%20%287%29-80f4ecc9.jpg");
+        /* Full height */
+        height: 100%;
+        width: 100%;
+        padding-top: 0px;
+        /* Center and scale the image nicely */
+        background-position: center;
+        background-repeat: no-repeat;
+        background-size: cover;
+    }
+</style>
+
+
+
+<div>
+    <h3 style="color:green;font-weight:bold;">OrderList</h3>
+        <h4 style="color:green;font-weight:bold;">Person Wise</h4>
+
+   
+    <hr />
+    <div class="row">
+        <div class="col-md-4">
+            <a asp-controller="AdminShowOrder" asp-action="Schedule" class="btn btn-success btn-lg btn-block btn-huge">Meal Wise</a>
+        </div>
+        <div class="col-md-4">
+            <a asp-controller="AdminShowOrder" asp-action="ItemBase" class="btn btn-success btn-lg btn-block btn-huge">Item Wise</a>
+        </div>
+        <div class="col-md-4">
+            <a asp-controller="AdminShowOrder" asp-action="home" class="btn btn-success btn-lg btn-block btn-huge">Person Wise</a>
+        </div>
+
+
+
+    </div>
+    <hr />
+
+    <div class="row">
+        <div class="col-sm-6"></div>
+        <div class="col-sm-6">
+            <form asp-action="DatePerson" asp-controller="AdminShowOrder" method="get" class="row">
+                <div class="col-sm-4">
+                    <label><b> Order Date </b></label>
+                    <input type="date" name="from" id="from" value="@from" class="form-control" />
+                </div>
+
+                <div class="col-sm-5">
+                    <label><b>Person</b></label>
+
+                    <input type="text" name="searchInput" id="searchInput" class="form-control" value="@userName" />
+                    <div id="suggesstion-box"></div>
+                    @*<small>user</small>
+                        <select name="UserId" id="UserId" class="form-control" asp-items="@(new SelectList(_ddlhelper.GetAllUsersList().Prepend(new KeyValuePair<string, string>("","-- Select User --")),"Key","Value",UserId))"></select>*@
+
+                </div>
+                <div class="col-sm-3">
+                    <br />
+                    <button type="submit" class="btn btn-success btn-sm">Search</button>
+                </div>
+            </form>
+        </div>
+
+    </div>
+    <br />
+
+
+    @*<div class="row">
+            <div class="col-lg-2">
+                <div class="form-group">
+                    <label for="sel1">Date:</label>
+                    <input type="date" name="LoadOrderDate" value="@Model.SetMenuDate.ToString("yyyy-MM-dd")" disabled />
+
+                    <input type="hidden" id="setMenuId" value="@Model.Id" />
+                </div>
+            </div>
+        </div>*@
+
+
+
+
+
+    @*<div class="row">
+            <div class="col-lg-3">
+                <div class="form-group">
+                    <label for="sel1">Set Menu Price: (Tk.)</label>
+                    <input type="text" id="setMenuPrice" class="form-control" value="@Model.SetMenuPrice">
+                </div>
+            </div>
+        </div>*@
+
+
+
+    <div class="row">
+
+        <div class="col-md-5">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    OnSpotOrder
+                </div>
+                <div class="card-body">
+                    <ul class="list-group" id="BreakfastItemListAdded">
+                        <li class="list-group-item" style="padding:0px">
+
+                            <div class="row">
+                                <div class="col-sm-4">
+                                    <p class="text"> <b>Item</b></p>
+                                    @*<span class="badge-default">Item</span>*@
+                                </div>
+                                <div class="col-sm-3">
+                                    <b>Meal</b>
+                                    @*<span class="badge-default"> Meal</span>*@
+                                </div>
+                                <div class="col-sm-3">
+                                    <b>Quantity</b>
+                                    @*<span class="badge-default">Quantity</span>*@
+                                </div>
+                                <div class="col-sm-2">
+
+                                </div>
+                            </div>
+                            <hr />
+                            @foreach (var item in allItemForTheDay)
+                            {
+                                <form asp-action="Check" asp-route-id="@item" asp-route-userid="@UserId" asp-controller="AdminShowOrder" method="post">
+                                    <div class="row">
+
+                                        <div class="col-sm-4">
+
+                                            @{
+                                                var itemname = _db.StoreOutItem.Where(x => x.Id == item).FirstOrDefault();
+
+
+                                            }
+
+                                            <asp:Label ID="Label1" runat="server" Text="@item" class="text">@itemname.Name</asp:Label>
+
+
+
+                                        </div>
+                                        <div class="col-sm-3">
+                                            <div class="form-group">
+                                                <select id="meal" name="meal" class="form-control border-radius-none" asp-items="@(new SelectList(_ddlHelper.GetMealType().Prepend(new KeyValuePair<string, string>("-1", "Meal")), "Key", "Value", ""))"></select>
+
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-3">
+
+                                            <input type="number" name="quantity" id="quantity" class="form-control col-sm-10" />
+                                        </div>
+                                        <div class="col-sm-2">
+                                            @*<a asp-action="Edit" asp-route-id="@" class="btn btn-cyan btn-sm">Edit</a>*@
+
+                                            <button type="submit" class="btnn">
+                                                <i class="fa fa-plus"></i>
+
+                                            </button>
+
+                                            @*<button type="submit" style="padding: 0px;margin: 0px;">
+                                                <i class="fas fa-plus"></i>
+                                            </button>*@
+                                        </div>
+                                    </div>
+
+
+                                </form>
+                                <hr />
+
+
+                            }
+
+
+
+
+
+                        </li>
+                    </ul>
+
+                </div>
+
+            </div>
+        </div>
+
+
+        <div class="col-md-7">
+
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    OrderList
+                </div>
+                <div class="card-body">
+                    <ul class="list-group" id="BreakfastItemListAdded">
+                        <li class="list-group-item" style="padding:0px">
+
+                            <div class="row">
+                                <div class="col-sm-2">
+                                    <p class="text"> <b>Date</b></p>
+                                    @*<span class="label label-default">Date</span>*@
+                                </div>
+                                <div class="col-sm-3">
+                                    <p class="meal"><b>Meal</b></p>
+                                    @*<span class="label label-default">Meal</span>*@
+                                </div>
+                                <div class="col-sm-2">
+                                    <b>Order</b>
+                                    @*<span class="label label-default">Order</span>*@
+
+
+                                </div>
+                                <div class="col-sm-2">
+                                    <b>Item</b>
+                                    @*<span class="label label-default">Item</span>*@
+
+
+                                </div>
+                                <div class="col-sm-2">
+                                    <b>Package</b>
+                                    @*<span class="label label-default">Package</span>*@
+
+
+                                </div>
+                                <div class="col-sm-1">
+                                    <p class="qn"> <b>Qt</b> </p>
+                                    @*<span class="label label-default">Qty</span>*@
+
+
+                                </div>
+                            </div>
+                            <hr />
+                            @if (OnSpotorderList != null)
+                            {
+                                @if (OnSpotorderList.Count > 0)
+                                {
+                                    foreach (var osp in OnSpotorderList)
+                                    {
+                                        <div class="row">
+                                            <div class="col-sm-2">
+                                                <p class="date"><small>@OrderDate</small></p>
+                                            </div>
+                                            <div class="col-sm-3">
+                                                @{
+                                                    var mealtype = _db.MealType.Where(x => x.Id == osp.MealTypeId).FirstOrDefault();
+                                                }
+                                                <p class="meal"><small> @mealtype.Name </small> </p>
+                                            </div>
+                                            <div class="col-sm-2">
+                                                <small> OnSpot </small>
+                                            </div>
+                                            <div class="col-sm-2">
+                                                @{
+                                                    var itemname = _db.StoreOutItem.Where(x => x.Id == osp.StoreOutItemId).FirstOrDefault();
+
+
+                                                }
+                                                <small>@itemname.Name </small>
+                                            </div>
+                                            <div class="col-sm-2">
+                                                <small> No </small>
+                                            </div>
+                                            <div class="col-sm-1">
+                                                <p class="qn"> <small>@osp.UnitOrdered </small> </p>
+                                            </div>
+
+                                        </div>
+                                        <hr />
+
+                                    }
+
+                                }
+                            }
+                            @{
+                                double qn = 0;
+                                double qItem = 0;
+                                if (PreOrderSetMenuDetailListBreakfast != null)
+                                {
+                                    var setMenuDetailBreakfast = _db.SetMenuDetails.Where(x => x.SetMenuId == PreOrderSetMenuDetailListBreakfast.SetMenuId).ToList();
+                                    var orderHistoryESMBreakfast = _db.OrderHistory.Where(x => x.SetMenuId == PreOrderSetMenuDetailListBreakfast.SetMenuId && x.StoreOutItemId == null).FirstOrDefault();
+                                    var orderHistoryECIBreakfast = _db.OrderHistory.Where(x => x.SetMenuId == PreOrderSetMenuDetailListBreakfast.SetMenuId && x.StoreOutItemId != null).ToList();
+                                    if (PreOrderSetMenuDetailListBreakfast.IsPreOrderSet == true)
+                                    {
+                                        qn += 1;
+                                    }
+                                    foreach (var item in setMenuDetailBreakfast)
+                                    {
+
+                                        <div class="row">
+                                            <div class="col-sm-2">
+                                                <p class="date"> <small>@OrderDate</small></p>
+
+                                            </div>
+                                            <div class="col-sm-3">
+                                                <p class="meal"> <small>BreakFast </small></p>
+                                            </div>
+                                            <div class="col-sm-2">
+                                                <small> Pre </small>
+                                            </div>
+                                            <div class="col-sm-2">
+                                                @{
+                                                    var itemname = _db.StoreOutItem.Where(x => x.Id == item.StoreOutItemId).FirstOrDefault();
+
+
+                                                }
+                                                <small> @itemname.Name  </small>
+                                            </div>
+                                            <div class="col-sm-2">
+                                                <small> Yes </small>
+                                            </div>
+                                            <div class="col-sm-1">
+                                                @if (@orderHistoryESMBreakfast != null)
+                                                {
+                                                    qItem = @orderHistoryESMBreakfast.UnitOrdered + qn;
+                                                }
+                                                else
+                                                {
+                                                    qItem = @qn;
+                                                }
+                                                <p class="qn">  <small> @qItem </small></p>
+                                            </div>
+
+                                        </div>
+                                        <hr />
+
+
+
+                                    }
+                                    foreach (var item in orderHistoryECIBreakfast)
+                                    {
+                                        <div class="row">
+                                            <div class="col-sm-2">
+                                                <p class="date"><small> @OrderDate</small></p>
+
+                                            </div>
+                                            <div class="col-sm-3">
+                                                <p class="meal">  <small> BreakFast </small> </p>
+                                            </div>
+                                            <div class="col-sm-2">
+                                                <small> Pre </small>
+                                            </div>
+                                            <div class="col-sm-2">
+                                                @{
+                                                    var itemname = _db.StoreOutItem.Where(x => x.Id == item.StoreOutItemId).FirstOrDefault();
+
+
+                                                }
+                                                <small> @itemname.Name </small>
+                                            </div>
+                                            <div class="col-sm-2">
+                                                <small> No </small>
+                                            </div>
+                                            <div class="col-sm-1">
+                                                <p class="qn">  <small> @item.UnitOrdered  </small> </p>
+                                            </div>
+
+                                        </div>
+                                        <hr />
+
+
+
+                                    }
+                                }
+
+                            }
+
+                            @{
+                                if (PreOrderSetMenuDetailListLunch != null)
+                                {
+                                    double qn2 = 0;
+                                    double qItem2 = 0;
+                                    var setMenuDetailLunch = _db.SetMenuDetails.Where(x => x.SetMenuId == PreOrderSetMenuDetailListLunch.SetMenuId).ToList();
+                                    var orderHistoryESMLunch = _db.OrderHistory.Where(x => x.SetMenuId == PreOrderSetMenuDetailListLunch.SetMenuId && x.StoreOutItemId == null).FirstOrDefault();
+                                    var orderHistoryECILunch = _db.OrderHistory.Where(x => x.SetMenuId == PreOrderSetMenuDetailListLunch.SetMenuId && x.StoreOutItemId != null).ToList();
+                                    if (PreOrderSetMenuDetailListLunch.IsPreOrderSet == true)
+                                    {
+                                        qn2 += 1;
+                                    }
+                                    foreach (var item in setMenuDetailLunch)
+                                    {
+
+                                        <div class="row">
+                                            <div class="col-sm-2">
+                                                <p class="date"><small> @OrderDate</small></p>
+                                            </div>
+                                            <div class="col-sm-3">
+                                                <p class="meal"><small> Lunch </small></p>
+                                            </div>
+                                            <div class="col-sm-2">
+                                                <small> Pre </small>
+                                            </div>
+                                            <div class="col-sm-2">
+                                                @{
+                                                    var itemname = _db.StoreOutItem.Where(x => x.Id == item.StoreOutItemId).FirstOrDefault();
+
+
+                                                }
+                                                <small> @itemname.Name </small>
+                                            </div>
+                                            <div class="col-sm-2">
+                                                <small>Yes </small>
+                                            </div>
+                                            <div class="col-sm-1">
+                                                @if (orderHistoryESMLunch != null)
+                                                {
+                                                    qItem2 = @orderHistoryESMLunch.UnitOrdered + qn2;
+                                                }
+                                                else
+                                                {
+                                                    qItem2 = @qn2;
+                                                }
+                                                <p class="qn"> <small> @qItem2 </small> </p>
+                                            </div>
+
+                                        </div>
+                                        <hr />
+
+
+
+                                    }
+                                    foreach (var item in orderHistoryECILunch)
+                                    {
+                                        <div class="row">
+                                            <div class="col-sm-2">
+                                                <p class="date"><small>@OrderDate </small></p>
+                                            </div>
+                                            <div class="col-sm-3">
+                                                <p class="meal">
+                                                    <small> Lunch </small>
+                                                </p>
+                                            </div>
+                                            <div class="col-sm-2">
+                                                <small> Pre </small>
+                                            </div>
+                                            <div class="col-sm-2">
+                                                @{
+                                                    var itemname = _db.StoreOutItem.Where(x => x.Id == item.StoreOutItemId).FirstOrDefault();
+
+
+                                                }
+                                                <small> @itemname.Name </small>
+                                            </div>
+                                            <div class="col-sm-2">
+                                                <small> No </small>
+                                            </div>
+                                            <div class="col-sm-1">
+                                                <p class="qn"> <small> @item.UnitOrdered </small></p>
+                                            </div>
+
+                                        </div>
+                                        <hr />
+
+
+
+                                    }
+
+                                }
+                            }
+
+
+                        <li />
+                    </ul>
+
+
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+
+    @*<div class="col-md-6">
+
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    Breakfast
+                </div>
+                <div class="card-body">
+                    <ul class="list-group" id="BreakfastItemListAdded">
+                        <li class="list-group-item" style="padding:0px">
+
+                            <div class="row">
+                                <div class="col-sm-2">
+                                    <span class="label label-default">Name</span>
+                                </div>
+                                <div class="col-sm-3">
+                                    <span class="label label-default">Item</span>
+
+
+                                </div>
+                                <div class="col-sm-2">
+                                    <span class="label label-default">Qty</span>
+
+
+                                </div>
+                                <div class="col-sm-3">
+                                    <span class="label label-default">Type</span>
+
+
+                                </div>
+                                <div class="col-sm-2">
+                                    <span class="label label-default">Mark</span>
+
+
+                                </div>
+                            </div>
+
+
+
+
+                            @foreach (var item in ItemForBreakFast)
+                            {
+
+                                var q = 0;
+                                foreach (var a in PreOrderSetMenuDetailListBreakfast)
+                                {
+                                    var setmnudtl = _db.SetMenuDetails.Where(x => x.StoreOutItemId == item.StoreOutItemId && x.SetMenuId == a.SetMenuId).FirstOrDefault();
+                                    if (setmnudtl != null)
+                                    {
+                                        q += 1;
+                                    }
+                                }
+
+
+                                    var orderHistoryForExtraSM = _db.OrderHistory.Where(x => x.ApplicationUser.Id == "95365f6d-0665-4630-a3ef-2b62642c8f40" && x.MealTypeId == 1 && x.StoreOutItemId == null).ToList();
+
+                                    foreach (var b in orderHistoryForExtraSM)
+                                    {
+                                        var setmnudt2 = _db.SetMenuDetails.Where(x => x.StoreOutItemId == item.StoreOutItemId && x.SetMenuId == b.SetMenuId).FirstOrDefault();
+                                        if (setmnudt2 != null)
+                                        {
+                                            q += 1;
+                                        }
+
+                                    }
+
+                                    if (q > 0)
+                                    {
+                                    <div class="row">
+                                        <div class="col-sm-4">
+                                            @item.StoreOutItem.Name
+
+                                        </div>
+                                        <div class="col-sm-2">
+                                            q
+
+                                        </div>
+                                        <div class="col-sm-3">
+                                            SetMenu
+
+                                        </div>
+                                        <div class="col-sm-2">
+                                            Selection
+
+                                        </div>
+                                    </div>
+                                    }
+
+                                @{
+                                        var orderHistoryForExtraItem = _db.OrderHistory.Where(x => x.ApplicationUser.Id == "95365f6d-0665-4630-a3ef-2b62642c8f40" && x.MealTypeId == 1 && x.StoreOutItemId != null).ToList();
+                                        double q2 = 0;
+                                    }
+                                    foreach (var c in orderHistoryForExtraItem)
+                                    {
+                                        if (item.SetMenuId == c.StoreOutItemId)
+                                        {
+                                            q2 += c.UnitOrdered;
+                                        }
+
+                                    }
+
+                                    if (q2 > 0)
+                                    {
+                                        <div class="row">
+                                            <div class="col-sm-4">
+                                                @item.StoreOutItem.Name
+
+                                            </div>
+                                            <div class="col-sm-2">
+                                                q2
+
+                                            </div>
+                                            <div class="col-sm-3">
+                                                Extra Chit
+
+                                            </div>
+                                            <div class="col-sm-2">
+                                                Selection
+
+                                            </div>
+                                        </div>
+                                    }
+
+
+                                }
+
+
+
+
+
+
+
+
+
+
+                        </li>
+                    </ul>
+                </div>
+
+
+
+            </div>
+        </div>
+
+
+
+
+        <div class="col-md-6">
+
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    Lunch
+                </div>
+                <div class="card-body">
+
+                </div>
+            </div>
+
+        </div>*@
+
+</div>
+
+
+@*<div class="row">
+
+
+
+
+        <div class="col-md-6">
+
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    Tea Break
+                </div>
+                <div class="card-body">
+                    <div class="row">
+
+                    </div>
+
+                </div>
+            </div>
+
+        </div>
+
+
+
+        <div class="col-md-6">
+
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    Extra Chit
+                </div>
+                <div class="card-body">
+
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+
+
+
+
+    <div class="row">
+        <div class="col-sm-12">
+            <div class="form-group">
+                <br />
+                <div class="col-sm-10 pl-0">
+                    <a class="btn btn-info btn-sm" onclick="UpdateSetMenuList()"> Update </a> |
+                    <a asp-action="Index" class="btn btn-sm btn-default">Back to List</a>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div id="messageDown"></div>
+        </div>
+    </div>*@
+
+@*<script src="https://ajax.aspnetcdn.com/ajax/jquery/jquery-3.3.1.min.js"
+            asp-fallback-src="~/lib/jquery/dist/jquery.min.js"
+            asp-fallback-test="window.jQuery"
+            crossorigin="anonymous"
+            integrity="sha384-tsQFqpEReu7ZLhBV2VZlAu7zcOV+rXbYlF2cqB8txI/8aZajjp4Bqd+V6D5IgvKT">
+    </script>*@
+
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.12.0/themes/smoothness/jquery-ui.css" />
+<script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+<script src="https://code.jquery.com/ui/1.12.0/jquery-ui.min.js"></script>
+
+@*<link rel="stylesheet" href="https://code.jquery.com/ui/1.12.0/themes/smoothness/jquery-ui.css" />
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.0/jquery-ui.min.js"></script>*@
+
+
+
+
+
+
+
+@section Scripts {
+
+
+    <script>
+                jQuery.noConflict();
+              $("#searchInput").autocomplete({
+        source: function (request, response) {
+            $.ajax({
+                url: '@Url.Action("GetSearchPerson","AdminShowOrder")',
+                dataType: "json",
+                data: { search: $("#searchInput").val() },
+                success: function (data) {
+                    console.log('Hiiii');
+                    console.log(data);
+                    var a = [];
+                    for (var i = 0; i < data.length; i++) {
+
+                        a.push(data[i].bupFullName);
+                    }
+                    console.log(a);
+
+                    response(a);
+                    $("#suggesstion-box").show();
+
+                },
+                error: function (xhr, status, error) {
+                    alert("Error");
+                }
+            });
+        }
+              });
+
+             $("#searchInput2").autocomplete({
+        source: function (request, response) {
+            $.ajax({
+                url: '@Url.Action("GetSearchItem","AdminShowOrder")',
+                dataType: "json",
+                data: { search: $("#searchInput2").val() },
+                success: function (data) {
+                    console.log('Hiiii');
+                    console.log(data);
+                    var a = [];
+                    for (var i = 0; i < data.length; i++) {
+
+                        a.push(data[i].Name);
+                    }
+                    console.log(a);
+
+                    response(a);
+                    $("#suggesstion-box2").show();
+
+                },
+                error: function (xhr, status, error) {
+                    alert("Error");
+                }
+            });
+        }
+              });
+            $(document).ready(function () {
+
+                var date = new Date();
+
+                var day = date.getDate();
+                var month = date.getMonth() + 1;
+                var year = date.getFullYear();
+
+                if (month < 10) month = "0" + month;
+                if (day < 10) day = "0" + day;
+
+                var today = year + "-" + month + "-" + day;
+                document.getElementById('from').value = today;
+
+            });
+
+
+
+        function OnspotOrder() {
+            var x = document.getElementById('Label1').innerText;
+                var ddlCategory = document.getElementById("DDLCategory");
+            var categoryId = ddlCategory.options[ddlCategory.selectedIndex].value.toString();
+            console.log(categoryId);
+            console.log(x);
+
+
+              $.ajax({
+
+        url: '@Url.Action("CreateOnspotOrder", "AdminShowOrder")',
+        type: "POST",
+        data: { MealTypeId: categoryId,ItemId:x },
+        success: function (response) {
+            if (response.success) {
+
+               //jQuery("#messageUp").append('<div class="alert alert-success" role="alert"><b>"' + response.responseText + '"</b></div>');
+
+                //window.alert(response.responseText);
+                //        //jQuery("#messageUp").append('<div class="alert alert-success" role="alert"><b>"' + response.responseText + '"</b></div>');
+                //window.location.reload(true);
+
+
+            } else {
+                // DoSomethingElse()
+                alert(response.responseText);
+            }
+        }
+
+
+    })
+
+
+            }
+            function test() {
+
+            }
+
+        function UpdateSetMenuList() {
+
+            //=============== Set Menu Id =================
+            var setMenuIdTemp = $('#setMenuId').val();
+            //alert(setMenuIdTemp);
+            //=============== Set Menu Id =================
+
+
+           //=============== Set Menu Item Id =================
+            var setMenuArray = [];
+                   var setMenuPrice = document.getElementById("setMenuPrice").value.toString();
+
+            var checkBoxSetMenu = document.getElementsByName("checkMainItem");
+            var checkBoxLengthSetMenu = checkBoxSetMenu.length;
+            var tempItemValueSetMenu = "";
+            for (var i = 0; i < checkBoxLengthSetMenu; i++) {
+                if (checkBoxSetMenu[i].checked == true) {
+
+                    tempItemValueSetMenu = checkBoxSetMenu[i].value.toString();
+                    var obj = { SetMenuItemId: tempItemValueSetMenu };
+                    setMenuArray.push(obj);
+                }
+            }
+            //=============== Set Menu Item Id =================
+
+
+            //=============== Extra Item Id =================
+            var addedItem = [];
+            var checkBoxAdded = document.getElementsByName("checkExtraItem");
+            var checkBoxLengthAdded = checkBoxAdded.length;
+            var textsAdded = document.getElementsByName("extraItemPrice");
+            var tempItemValueAdded = "";
+            var tempPriceValueAdded = "";
+            for (var i = 0; i < checkBoxLengthAdded; i++) {
+                if (checkBoxAdded[i].checked == true) {
+                    tempPriceValueAdded = textsAdded[i].value.toString();
+                    tempItemValueAdded = checkBoxAdded[i].value.toString();
+                    var obj = { AddedItemId: tempItemValueAdded, AddedItemPrice: tempPriceValueAdded };
+                    addedItem.push(obj);
+                }
+            }
+            //=============== Extra Item Id =================
+
+            var tempExtraItemList = "";
+            var tempSetMenuList = "";
+            tempExtraItemList = JSON.stringify(addedItem);
+            tempSetMenuList = JSON.stringify(setMenuArray);
+
+
+
+             $.ajax({
+
+                url: '@Url.Action("UpdateSetMenuAndAddedItemList", "SetMenu")',
+                 type: "POST",
+                 data: { SetMenuList: tempSetMenuList, ExtraItemList: tempExtraItemList, SetMenuId: setMenuIdTemp, SetMenuPrice: setMenuPrice },
+                success: function (response) {
+                    if (response.success) {
+
+                        //alert(response.responseText);
+                        //window.location.reload(true);
+
+
+
+
+                        jQuery("#messageUp").append('<div class="alert alert-success" role="alert"><b>"' + response.responseText + '"</b></div>');
+                        jQuery("#messageDown").append('<div class="alert alert-success" role="alert"><b>"' + response.responseText + '"</b></div>');
+
+
+                    } else {
+                        // DoSomethingElse()
+                        //alert(response.responseText);
+                        jQuery("#messageUp").append('<div class="alert alert-danger" role="alert"><b>"' + response.responseText + '"</b></div>');
+                        jQuery("#messageDown").append('<div class="alert alert-danger" role="alert"><b>"' + response.responseText +'"</b></div>');
+                    }
+                }
+
+
+            })
+
+
+
+
+        }
+
+
+
+
+
+
+
+        //<<<<<<<<<<<<<<<<<< CleanPriceFieldOfExtraItem >>>>>>>>>>>>>>>>>>>>>>>
+        function CleanPriceFieldOfExtraItem(storeOutItemId) {
+
+            var isChecked = $('#checkadded_' + storeOutItemId).is(":checked");
+            if (isChecked == true) {
+                //alert('is checked');
+            } else {
+                //alert('is not checked');
+                $('#priceadded_' + storeOutItemId).val('');
+
+            }
+
+        }
+        //<<<<<<<<<<<<<<<<<< CleanPriceFieldOfExtraItem >>>>>>>>>>>>>>>>>>>>>>>
+
+    </script>
+}
+
+
+
+

@@ -1,0 +1,80 @@
+﻿@model Mess_Management_System_Alpha_V2.Models.MessModels.StoreOutItemRecipe
+
+@{
+    ViewData["Title"] = "Delete";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<h2>Delete</h2>
+
+<div>
+    <h4>StoreOut Item Recipe</h4>
+    <hr />
+    <div class="row">
+        <div class="col-md-4">
+            <a asp-controller="StorageManagement" asp-action="WarehouseStorageIn" class="btn btn-primary btn-lg btn-block btn-huge">Store In</a>
+        </div>
+        <div class="col-md-4">
+            <a asp-controller="StorageManagement" asp-action="WarehouseStorageOut" class="btn btn-primary btn-lg btn-block btn-huge">Store Out</a>
+        </div>
+        <div class="col-md-4">
+            <a asp-controller="StoreOutItemRecipe" asp-action="Index" class="btn btn-primary btn-lg btn-block btn-huge">Store Out Recipe</a>
+        </div>
+
+
+
+    </div>
+
+    <hr />
+    <div class="row">
+        <div class="col-sm-3">
+
+        </div>
+        <div class="col-sm-7">
+            <div class="row">
+                <h4> Are you sure you want to delete this? </h4>
+            </div>
+            <dl class="dl-horizontal">
+                <dt>
+                    @Html.DisplayNameFor(model => model.StoreOutItem)
+                </dt>
+                <dd>
+                    @Html.DisplayFor(model => model.StoreOutItem.Name)
+                </dd>
+                <dt>
+                    @Html.DisplayNameFor(model => model.StoreInItem)
+                </dt>
+                <dd>
+                    @Html.DisplayFor(model => model.StoreInItem.Name)
+                </dd>
+                <dt>
+                    @Html.DisplayNameFor(model => model.MinimumStoreOutUnit)
+                </dt>
+                <dd>
+                    @Html.DisplayFor(model => model.MinimumStoreOutUnit)
+                </dd>
+                <dt>
+                    @Html.DisplayNameFor(model => model.RequiredStoreInUnit)
+                </dt>
+                <dd>
+                    @Html.DisplayFor(model => model.RequiredStoreInUnit)
+                </dd>
+            </dl>
+
+            <form asp-action="Delete">
+                <input type="hidden" asp-for="Id" />
+                <div class="form-group">
+                    <br />
+                    <div class="col-sm-offset-2 col-sm-10">
+                        <input type="submit" value="Delete" class="btn btn-danger" /> |
+                        <a asp-action="Index" class="btn btn-default">Back to List</a>
+                    </div>
+                </div>
+
+            </form>
+            </div>
+        <div class="col-sm-2">
+
+        </div>
+        </div>
+    </div>

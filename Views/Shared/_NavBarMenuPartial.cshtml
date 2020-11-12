@@ -1,0 +1,622 @@
+﻿@using Microsoft.AspNetCore.Identity
+
+
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
+@inject RoleManager<IdentityRole> RoleManager
+@inject ApplicationDbContext _context
+
+
+@{
+    var user = await UserManager.GetUserAsync(User);
+    string existingRole = "";
+    if (user != null)
+    {
+        existingRole = UserManager.GetRolesAsync(user).Result.Single();
+    }
+
+    var roleExist = RoleManager.FindByNameAsync(existingRole);
+    string roleId = "";
+    if (roleExist.Result != null)
+    {
+        roleId = roleExist.Result.Id;
+    }
+
+}
+<head>
+    @*<meta charset="utf-8" />*@
+    <link rel="apple-touch-icon" sizes="76x76" href="~/assets/img/apple-icon.png">
+    <link rel="icon" type="image/png" href="~/assets/img/favicon.png">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+    <title>
+        Material Dashboard by Creative Tim
+    </title>
+    <meta content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, shrink-to-fit=no' name='viewport' />
+
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css" integrity="sha384-9gVQ4dYFwwWSjIDZnLEWnxCjeSWFphJiwGPXr1jddIhOegiu1FwO5qRGvFXOdJZ4" crossorigin="anonymous">
+    <!-- Our Custom CSS -->
+    @*<link rel="stylesheet" href="~/css/style4.css">*@
+
+    <!-- Font Awesome JS -->
+    <script defer src="https://use.fontawesome.com/releases/v5.0.13/js/solid.js" integrity="sha384-tzzSw1/Vo+0N5UhStP3bvwWPq+uvzCMfrN1fEFe+xBmv1C/AtVX5K0uZtmcHitFZ" crossorigin="anonymous"></script>
+    <script defer src="https://use.fontawesome.com/releases/v5.0.13/js/fontawesome.js" integrity="sha384-6OIrr52G08NpOFSZdxxz1xdNSndlD4vdcf/q2myIUVO0VsqaGHJsB0RaBE01VTOY" crossorigin="anonymous"></script>
+    <!--     Fonts and icons     -->
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Roboto+Slab:400,700|Material+Icons" />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/latest/css/font-awesome.min.css">
+    <!-- CSS Files -->
+    <link href="~/assets/css/material-dashboard.css?v=2.1.1" rel="stylesheet" />
+    <!-- CSS Just for demo purpose, don't include it in your project -->
+    <link href="~/assets/demo/demo.css" rel="stylesheet" />
+</head>
+<style>
+
+    .dropdown-content a:hover {
+        background-color: #ddd;
+    }
+
+    .dropdown:hover .dropdown-content {
+        display: block;
+    }
+
+    .dropdown:hover .dropbtn {
+        background-color: #3e8e41;
+    }
+
+    .textdrp {
+        font-size: 15px;
+    }
+
+    .menu-large {
+        position: static !important;
+    }
+
+    .dropdown-container {
+        display: none;
+        background-color: #262626;
+        padding-left: 8px;
+    }
+
+    .dropdown-btn {
+        padding: 6px 8px 6px 16px;
+        text-decoration: none;
+        font-size: 20px;
+        color: #818181;
+        display: block;
+        border: none;
+        background: none;
+        width: 100%;
+        text-align: left;
+        cursor: pointer;
+        outline: none;
+    }
+</style>
+
+
+@if (SignInManager.IsSignedIn(User))
+{
+
+    @*<ul class="nav navbar-nav">
+
+            @if (existingRole == "Admin")
+            {
+                <li><a asp-area="" asp-controller="Admin" asp-action="Index">Home</a></li>
+            }
+            else
+            {
+                <li><a asp-area="" asp-controller="Consumer" asp-action="Index">Home</a></li>
+            }
+
+            @if (User.Identity.IsAuthenticated)
+            {
+
+                var mainMenuListId = _context.SubMenu.Select(x => x.MenuId).Distinct();
+
+                @if (mainMenuListId.Any())
+                {
+
+                    @foreach (var menuData in mainMenuListId)
+                    {
+                        var menu = _context.Menu.Where(x => x.Id == menuData).FirstOrDefault();
+                        <li class="dropdown">
+                            <a class="dropdown-toggle" data-toggle="dropdown">@menu.MenuName <span class="caret"></span></a>
+                            <ul class="dropdown-menu clearfix" role="menu">
+                                @foreach (var subMenu in _context.SubMenu.Where(x => x.MenuId == menuData).ToList())
+                                {
+                                    <li><a asp-area="" asp-controller="@subMenu.ControllerName" asp-action="@subMenu.ActionName">@subMenu.SubMenuName</a></li>
+                                }
+                            </ul>
+                        </li>
+
+                    }
+                }
+
+
+            }
+
+
+        </ul>*@
+
+
+
+    @if (existingRole == "Admin")
+    {
+
+        @*<div class="wrapper ">*@
+        <div class="sidebar" data-color="green" style="background: url('@Url.Content("~/images/bg3.jpg")')">
+        <!--
+
+        url('@Url.Content("~/images/food.jpg")')
+            Tip 1: You can change the color of the sidebar using: data-color="purple | azure | green | orange | danger"
+
+            Tip 2: you can also add an image using data-image tag
+        -->
+        <div class="logo">
+                    <a href="http://www.creative-tim.com" class="simple-text logo-normal" style="font-weight:bold;color:green">
+                        <img src="~/images/bup_logo.png" height="50" />
+
+                        BUP Mess
+                    </a>
+                </div>
+                <div class="sidebar-wrapper">
+                    <ul class="nav">
+                        <li class="nav-item">
+                            <a class="nav-link" style="font-size:15px;font-weight:bold;" asp-controller="AdminShowOrder" asp-action="Dashboard">
+                                <i class="material-icons">dashboard</i>
+                                <p>Dashboard</p>
+                            </a>
+                        </li>
+
+                        @*<li class="nav-item active">
+                            <a href="#homeSubmenu" style="font-size:15px;font-weight:bold;" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle nav-link">
+                                &nbsp;&nbsp;<i class="fas fa-database"></i> &nbsp; &nbsp;
+                                Order
+
+                            </a>
+                            <ul class="collapse list-unstyled" id="homeSubmenu" style="padding-left:40px;padding-top:10px;">
+                                <li>
+                                    <a asp-controller="AdminShowOrder" asp-action="Schedule" style="font-weight:bold;font-size:15px;color:darkgray;">Schedule Wise</a>
+                                </li>
+                                <li>
+                                    <a asp-controller="AdminShowOrder" asp-action="ItemBase" style="font-weight:bold;font-size:15px;color:darkgray;">Item Wise</a>
+                                </li>
+                                <li>
+                                    <a asp-controller="AdminShowOrder" asp-action="home" style="font-weight:bold;font-size:15px;color:darkgray;">Person Wise</a>
+                                </li>
+                            </ul>
+                        </li>*@
+
+
+                        <li class="nav-item ">
+                            <a href="#homeSubmenu2" style="font-size:15px;font-weight:bold;" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle nav-link">
+                                &nbsp;&nbsp;<i class="fas fa-database"></i> &nbsp; &nbsp;
+                                Store
+
+                            </a>
+                            <ul class="collapse list-unstyled" id="homeSubmenu2" style="padding-left:40px;padding-top:10px;">
+                                <li>
+                                    <a asp-controller="StorageManagement"  asp-action="WarehouseStorageNew" asp-route-storeId="1" style="font-weight:bold;font-size:14px;color:black;">Store In</a>
+                                </li>
+                                <li>
+                                    <a asp-controller="StorageManagement"  asp-action="WarehouseStorageNew" asp-route-storeId="2" style="font-weight:bold;font-size:14px;color:black;">Store Out</a>
+                                </li>
+                                <li>
+                                    <a asp-controller="StorageManagement"  asp-action="WarehouseStorageNew" asp-route-storeId="3" style="font-weight:bold;font-size:14px;color:black;">Store Out Recipe</a>
+                                </li>
+                            </ul>
+                        </li>
+
+
+                        @*<li class="">
+            <a class="nav-link dropdown-toggle" style="font-size:15px;font-weight:bold;" data-toggle="dropdown" href="#" aria-haspopup="true" aria-expanded="false"> <i class="material-icons">dashboard</i>OrderList</a>
+
+
+            <ul class="collapse list-unstyled">
+                <li>
+                    <a class="dropdown-item" asp-controller="AdminShowOrder" asp-action="Schedule">ScheduleBase</a>
+                </li>
+                <li>
+                    <a class="dropdown-item" asp-controller="AdminShowOrder" asp-action="ItemBase">ItemBase</a>
+                </li>
+                <li>
+                    <a class="dropdown-item" asp-controller="AdminShowOrder" asp-action="home">PersonBase</a>
+                </li>
+            </ul>
+        </li>*@
+                        @*<li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle textdrp" style="font-size:15px;font-weight:bold;" data-toggle="dropdown" href="#"> <i class="material-icons">dashboard</i>Store</a>
+
+
+                            <div class="dropdown-menu collapse list-unstyled">
+                                <a class="dropdown-item" asp-controller="StorageManagement" asp-action="WarehouseStorageIn">Store In</a>
+                                <a class="dropdown-item" asp-controller="StorageManagement" asp-action="WarehouseStorageOut">Store out</a>
+                                <a class="dropdown-item" asp-controller="StoreOutItemRecipe" asp-action="Index">Store Out Recipe</a>
+
+                            </div>
+                        </li>*@
+                        <li class="nav-item ">
+                            <a class="nav-link" style="font-size:18px;font-weight:bold;" asp-controller="AdminMenu" asp-action="Menu">
+                                <i class="material-icons">dashboard</i>
+                                <p>Food Item</p>
+                            </a>
+                        </li>
+
+                        <li class="nav-item ">
+                            <a class="nav-link" style="font-size:18px;font-weight:bold;" asp-controller="AdminMenu" asp-action="Test">
+                                <i class="material-icons">dashboard</i>
+                                <p>Menu</p>
+                            </a>
+                        </li>
+
+                    </ul>
+                </div>
+            </div>
+        @*</div>*@
+
+        //---------------------------------------------------------------------------------------------------------
+
+
+
+
+        @*<nav id="sidebar">
+            <div class="sidebar-header">
+                <h3>Bootstrap Sidebar</h3>
+                <strong>BS</strong>
+            </div>
+
+            <ul class="list-unstyled components">
+                <li class="active">
+                    <a href="#homeSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">
+                        <i class="fas fa-home"></i>
+                        Home
+                    </a>
+                    <ul class="collapse list-unstyled" id="homeSubmenu">
+                        <li>
+                            <a href="#">Home 1</a>
+                        </li>
+                        <li>
+                            <a href="#">Home 2</a>
+                        </li>
+                        <li>
+                            <a href="#">Home 3</a>
+                        </li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="#">
+                        <i class="fas fa-briefcase"></i>
+                        About
+                    </a>
+                    <a href="#pageSubmenu" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle">
+                        <i class="fas fa-copy"></i>
+                        Pages
+                    </a>
+                    <ul class="collapse list-unstyled" id="pageSubmenu">
+                        <li>
+                            <a href="#">Page 1</a>
+                        </li>
+                        <li>
+                            <a href="#">Page 2</a>
+                        </li>
+                        <li>
+                            <a href="#">Page 3</a>
+                        </li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="#">
+                        <i class="fas fa-image"></i>
+                        Portfolio
+                    </a>
+                </li>
+                <li>
+                    <a href="#">
+                        <i class="fas fa-question"></i>
+                        FAQ
+                    </a>
+                </li>
+                <li>
+                    <a href="#">
+                        <i class="fas fa-paper-plane"></i>
+                        Contact
+                    </a>
+                </li>
+            </ul>
+
+            <ul class="list-unstyled CTAs">
+                <li>
+                    <a href="https://bootstrapious.com/tutorial/files/sidebar.zip" class="download">Download source</a>
+                </li>
+                <li>
+                    <a href="https://bootstrapious.com/p/bootstrap-sidebar" class="article">Back to article</a>
+                </li>
+            </ul>
+        </nav>*@
+
+        <!-- Page Content  -->
+        
+
+
+            }
+            else
+            {
+            @*<li><a asp-area="" asp-controller="Consumer" asp-action="Index">Home</a></li>*@
+            @*<li class="nav-item">
+                    <a class="nav-link " asp-controller="Consumer" asp-action="Index">
+                        Home
+                        <span class="sr-only">(current)</span>
+                    </a>
+                </li>*@
+            }
+
+
+            @*@if (User.Identity.IsAuthenticated)
+                {
+
+                    var mainMenuListId = _context.SubMenu.Select(x => x.MenuId).Distinct();
+
+                    @if (mainMenuListId.Any())
+                    {
+
+                        @foreach (var menuData in mainMenuListId)
+                        {
+                            var menu = _context.Menu.Where(x => x.Id == menuData).FirstOrDefault();
+
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle small" id="navbarDropdownMenuLink-555" data-toggle="dropdown"
+                                   aria-haspopup="true" aria-expanded="false">
+                                    @menu.MenuName
+                                </a>
+                                <div class="dropdown-menu dropdown-secondary" aria-labelledby="navbarDropdownMenuLink-555" style="padding: 0px;">
+                                    @foreach (var subMenu in _context.SubMenu.Where(x => x.MenuId == menuData).ToList())
+                                    {
+                                        <a class="dropdown-item small" asp-controller="@subMenu.ControllerName" asp-action="@subMenu.ActionName">@subMenu.SubMenuName</a>
+                                    }
+                                </div>
+                            </li>
+
+                        }
+                    }
+
+                }*@
+
+
+
+            }
+
+
+            else
+            {
+            @*<ul class="nav navbar-nav navbar-right">
+                    <li><a asp-area="Identity" asp-page="/Account/Register">Register</a></li>
+                    <li><a asp-area="Identity" asp-page="/Account/Login">Login</a></li>
+                </ul>*@
+            }
+
+            @*<script src="~/assets/js/core/jquery.min.js"></script>
+                <script src="~/assets/js/core/popper.min.js"></script>
+                <script src="~/assets/js/core/bootstrap-material-design.min.js"></script>
+                <script src="~/assets/js/plugins/perfect-scrollbar.jquery.min.js"></script>
+                <!-- Plugin for the momentJs  -->
+                <script src="~/assets/js/plugins/moment.min.js"></script>
+                <!--  Plugin for Sweet Alert -->
+                <script src="~/assets/js/plugins/sweetalert2.js"></script>
+                <!-- Forms Validations Plugin -->
+                <script src="~/assets/js/plugins/jquery.validate.min.js"></script>
+                <!-- Plugin for the Wizard, full documentation here: https://github.com/VinceG/twitter-bootstrap-wizard -->
+                <script src="~/assets/js/plugins/jquery.bootstrap-wizard.js"></script>
+                <!--	Plugin for Select, full documentation here: http://silviomoreto.github.io/bootstrap-select -->
+                <script src="~/assets/js/plugins/bootstrap-selectpicker.js"></script>
+                <!--  Plugin for the DateTimePicker, full documentation here: https://eonasdan.github.io/bootstrap-datetimepicker/ -->
+                <script src="~/assets/js/plugins/bootstrap-datetimepicker.min.js"></script>
+                <!--  DataTables.net Plugin, full documentation here: https://datatables.net/  -->
+                <script src="~/assets/js/plugins/jquery.dataTables.min.js"></script>
+                <!--	Plugin for Tags, full documentation here: https://github.com/bootstrap-tagsinput/bootstrap-tagsinputs  -->
+                <script src="~/assets/js/plugins/bootstrap-tagsinput.js"></script>
+                <!-- Plugin for Fileupload, full documentation here: http://www.jasny.net/bootstrap/javascript/#fileinput -->
+                <script src="~/assets/js/plugins/jasny-bootstrap.min.js"></script>
+                <!--  Full Calendar Plugin, full documentation here: https://github.com/fullcalendar/fullcalendar    -->
+                <script src="~/assets/js/plugins/fullcalendar.min.js"></script>
+                <!-- Vector Map plugin, full documentation here: http://jvectormap.com/documentation/ -->
+                <script src="~/assets/js/plugins/jquery-jvectormap.js"></script>
+                <!--  Plugin for the Sliders, full documentation here: http://refreshless.com/nouislider/ -->
+                <script src="~/assets/js/plugins/nouislider.min.js"></script>
+                <!-- Include a polyfill for ES6 Promises (optional) for IE11, UC Browser and Android browser support SweetAlert -->
+                <script src="https://cdnjs.cloudflare.com/ajax/libs/core-js/2.4.1/core.js"></script>
+                <!-- Library for adding dinamically elements -->
+                <script src="~/assets/js/plugins/arrive.min.js"></script>
+                <!--  Google Maps Plugin    -->
+                <script src="https://maps.googleapis.com/maps/api/js?key=YOUR_KEY_HERE"></script>
+                <!-- Chartist JS -->
+                <script src="~/assets/js/plugins/chartist.min.js"></script>
+                <!--  Notifications Plugin    -->
+                <script src="~/assets/js/plugins/bootstrap-notify.js"></script>
+                <!-- Control Center for Material Dashboard: parallax effects, scripts for the example pages etc -->
+                <script src="~/assets/js/material-dashboard.js?v=2.1.1" type="text/javascript"></script>
+                <!-- Material Dashboard DEMO methods, don't include it in your project! -->
+                <script src="~/assets/demo/demo.js"></script>*@
+            <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+            <script>
+
+
+
+                $(".nav a").on("click", function () {
+                    $(".nav").find(".active").removeClass("active");
+                    $(this).parent().addClass("active");
+                });
+            </script>
+            @*<script>
+                  $(document).ready(function() {
+                    $().ready(function() {
+                      $sidebar = $('.sidebar');
+
+                      $sidebar_img_container = $sidebar.find('.sidebar-background');
+
+                      $full_page = $('.full-page');
+
+                      $sidebar_responsive = $('body > .navbar-collapse');
+
+                      window_width = $(window).width();
+
+                      fixed_plugin_open = $('.sidebar .sidebar-wrapper .nav li.active a p').html();
+
+                      if (window_width > 767 && fixed_plugin_open == 'Dashboard') {
+                        if ($('.fixed-plugin .dropdown').hasClass('show-dropdown')) {
+                          $('.fixed-plugin .dropdown').addClass('open');
+                        }
+
+                      }
+
+                      $('.fixed-plugin a').click(function(event) {
+                        // Alex if we click on switch, stop propagation of the event, so the dropdown will not be hide, otherwise we set the  section active
+                        if ($(this).hasClass('switch-trigger')) {
+                          if (event.stopPropagation) {
+                            event.stopPropagation();
+                          } else if (window.event) {
+                            window.event.cancelBubble = true;
+                          }
+                        }
+                      });
+
+                      $('.fixed-plugin .active-color span').click(function() {
+                        $full_page_background = $('.full-page-background');
+
+                        $(this).siblings().removeClass('active');
+                        $(this).addClass('active');
+
+                        var new_color = $(this).data('color');
+
+                        if ($sidebar.length != 0) {
+                          $sidebar.attr('data-color', new_color);
+                        }
+
+                        if ($full_page.length != 0) {
+                          $full_page.attr('filter-color', new_color);
+                        }
+
+                        if ($sidebar_responsive.length != 0) {
+                          $sidebar_responsive.attr('data-color', new_color);
+                        }
+                      });
+
+                      $('.fixed-plugin .background-color .badge').click(function() {
+                        $(this).siblings().removeClass('active');
+                        $(this).addClass('active');
+
+                        var new_color = $(this).data('background-color');
+
+                        if ($sidebar.length != 0) {
+                          $sidebar.attr('data-background-color', new_color);
+                        }
+                      });
+
+                      $('.fixed-plugin .img-holder').click(function() {
+                        $full_page_background = $('.full-page-background');
+
+                        $(this).parent('li').siblings().removeClass('active');
+                        $(this).parent('li').addClass('active');
+
+
+                        var new_image = $(this).find("img").attr('src');
+
+                        if ($sidebar_img_container.length != 0 && $('.switch-sidebar-image input:checked').length != 0) {
+                          $sidebar_img_container.fadeOut('fast', function() {
+                            $sidebar_img_container.css('background-image', 'url("' + new_image + '")');
+                            $sidebar_img_container.fadeIn('fast');
+                          });
+                        }
+
+                        if ($full_page_background.length != 0 && $('.switch-sidebar-image input:checked').length != 0) {
+                          var new_image_full_page = $('.fixed-plugin li.active .img-holder').find('img').data('src');
+
+                          $full_page_background.fadeOut('fast', function() {
+                            $full_page_background.css('background-image', 'url("' + new_image_full_page + '")');
+                            $full_page_background.fadeIn('fast');
+                          });
+                        }
+
+                        if ($('.switch-sidebar-image input:checked').length == 0) {
+                          var new_image = $('.fixed-plugin li.active .img-holder').find("img").attr('src');
+                          var new_image_full_page = $('.fixed-plugin li.active .img-holder').find('img').data('src');
+
+                          $sidebar_img_container.css('background-image', 'url("' + new_image + '")');
+                          $full_page_background.css('background-image', 'url("' + new_image_full_page + '")');
+                        }
+
+                        if ($sidebar_responsive.length != 0) {
+                          $sidebar_responsive.css('background-image', 'url("' + new_image + '")');
+                        }
+                      });
+
+                      $('.switch-sidebar-image input').change(function() {
+                        $full_page_background = $('.full-page-background');
+
+                        $input = $(this);
+
+                        if ($input.is(':checked')) {
+                          if ($sidebar_img_container.length != 0) {
+                            $sidebar_img_container.fadeIn('fast');
+                            $sidebar.attr('data-image', '#');
+                          }
+
+                          if ($full_page_background.length != 0) {
+                            $full_page_background.fadeIn('fast');
+                            $full_page.attr('data-image', '#');
+                          }
+
+                          background_image = true;
+                        } else {
+                          if ($sidebar_img_container.length != 0) {
+                            $sidebar.removeAttr('data-image');
+                            $sidebar_img_container.fadeOut('fast');
+                          }
+
+                          if ($full_page_background.length != 0) {
+                            $full_page.removeAttr('data-image', '#');
+                            $full_page_background.fadeOut('fast');
+                          }
+
+                          background_image = false;
+                        }
+                      });
+
+                      $('.switch-sidebar-mini input').change(function() {
+                        $body = $('body');
+
+                        $input = $(this);
+
+                        if (md.misc.sidebar_mini_active == true) {
+                          $('body').removeClass('sidebar-mini');
+                          md.misc.sidebar_mini_active = false;
+
+                          $('.sidebar .sidebar-wrapper, .main-panel').perfectScrollbar();
+
+                        } else {
+
+                          $('.sidebar .sidebar-wrapper, .main-panel').perfectScrollbar('destroy');
+
+                          setTimeout(function() {
+                            $('body').addClass('sidebar-mini');
+
+                            md.misc.sidebar_mini_active = true;
+                          }, 300);
+                        }
+
+                        // we simulate the window Resize so the charts will get updated in realtime.
+                        var simulateWindowResize = setInterval(function() {
+                          window.dispatchEvent(new Event('resize'));
+                        }, 180);
+
+                        // we stop the simulation of Window Resize after the animations are completed
+                        setTimeout(function() {
+                          clearInterval(simulateWindowResize);
+                        }, 1000);
+
+                      });
+                    });
+                  });
+                </script>*@
+
+
+
+

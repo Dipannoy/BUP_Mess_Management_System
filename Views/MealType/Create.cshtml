@@ -1,0 +1,91 @@
+﻿@model Mess_Management_System_Alpha_V2.Models.MessModels.MealType
+
+@{
+    ViewData["Title"] = "Create";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<h2>Create</h2>
+
+<h4>Meal Type</h4>
+<hr />
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tempusdominus-bootstrap-4/5.0.0-alpha14/css/tempusdominus-bootstrap-4.min.css" />
+
+<div class="row">
+    <div class="col-md-12">
+        <form asp-action="Create" class="form-horizontal">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+
+            <div class="form-group">
+                <label asp-for="Serial" class="control-label col-sm-2"></label>
+                <div class="col-sm-10">
+                    <input asp-for="Serial" type="text" class="form-control" placeholder="Enter Serial">
+                    <span asp-validation-for="Serial" class="text-danger"></span>
+                </div>
+            </div>
+
+
+            <div class="form-group">
+                <label asp-for="Name" class="control-label col-sm-2"></label>
+                <div class="col-sm-10">
+                    <input asp-for="Name" type="text" class="form-control" placeholder="Enter Name">
+                    <span asp-validation-for="Name" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="col-sm-offset-2 col-sm-10">
+                    <div class="checkbox">
+                        <label>
+                            <input asp-for="IsAvailableForPreOrder" /> @Html.DisplayNameFor(model => model.IsAvailableForPreOrder)
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <div class="col-sm-5">
+                    <label asp-for="PreOrderLastTime" class="control-label"></label>
+                    <input type="text" class="form-control datetimepicker-input" id="datetimepicker5" data-toggle="datetimepicker" data-target="#datetimepicker5" name="PreOrderLastTime" required />
+                    <span asp-validation-for="PreOrderLastTime" class="text-danger"></span>
+                </div>
+            </div>
+
+
+
+            <div class="form-group">
+                <br />
+                <div class="col-sm-offset-1 col-sm-10">
+                    <input type="submit" value="Create" class="btn btn-primary" /> |
+                    <a asp-action="Index" class="btn btn-default">Back to List</a>
+                </div>
+            </div>
+
+
+
+        </form>
+    </div>
+</div>
+
+
+
+
+
+
+
+@section Scripts {
+
+
+
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/tempusdominus-bootstrap-4/5.0.0-alpha14/js/tempusdominus-bootstrap-4.min.js"></script>
+
+    <script>
+        $(function () {
+            $('#datetimepicker5').datetimepicker();
+        });
+
+    </script>
+
+}

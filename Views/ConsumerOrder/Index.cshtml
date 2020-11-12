@@ -1,0 +1,220 @@
+﻿
+@model List<BupMessManagement.Models.ConsumerOrder>
+
+@*@inject ApplicationDbContext _context
+@inject Microsoft.AspNetCore.Identity.UserManager<ApplicationUser> _userManager
+@inject ApplicationDbContext _db
+@inject IDDLHelper _ddlHelper*@
+@{
+    //ViewData["Title"] = "Consumer Order";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    int totalPages = 0;
+    string consmName = "";
+    if(ViewBag.TotalPages != null)
+    {
+        totalPages = ViewBag.TotalPages;
+
+    }
+    if(ViewBag.SearchedConsumer != null)
+    {
+        consmName = ViewBag.SearchedConsumer;
+    }
+
+    //var userList = _context.Users.Where(i => i.Id != null).ToList();
+    //var preOrderScheduleList = _context.PreOrderSchedule.Where(x => x.Id > 0).ToList();
+
+    //var query = from c in userList
+    //            join k in preOrderScheduleList on c.Id equals k.UserId into cc
+    //            from colct in cc.DefaultIfEmpty()
+    //            orderby c.Id descending
+    //            select new
+    //            {
+    //                c.Id,
+    //                c.BUPFullName,
+
+    //                MealStatus = colct == null ? false : colct.IsPreOrderSet
+
+    //            };
+
+    //var fullConsumerOrderList = query.ToList();
+    //var z = 0;
+
+
+}
+
+<head>
+</head>
+
+<style>
+</style>
+
+<div style="padding-top:50px;">
+    <h3 style="color:green"> Consumer Order </h3>
+
+    <div class="row">
+        <div class="col-sm-6">
+
+        </div>
+
+        <div class="col-sm-6">
+            <div class="row">
+                <form id="con" asp-action="FetchConsumer" method="post" class="row">
+
+                    <div class="col-sm-3">
+                        <label style="font-weight:bold;color:grey;font-size:16px;"> Consumer </label>
+                    </div>
+                    <div class="col-sm-3">
+                        <input type="text" name="consumer" id="consumer" value="@consmName" class="form-control" />
+                       </div>
+                    <div class="col-sm-3">
+                        <button rel="tooltip" type="submit" style="padding-left:15px;padding-right:15px;padding-top:10px;padding-bottom:10px;" class="btn">  Filter</button>
+
+                    </div>
+                    <div class="col-sm-3">
+                        @*<button rel="tooltip" style="padding-left:15px;padding-right:15px;padding-top:10px;padding-bottom:10px;" asp-action="ClearFilter" class="btn"> Clear Filter</button>*@
+
+                    </div>
+
+                </form>
+
+            </div>
+
+
+        </div>
+    </div>
+
+    <div>
+
+        <table class="table table-striped">
+            <tr>
+                <th>
+                    User Name
+                </th>
+                <th>
+                    Breakfast
+                </th>
+                <th>
+                    Teabreak
+                </th>
+                <th>
+                    Lunch
+                </th>
+            </tr>
+
+            @foreach (var item in Model)
+            {
+                <tr>
+                    @*<td>@item.Id</td>*@
+                    <td>@item.BUPFullName</td>
+                    <td>
+                        @if (item.Breakfast == 100)
+                        {
+                            var id = item.BUPFullName + "-1";
+                            var un = item.UserName.ToString();
+                            <input type="checkbox" onchange="OnOffModify(id,'@un')" id="@id" value="false"> @*@(Convert.ToBoolean(ViewBag.UserSettings.IsBreakfastOnOff) == true ? "checked='checked'" : string.Empty)*@
+
+                        }
+                        else
+                        {
+                            var id = item.BUPFullName + "-1";
+                            var un = item.UserName.ToString();
+
+                            <input type="checkbox" onchange="OnOffModify(id,'@un')" id="@id" value="true" checked>@*@(Convert.ToBoolean(ViewBag.UserSettings.IsBreakfastOnOff) == true ? "checked='checked'" : string.Empty)*@
+
+                        }
+                    </td>
+                    <td>
+                        @if (item.Teabreak == 100)
+                        {
+                            var id = item.BUPFullName + "-3";
+                            var un = item.UserName.ToString();
+                            <input type="checkbox" onchange="OnOffModify(id,'@un')" id="@id" value="false"> @*@(Convert.ToBoolean(ViewBag.UserSettings.IsBreakfastOnOff) == true ? "checked='checked'" : string.Empty)*@
+
+                        }
+                        else
+                        {
+                            var id = item.BUPFullName + "-3";
+                            var un = item.UserName.ToString();
+                            <input type="checkbox" onchange="OnOffModify(id,'@un')" id="@id" value="true" checked> @*@(Convert.ToBoolean(ViewBag.UserSettings.IsBreakfastOnOff) == true ? "checked='checked'" : string.Empty)*@
+
+                        }
+                    </td>
+                    <td>
+                        @if (item.Lunch == 100)
+                        {
+                            var id = item.BUPFullName + "-2";
+                            var un = item.UserName.ToString();
+                            <input type="checkbox" onchange="OnOffModify(id,'@un')" id="@id" value="false"> @*@(Convert.ToBoolean(ViewBag.UserSettings.IsBreakfastOnOff) == true ? "checked='checked'" : string.Empty)*@
+
+                        }
+                        else
+                        {
+                            var id = item.BUPFullName + "-2";
+                            var un = item.UserName.ToString();
+                            <input type="checkbox" onchange="OnOffModify(id,'@un')" id="@id" value="true" checked> @*@(Convert.ToBoolean(ViewBag.UserSettings.IsBreakfastOnOff) == true ? "checked='checked'" : string.Empty)*@
+
+                        }
+                    </td>
+
+                </tr>
+            }
+        </table>
+
+    </div>
+
+    <div>
+        <ul class="pagination">
+            @for (var i = 1; i <= totalPages; i++)
+            {
+                <a asp-action="GetPageResult" asp-route-currentpage="@i" asp-route-searchconsumer="@consmName"  class="page-link">@i</a>
+              
+
+                @*<li class="page-item @(i == Model.CurrentPage ? "active" : "")">
+                    <a asp-page="/pagination" asp-route-currentpage="@i" class="page-link">@i</a>
+                </li>*@
+            }
+        </ul>
+    </div>
+
+
+</div>
+
+
+<script>
+
+
+    function OnOffModify(id,username) {
+
+        var checked =  document.getElementById(id).checked;
+
+       
+
+         $.ajax({
+
+                    url: '@Url.Action("OnOffModify", "ConsumerOrder")',
+                    type: "POST",
+             //dataType: 'json',
+             data: { Id: id, Checked: checked, UserName: username },
+                    //contentType: 'application/json; charset=utf-8',
+                    success: function (response) {
+                        if (response.success) {
+
+
+                            alert(response.responseText);
+
+
+
+                        } else {
+                            // DoSomethingElse()
+                            alert(response.responseText);
+                            window.location.reload(true);
+                        }
+                    }
+
+
+                })
+
+
+
+    }
+</script>

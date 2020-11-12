@@ -1,0 +1,896 @@
+﻿@inject ApplicationDbContext _db
+
+@inject IDDLHelper _ddlHelper
+
+@inject IDDLHelper _ddlhelper
+
+@{
+    ViewData["Title"] = "WarehouseStorageOut";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+
+
+    var ErrorList = new Dictionary<string, string>();
+    List<double> qnnt = new List<double>();
+
+
+    var UserGivenAmount = new Dictionary<string, string>();
+    var StoreOutSuccessMsg = new Dictionary<string, string>();
+    var PriceListForGivenStorage = new List<RemainingBalanceAndWeightedPriceCalculation>();
+    var TempPriceList = new Dictionary<string, double>();
+    var TempQuantityList = new Dictionary<string, double>();
+    string dateinput = "";
+    double quantity = 0;
+    double chkquantity = 0;
+    string dateInputForOnOffMeal = "";
+    string stMenuDate = "";
+    long ItemId = 0;
+    string orderDate = DateTime.Now.ToShortDateString();
+    //var RawMaterialList = null;
+
+
+    if (ViewBag.Date != null)
+    {
+        dateInputForOnOffMeal = ViewBag.Date.AddDays(-1).ToShortDateString();
+        dateinput = ViewBag.Date.ToShortDateString();
+        stMenuDate = ViewBag.Date.ToShortDateString();
+    }
+    else
+    {
+        dateinput = DateTime.Today.ToShortDateString();
+        dateInputForOnOffMeal = DateTime.Now.AddDays(-1).ToShortDateString();
+        stMenuDate = DateTime.Now.AddDays(-1).ToShortDateString();
+
+    }
+    if (ViewBag.OrderDate != null)
+    {
+        orderDate = ViewBag.OrderDate.ToShortDateString();
+
+
+
+    }
+    int daay;
+    int month;
+    long year;
+    string[] Datearray = orderDate.Split("/");
+    daay = Int32.Parse(Datearray[1]);
+    month = Int32.Parse(Datearray[0]);
+    year = Int32.Parse(Datearray[2]);
+    string showdate = daay.ToString() + '/' + month.ToString() + '/' + year.ToString();
+
+    if (ViewBag.ItemId != null)
+    {
+        ItemId = ViewBag.ItemId;
+
+    }
+    if (ViewBag.quantity != null)
+    {
+        quantity = ViewBag.quantity;
+        qnnt.Add(quantity);
+        qnnt.Add(quantity + 1);
+        qnnt.Add(quantity + 2);
+        qnnt.Add(quantity + 3);
+        qnnt.Add(quantity + 4);
+
+    }
+    if (ViewBag.chkquantity != null)
+    {
+        chkquantity = ViewBag.chkquantity;
+
+
+
+
+
+
+    }
+
+    var str = _db.StoreOutItemRecipe.Where(x => x.StoreOutItemId == ItemId).ToList();
+
+
+    var activeMealTypes = _db.MealType.Where(a => a.IsAvailableForPreOrder).ToList();
+
+    var preOrderScheduleList = _db.PreOrderSchedule.Include(x => x.MealType).Include(x => x.ApplicationUser).ToList();
+
+    if (ViewBag.TempPriceList != null)
+    {
+        TempPriceList = (Dictionary<string, double>)ViewBag.TempPriceList;
+        TempQuantityList = (Dictionary<string, double>)ViewBag.TempQuantityList;
+
+
+    }
+
+    if (ViewBag.ErrorList != null && ViewBag.UserGivenAmount != null && PriceListForGivenStorage != null)
+    {
+        ErrorList = (Dictionary<string, string>)ViewBag.ErrorList;
+        UserGivenAmount = (Dictionary<string, string>)ViewBag.UserGivenAmount;
+        StoreOutSuccessMsg = (Dictionary<string, string>)ViewBag.StoreOutSuccessMsg;
+    }
+
+
+}
+<style>
+
+
+    body {
+        font-family: 'Roboto', sans-serif;
+        color: #546E7A;
+    }
+
+    .wrapper {
+        max-width: 18rem;
+        padding: 0 0.5rem;
+        margin-left: auto;
+        margin-right: auto;
+        padding-top: 4rem;
+    }
+
+    input:focus {
+        outline: none;
+    }
+
+    #ui-datepicker-div {
+        display: none;
+        background-color: #fff;
+        box-shadow: 0 0.125rem 0.5rem rgba(0,0,0,0.1);
+        margin-top: 0.25rem;
+        border-radius: 0.5rem;
+        padding: 0.5rem;
+    }
+
+    table {
+        border-collapse: collapse;
+        border-spacing: 0;
+    }
+
+    .ui-datepicker-calendar thead th {
+        padding: 0.25rem 0;
+        text-align: center;
+        font-size: 0.75rem;
+        font-weight: 400;
+        color: #78909C;
+    }
+
+    .ui-datepicker-calendar tbody td {
+        width: 2.5rem;
+        text-align: center;
+        padding: 0;
+    }
+
+        .ui-datepicker-calendar tbody td a {
+            display: block;
+            border-radius: 0.25rem;
+            line-height: 2rem;
+            transition: 0.3s all;
+            color: #546E7A;
+            font-size: 0.875rem;
+            text-decoration: none;
+        }
+
+            .ui-datepicker-calendar tbody td a:hover {
+                background-color: #E0F2F1;
+            }
+
+            .ui-datepicker-calendar tbody td a.ui-state-active {
+                background-color: #009688;
+                color: white;
+            }
+
+    .ui-datepicker-header a.ui-corner-all {
+        cursor: pointer;
+        position: absolute;
+        top: 0;
+        width: 2rem;
+        height: 2rem;
+        margin: 0.5rem;
+        border-radius: 0.25rem;
+        transition: 0.3s all;
+    }
+
+        .ui-datepicker-header a.ui-corner-all:hover {
+            background-color: #ECEFF1;
+        }
+
+    .ui-datepicker-header a.ui-datepicker-prev {
+        left: 0;
+        background: url("~/assets/img/prev.png");
+        background-repeat: no-repeat;
+        background-size: 0.5rem;
+        background-position: 50%;
+        transform: rotate(180deg);
+    }
+
+    .ui-datepicker-header a.ui-datepicker-next {
+        right: 0;
+        background: url("~/assets/img/prev.png");
+        background-repeat: no-repeat;
+        background-size: 10px;
+        background-position: 50%;
+    }
+
+    .ui-datepicker-header a > span {
+        display: none;
+    }
+
+    .ui-datepicker-title {
+        text-align: center;
+        line-height: 2rem;
+        margin-bottom: 0.25rem;
+        font-size: 0.875rem;
+        font-weight: 500;
+        padding-bottom: 0.25rem;
+    }
+
+    .ui-datepicker-week-col {
+        color: #78909C;
+        font-weight: 400;
+        font-size: 0.75rem;
+    }
+</style>
+
+@*<h3 style="color:green;font-weight:bold;">Storage Out</h3>
+
+
+
+    <hr />*@
+
+@*<div id="storeIn" class="row">
+        <partial name="WarehouseStorageIn" />
+    </div>*@
+<h3 style="color:green;font-weight:bold;">Storage Out</h3>
+
+
+
+<hr />
+
+
+<div class="container-fluid">
+    @{
+        double LastTtlPrice = 0;
+    }
+
+
+
+
+
+
+    <div class="row">
+        <div class="col-sm-2">
+            @*<form id="select_date" name="select_date" method="POST" asp-action="Test" asp-controller="StorageManagement">*@
+            @*</form>*@
+
+        </div>
+        <div class="col-sm-9">
+
+
+
+            @if (ErrorList.Where(a => a.Key == "msg").ToList().Count > 0)
+            {
+                <div class="danger">
+                    @ErrorList.FirstOrDefault(a => a.Key == "msg").Value
+                </div>
+            }
+
+            <form id="raw" asp-action="GetRawMaterial" method="get">
+
+                @*<div class="form-group">
+                        <label class="control-label">Date:</label>
+                        <input type="date" name="date" id="textStoreDate" class="col-sm-2" />
+                    </div>*@
+                <div class="row">
+                    <div class="col-sm-4">
+                        <label class="control-label"><b>Date:</b></label>
+                        <div class="input-group no-border">
+
+                            <input type="text" id="datepicker" name="datepicker" value="@showdate" onchange="ItemOnDate()" class="form-control col-sm-8" placeholder="Search...">
+                            @*<button type="submit" class="btn btn-white btn-round btn-just-icon">
+                                    <i class="material-icons">search</i>
+                                    <div class="ripple-container"></div>
+                                </button>*@
+                        </div>
+
+
+                    </div>
+                    <div class="col-sm-4">
+                        <div class="form-group">
+
+                            <label class="control-label"><b>Item:</b></label>
+                            <select id="mySelect" name="Item" class="form-control border-radius-none"></select>
+                            @*<select id="meal" name="meal" class="form-control border-radius-none" asp-items="@(new SelectList(_ddlHelper.GetMealType().Prepend(new KeyValuePair<string, string>("-1","Meal")),"Key","Value",""))"></select>*@
+                        </div>
+                    </div>
+                    <div class="col-sm-1">
+                        <div class="form-group" style="padding-top:5px">
+                            <br />
+                            <input class="btn btn-sm btn-success" name="submit" type="submit" id="Preview" value="Load" />
+                        </div>
+                    </div>
+                </div>
+            </form>
+            <div class="row" style="padding-left:30px">
+                @if (ItemId > 0 && quantity > 0)
+                {
+                    var sot = _db.StoreOutItem.Where(x => x.Id == ItemId).FirstOrDefault();
+                    double c = -1;
+                    @if (chkquantity == 0)
+                    {
+                        c = quantity;
+                    }
+                    else
+                    {
+                        c = chkquantity;
+                    }
+                    <div class="col-sm-3">
+                        <span class="badge badge-primary">
+
+                            @showdate @sot.Name-@quantity pcs
+                        </span>
+                    </div>
+                    <div class="col-sm-" style="display:inline-flex">
+
+                        <form id="quant" asp-action="Testing" asp-route-StoreOutDate="@orderDate" asp-route-quantity="@quantity" asp-route-itemId="@ItemId" method="post">
+
+
+
+                            <select id="chkquantity" name="chkquantity" class="form-control" asp-items="@(new SelectList(qnnt.Prepend(c)))"></select>
+                            @*<input class="btn btn-sm btn-success" name="submit" type="submit" id="Preview" value="Check" />*@
+                        </form>
+                    </div>
+
+
+                    <div class="col-sm-1" style="padding-right:30px">
+                    </div>
+
+                }
+
+            </div>
+            <br />
+            @if (str.Count > 0)
+            {
+                <form id="frm" asp-action="SaveUpdateWarehouseStorageOut" asp-route-StoreOutDate="@orderDate" asp-route-quantity="@quantity" asp-route-chkquantity="@chkquantity" asp-route-itemId="@ItemId" method="post">
+
+                    <table class="table-striped table-bordered">
+                        <thead class="grey lighten-2">
+                            <tr>
+                                <th scope="col">#</th>
+                                <th scope="col" style="font-weight:bold;color:green">Name</th>
+                                <th scope="col" style="font-weight:bold;color:green">Amount</th>
+                                <th scope="col" style="font-weight:bold;color:green">AvailableBalance</th>
+                                <th scope="col" style="font-weight:bold;color:green">Weighted Price</th>
+                                <th scope="col" style="font-weight:bold;color:green">Total Price</th>
+                                <th scope="col" style="font-weight:bold;color:green">Suggested Amount</th>
+
+
+
+
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @{ int i = 1;
+
+                            }
+
+                            @foreach (var rmi in str)
+                            {
+
+                                var sii = _db.StoreInItem.Where(x => x.Id == rmi.StoreInItemId).Include(a => a.RemainingBalanceAndWeightedPriceCalculationList).Include(a => a.UnitType).FirstOrDefault();
+                                @if (chkquantity != 0)
+                                {
+                                    quantity = chkquantity;
+                                }
+                                double minProduction = _db.StoreOutItem.Where(x => x.Id == ItemId).FirstOrDefault().MinimumProductionUnit;
+                                double minRawUnit = rmi.RequiredStoreInUnit;
+                                double suggestedUnit = (minRawUnit * quantity) / minProduction;
+
+
+                                <tr>
+                                    <th scope="row" style="font-weight:bold;">@(i++)</th>
+                                    <td style="font-weight:bold;color:chocolate;font-size:15px;">@sii.Name</td>
+                                    <td>
+                                        @{
+                                            var tempError = ErrorList.Where(x => x.Key == sii.Id.ToString()).FirstOrDefault();
+                                            var userGivenAmount = UserGivenAmount.Where(x => x.Key == sii.Id.ToString()).Count() > 0 ? Double.Parse(UserGivenAmount.Where(x => x.Key == sii.Id.ToString()).FirstOrDefault().Value) : 0.00;
+                                            double q = 0;
+                                            var RemBal = sii.RemainingBalanceAndWeightedPriceCalculationList.Count() == 0 ? 0 : sii.RemainingBalanceAndWeightedPriceCalculationList.LastOrDefault().TotalAvailableAmount;
+                                            RemBal += userGivenAmount;
+                                            @if (TempQuantityList != null)
+                                            {
+                                                @if (TempQuantityList.Count > 0)
+                                                {
+                                                    @if (TempQuantityList.ContainsKey(@sii.Id.ToString()))
+                                                    {
+                                                        q = TempQuantityList[@sii.Id.ToString()];
+
+                                                    }
+                                                    else
+                                                    {
+                                                        q = suggestedUnit;
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    q = suggestedUnit;
+
+                                                }
+
+                                            }
+                                            <div>
+                                                @if (sii.UnitType.Id == 4 || sii.UnitType.Id == 8)
+                                                {
+                                                    <input class="col-sm-7" type="number" name="@sii.Id" value="@q" id="@sii.Id" min="0.00" />
+                                                    <span style="font-weight:bold;">@sii.UnitType.ShortName</span>
+                                                }
+                                                else
+                                                {
+                                                    <input class="col-sm-7" type="number" step="0.01" value="@q" name="@sii.Id" id="@sii.Id" min="0.00" />
+                                                    <span style="font-weight:bold;">@sii.UnitType.ShortName</span>
+                                                }
+                                            </div>
+                                            @*<div>
+                                                    <input class="" type="number" step="0.01" name="@sii.Id" id="sq" onchange="qChange()" value="@q" min="0.00" max="@RemBal" />
+                                                    <span class=""> @sii.UnitType.ShortName</span>
+                                                </div>*@
+                                            @if (tempError.Value != null && tempError.Value.Length > 0)
+                                            {
+                                                <div class="alert alert-danger" role="alert" style="margin: 0px;padding: 0px;">
+                                                    @tempError.Value
+                                                </div>
+                                            }
+                                        }
+                                    </td>
+                                    <td style="font-weight:bold;color:chocolate;font-size:15px;">
+                                        @{
+                                            var ra = _db.RemainingBalanceAndWeightedPriceCalculation.Where(x => x.StoreInItemId == sii.Id).LastOrDefault();
+                                        }
+
+                                        @ra.TotalAvailableAmount   <span class="pl-1">@sii.UnitType.ShortName</span>
+                                    </td>
+                                    <td style="font-weight:bold;color:chocolate;font-size:15px;">
+                                        @{
+                                            var rb = _db.RemainingBalanceAndWeightedPriceCalculation.Where(x => x.StoreInItemId == sii.Id).LastOrDefault();
+                                        }
+
+                                        @rb.WeightedPrice.ToString("#.##") Tk
+                                    </td>
+
+
+                                    @{
+                                        double tPrice = 0;
+                                    }
+                                    @if (TempQuantityList != null)
+                                    {
+                                        @if (TempQuantityList.Count > 0)
+                                        {
+                                            @if (TempQuantityList.ContainsKey(@sii.Id.ToString()))
+                                            {
+                                                tPrice = TempQuantityList[@sii.Id.ToString()] * TempPriceList[@sii.Id.ToString()];
+                                                LastTtlPrice = LastTtlPrice + tPrice;
+                                                <td style="font-weight:bold;color:chocolate;font-size:15px;">  @tPrice.ToString("#.##") Tk </td>
+
+                                            }
+                                            else
+                                            {
+                                                <td style="font-weight:bold;color:chocolate;font-size:15px;"> 0.00 Tk </td>
+                                            }
+                                        }
+                                        else
+                                        {
+                                            <td style="font-weight:bold;color:chocolate;font-size:15px;"> 0.00 Tk </td>
+                                        }
+
+                                    }
+
+
+
+
+
+                                    <td style="font-weight:bold;color:chocolate;font-size:15px;">
+
+                                        @suggestedUnit @sii.UnitType.ShortName
+
+
+                                    </td>
+
+                                </tr>
+
+                            }
+
+
+                        </tbody>
+                        <tr>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td style="font-weight:bold;color:red;font-size:15px;">Total</td>
+                            @if (@LastTtlPrice > 0)
+                            {
+                                <td style="font-weight:bold;color:red;font-size:15px;">@LastTtlPrice.ToString("#.##") Tk</td>
+                            }
+                            else
+                            {
+                                <td style="font-weight:bold;color:red;font-size:15px;">0.00 Tk</td>
+
+                            }
+
+                            <td></td>
+
+
+
+
+                        </tr>
+                        <tr>
+                            @{
+                                var it = _db.StoreOutItem.Where(x => x.Id == ItemId).FirstOrDefault();
+                            }
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td style="font-weight:bold;color:red;font-size:15px;">Per @it.Name Cost</td>
+                            @if (@LastTtlPrice / quantity > 0)
+                            {
+                                double p = @LastTtlPrice / quantity;
+
+                                <td style="font-weight:bold;color:red;font-size:15px;">@p.ToString("#.##") Tk</td>
+                            }
+                            else
+                            {
+                                <td style="font-weight:bold;color:red;font-size:15px;">0.00 Tk</td>
+
+                            }
+
+                            <td></td>
+
+
+
+
+                        </tr>
+                    </table>
+
+
+                    <div class="form-group">
+                        <br />
+                        <div class="col-sm-10" style="margin-left: 0px;padding-left: 0px;">
+                            @*<input class="btn btn-sm btn-success" name="submit" type="submit" id="Preview" value="Preview" />*@
+                            <input class="btn btn-sm btn-success" name="submit" type="submit" id="StoreOut" value="Store Out" />
+
+                            @*<button class="btn btn-sm btn-primary" type="submit" style="margin-left: 0px;"> Store Out </button> |*@
+                            @*<a asp-action="Index" class="btn btn-sm btn-default">Back to List</a>*@
+                        </div>
+                    </div>
+
+                </form>
+            }
+
+
+            @if (str.Count == 0 && ItemId > 0)
+            {
+                <form id="frm2" asp-action="SaveUpdateWarehouseStorageOut" asp-route-StoreOutDate="@orderDate" asp-route-quantity="@quantity" asp-route-chkquantity="@chkquantity" asp-route-itemId="@ItemId" method="post">
+
+                    <table class="table-striped table-bordered">
+                        <thead class="grey lighten-2">
+                            <tr>
+                                <th scope="col">#</th>
+                                <th scope="col">Name</th>
+                                <th scope="col">Amount</th>
+                                <th scope="col">AvailableBalance</th>
+                                <th scope="col">Weighted Price</th>
+                                <th scope="col">Total Price</th>
+
+
+
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @{ int i = 1;
+                                if (chkquantity != 0)
+                                {
+                                    quantity = chkquantity;
+                                }
+                            }
+
+
+                            @foreach (var sii in _db.StoreInItem.Include(a => a.RemainingBalanceAndWeightedPriceCalculationList).Include(a => a.UnitType).ToList())
+                            {
+                                <tr>
+                                    <th scope="row">@(i++)</th>
+                                    <td>@sii.Name</td>
+                                    <td>
+                                        @{
+                                            var tempError = ErrorList.Where(x => x.Key == sii.Id.ToString()).FirstOrDefault();
+                                            var userGivenAmount = UserGivenAmount.Where(x => x.Key == sii.Id.ToString()).Count() > 0 ? Double.Parse(UserGivenAmount.Where(x => x.Key == sii.Id.ToString()).FirstOrDefault().Value) : 0.00;
+                                            double q = 0;
+                                            var RemBal = sii.RemainingBalanceAndWeightedPriceCalculationList.Count() == 0 ? 0 : sii.RemainingBalanceAndWeightedPriceCalculationList.LastOrDefault().TotalAvailableAmount;
+                                            RemBal += userGivenAmount;
+                                            @if (TempQuantityList != null)
+                                            {
+                                                @if (TempQuantityList.Count > 0)
+                                                {
+                                                    @if (TempQuantityList.ContainsKey(@sii.Id.ToString()))
+                                                    {
+                                                        q = TempQuantityList[@sii.Id.ToString()];
+
+                                                    }
+                                                    @*else
+                                                        {
+                                                            @userGivenAmount = 0;
+                                                        }*@
+                                                }
+                                            }
+                                            <div>
+                                                <input class="" type="number" step="0.01" name="@sii.Id" id="@sii.Id" onchange="qChange()" value="@q" min="0.00" max="@RemBal" />
+                                                @*<span class="">Bal: @RemBal @sii.UnitType.ShortName</span>*@
+                                            </div>
+                                            @if (tempError.Value != null && tempError.Value.Length > 0)
+                                            {
+                                                <div class="alert alert-danger" role="alert" style="margin: 0px;padding: 0px;">
+                                                    @tempError.Value
+                                                </div>
+                                            }
+                                        }
+                                    </td>
+                                    <td>
+                                        @{
+                                            var ra = _db.RemainingBalanceAndWeightedPriceCalculation.Where(x => x.StoreInItemId == sii.Id).LastOrDefault();
+                                        }
+
+                                        @ra.TotalAvailableAmount   <span class="pl-1">@sii.UnitType.ShortName</span>
+                                    </td>
+                                    <td>
+                                        @{
+                                            var rb = _db.RemainingBalanceAndWeightedPriceCalculation.Where(x => x.StoreInItemId == sii.Id).LastOrDefault();
+                                        }
+
+                                        @rb.WeightedPrice.ToString("#.##") Tk
+                                    </td>
+
+
+                                    @{
+                                        double tPrice = 0;
+                                    }
+                                    @if (TempQuantityList != null)
+                                    {
+                                        @if (TempQuantityList.Count > 0)
+                                        {
+                                            @if (TempQuantityList.ContainsKey(@sii.Id.ToString()))
+                                            {
+                                                tPrice = TempQuantityList[@sii.Id.ToString()] * TempPriceList[@sii.Id.ToString()];
+                                                LastTtlPrice = LastTtlPrice + tPrice;
+                                                <td>  @tPrice.ToString("#.##") Tk </td>
+
+                                            }
+                                            else
+                                            {
+                                                <td> 0.00 Tk </td>
+                                            }
+                                        }
+                                        else
+                                        {
+                                            <td> 0.00 Tk </td>
+                                        }
+
+                                    }
+
+
+
+
+
+
+                                </tr>
+
+                            }
+
+
+                        </tbody>
+                        <tr>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td class="font-weight-bolder">Total</td>
+                            @if (@LastTtlPrice > 0)
+                            {
+                                <td>@LastTtlPrice.ToString("#.##") Tk</td>
+                            }
+                            else
+                            {
+                                <td>0.00 Tk</td>
+
+                            }
+
+
+
+
+
+                        </tr>
+                        <tr>
+                            @{
+                                var it = _db.StoreOutItem.Where(x => x.Id == ItemId).FirstOrDefault();
+                            }
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td></td>
+                            <td class="font-weight-bolder">Per @it.Name Cost</td>
+                            @if (@LastTtlPrice / quantity > 0)
+                            {
+                                double p = @LastTtlPrice / quantity;
+
+                                <td>@p.ToString("#.##") Tk</td>
+                            }
+                            else
+                            {
+                                <td>0.00 Tk</td>
+
+                            }
+
+                            <td></td>
+
+
+
+
+                        </tr>
+                    </table>
+
+
+                    <div class="form-group">
+                        <br />
+                        <div class="col-sm-10" style="margin-left: 0px;padding-left: 0px;">
+                            @*<input class="btn btn-sm btn-success" name="submit" type="submit" id="Preview" value="Preview" />*@
+                            <input class="btn btn-sm btn-success" name="submit" type="submit" id="StoreOut" value="Store Out" />
+
+                            @*<button class="btn btn-sm btn-primary" type="submit" style="margin-left: 0px;"> Store Out </button> |*@
+                            @*<a asp-action="Index" class="btn btn-sm btn-default">Back to List</a>*@
+                        </div>
+                    </div>
+
+                </form>
+            }
+
+        </div>
+
+
+
+
+        @*@if (PriceListForGivenStorage != null)
+            {
+                @foreach (var p in PriceListForGivenStorage)
+                {
+
+
+
+
+                    <h5>@p.WeightedPrice</h5>
+                }
+            }*@
+        <div class=" col-sm-1">
+
+        </div>
+    </div>
+</div>
+
+@*<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>*@
+
+
+
+
+<script>
+    $(document).ready(function () {
+        ItemOnDate();
+    });
+    $("#storeIn").hide();
+
+    function CheckLoad() {
+        $("#storeIn").show();
+        $("#storeOut").hide();
+
+
+    }
+     $(function () {
+        $("#datepicker").datepicker({
+            dateFormat: "dd-mm-yy"
+            , duration: "fast"
+        });
+    });
+
+    function chk() {
+          console.log('hello');
+
+}
+    
+
+
+
+
+    //document.getElementById('textStoreDate').value = today;
+    function check() {
+
+
+                 $.ajax({
+
+        url: '@Url.Action("Test", "StorageManagement")',
+        type: "POST",
+        data: {  },
+        success: function (response) {
+            if (response.success) {
+
+               //jQuery("#messageUp").append('<div class="alert alert-success" role="alert"><b>"' + response.responseText + '"</b></div>');
+
+                //window.alert(response.responseText);
+                //        //jQuery("#messageUp").append('<div class="alert alert-success" role="alert"><b>"' + response.responseText + '"</b></div>');
+                //window.location.reload(true);
+
+
+            } else {
+                // DoSomethingElse()
+                alert(response.responseText);
+            }
+        }
+
+
+    })
+    }
+    function ItemOnDate() {
+         var dateTime = document.getElementById("datepicker").value.toString();
+
+         $.ajax({
+                url: '@Url.Action("GetItemsOnDay","StorageManagement")',
+             dataType: "json",
+             data: { Date: dateTime },
+                success: function (data) {
+                    console.log(data);
+                    var $mySelect = $('#mySelect');
+                    $mySelect.empty();
+
+                       $.each(data, function (key, value) {
+            var $option = $("<option/>", {
+                value: key,
+                text: value
+            });
+                           $mySelect.append($option);
+                           document.getElementById("datepicker").value = dateTime;
+        });
+
+                },
+                error: function (xhr, status, error) {
+                    alert("Error");
+                }
+            });
+
+
+    }
+
+    $(function () {
+        $('#chkquantity').change(function () {
+            this.form.submit();
+        });
+    });
+    function qChange() {
+        console.log('dip');
+        ("#frm2").submit();
+    }
+   
+    function ItemQuantityOnDate() {
+        var item = document.getElementById("mySelect").value.toString();
+        var dateTime = document.getElementById("OrderDate").value.toString();
+
+          $.ajax({
+                url: '@Url.Action("GetItemQuantityOnDay","StorageManagement")',
+              dataType: "json",
+              data: { Date: dateTime, ItemId: item },
+                success: function (data) {
+                    console.log(data);
+
+
+
+
+                },
+                error: function (xhr, status, error) {
+                    alert("Error");
+                }
+            });
+
+    }
+
+</script>
+

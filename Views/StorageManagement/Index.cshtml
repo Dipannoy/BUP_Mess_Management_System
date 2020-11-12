@@ -1,0 +1,122 @@
+﻿@model IEnumerable<Mess_Management_System_Alpha_V2.Models.MessModels.WarehouseStorage>
+@inject ApplicationDbContext _db
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+
+<div class="container-fluid">
+    <div class="row">
+        <span class="h2">Warehouse Storage</span>
+        <span class="float-right">
+            <a asp-action="WarehouseStorageIn" class="btn btn-success btn-sm px-3"><i class="fas fa-sign-in-alt"></i> Store In</a> |
+            <a asp-action="WarehouseStorageOut" class="btn btn-warning btn-sm"><i class="fas fa-sign-out-alt"></i> Store Out</a>
+        </span>
+    </div>
+    <div class="row d-flex justify-content-start">
+
+        @if (Model != null)
+        {
+            int i1 = 0;
+            @foreach (var gr in Model.GroupBy(x => x.StoreInItem))
+            {
+                {
+                    i1 += 1;
+                }
+                <div class=" p-3">
+                    
+                    <div class="p-2 bg-primary text-white font-weight-bold mw-100">
+                        <span>
+                            @i1.
+                        </span>
+                        <span>
+                            @{
+                                var itemName = _db.StoreInItem.Include(a => a.UnitType).Where(x => x.Id == gr.Key.Id).FirstOrDefault();
+                            }
+                            @itemName.Name
+                        </span>
+                        <span>
+                            @{
+                                var remainingAmount = _db.RemainingBalanceAndWeightedPriceCalculation.Where(x => x.StoreInItemId == gr.Key.Id).LastOrDefault();
+                            }
+                            <span class="badge badge-success float-right" style="padding: 1% 2%;">Bal: @remainingAmount.TotalAvailableAmount @itemName.UnitType.ShortName</span>
+                            @*<span class="badge badge-success"></span>*@
+
+                        </span>
+                        <div>
+                            <span class="badge badge-success" >  W.Price: @remainingAmount.WeightedPrice.ToString("#.##") Tk</span>
+                          
+                        </div>
+                        @*<span class="badge badge-success float-right" style="padding: 1% 2%;">W.Price: @remainingAmount.WeightedPrice.ToString("#.##") Tk</span>*@
+
+                    </div>
+                    <div>
+                        <div colspan="3">
+                            @{
+                                var warehousList = _db.WarehouseStorage.Where(x => x.StoreInItemId == gr.Key.Id).ToList();
+                            }
+                            <div class="card p-2">
+                                <table class="">
+                                    <thead>
+                                        <tr>
+                                            <th>Date</th>
+                                            <th style="padding-left: 10px;">In (@itemName.UnitType.ShortName)</th>
+                                            <th style="padding-left: 10px;">Out (@itemName.UnitType.ShortName)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+
+                                        @if (warehousList.Count > 0 && warehousList != null)
+                                        {
+                                            foreach (var wl in warehousList)
+                                            {
+                                                <tr>
+                                                    <td>@wl.Date.ToShortDateString()</td>
+                                                    @if (wl.IsStoreOut == false)
+                                                    {
+                                                        <td style="padding-left: 10px;">@wl.Amount</td>
+                                                    }
+                                                    else
+                                                    {
+                                                        <td style="padding-left: 10px;">--</td>
+                                                    }
+
+                                                    @if (wl.IsStoreOut == true)
+                                                    {
+                                                        <td style="padding-left: 10px;">@wl.Amount</td>
+                                                    }
+                                                    else
+                                                    {
+                                                        <td style="padding-left: 10px;">--</td>
+                                                    }
+                                                </tr>
+                                            }
+                                        }
+
+                                        <tr style="background-color:lightgray;">
+                                            <td class="font-bold">Total: </td>
+                                            @if (warehousList.Count() > 0)
+                                            {
+                                                <th><span class="badge badge-secondary" style="padding: 1% 2%;">@warehousList.Where(x => x.IsStoreOut == false).Sum(x => x.Amount)</span></th>
+                                                <th><span class="badge badge-secondary" style="padding: 1% 2%;">@warehousList.Where(x => x.IsStoreOut == true).Sum(x => x.Amount)</span></th>
+                                            }
+                                        </tr>
+                                    </tbody>
+                                </table>
+
+                            </div>
+                        </div>
+                    </div>
+                    
+                    
+                </div>
+            }
+        }
+    </div>
+</div>
+
+
+
+
+

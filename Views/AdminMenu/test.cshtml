@@ -1,0 +1,3931 @@
+﻿@inject ApplicationDbContext _context
+@inject Microsoft.AspNetCore.Identity.UserManager<ApplicationUser> _userManager
+@inject ApplicationDbContext _db
+@inject IDDLHelper _ddlHelper
+@{
+    ViewData["Title"] = "Test";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    long editableId = 0;
+    if (ViewBag.ExtraEditedItem != null)
+    {
+        editableId = ViewBag.ExtraEditedItem.Id;
+    }
+    var active = "in active";
+}
+
+<head>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto|Varela+Round|Open+Sans">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+
+</head>
+
+<style>
+    /*.list-group {
+        max-height: 1000px;
+        margin-bottom: 10px;
+        overflow: scroll;
+        -webkit-overflow-scrolling: touch;
+    }*/
+
+    /*.body, .html {
+        height: 100%;
+        margin: 0;
+    }*/
+
+    .th {
+        font: 500;
+    }
+    .btn {
+  padding: 0px 0px;
+  font-size: 15px;
+  cursor: pointer;
+    margin:0;
+    color:red;
+}
+
+    .menu {
+        flex-direction: row;
+    }
+
+    .text {
+        padding-left: 20px;
+    }
+
+    .date {
+        padding-left: 10px;
+    }
+
+    .meal {
+        padding-left: 20px;
+    }
+
+    .qn {
+        padding-left: 0px;
+    }
+
+    .hidden {
+        display: none;
+    }
+
+    .bodyy {
+        height: 100%;
+        margin: 0;
+    }
+
+    .full-height {
+        height: 100%;
+    }
+        .small-btn {
+        width: 2px;
+        height: 2px;
+    }
+     hr.divider { 
+  margin: .5em;
+  border-width: 2px;
+} 
+
+    .bgg {
+        /* The image used */
+        background-image: url("https://www.tibits.co.uk/assets/images/8/Autumn%20table%20%287%29-80f4ecc9.jpg");
+        /* Full height */
+        /*height: 500%;*/
+        /*width: 100%;
+        padding-top: 0px;*/
+        /* Center and scale the image nicely */
+        /*background-position: center;
+        background-repeat: no-repeat;*/
+        background-size: cover;
+    }
+    .day-Name{
+        padding-left:50px;
+    }
+    .item-Text{
+    font-weight:bold;
+    font-size:14px;
+    color:brown;
+    }
+    .price-Text{
+    font-size:14px;
+    font-weight:500;
+    color:black;
+    }
+
+
+    .table-wrapper {
+        width: 700px;
+        margin: 30px auto;
+        background: #fff;
+        padding: 20px;
+        box-shadow: 0 1px 1px rgba(0,0,0,.05);
+    }
+
+    .table-title {
+        padding-bottom: 10px;
+        margin: 0 0 10px;
+    }
+
+        .table-title h2 {
+            margin: 6px 0 0;
+            font-size: 22px;
+        }
+
+        .table-title .add-new {
+            float: right;
+            height: 30px;
+            font-weight: bold;
+            font-size: 12px;
+            text-shadow: none;
+            min-width: 100px;
+            border-radius: 50px;
+            line-height: 13px;
+        }
+
+            .table-title .add-new i {
+                margin-right: 4px;
+            }
+
+    table.table {
+        table-layout: fixed;
+    }
+
+        table.table tr th, table.table tr td {
+            border-color: white;
+        }
+
+        table.table th i {
+            font-size: 30px;
+            font-weight: bolder;
+            margin: 0 5px;
+            cursor: pointer;
+        }
+
+        table.table th:last-child {
+            width: 100px;
+        }
+
+        table.table td a {
+            cursor: pointer;
+            display: inline-block;
+            margin: 0 5px;
+            min-width: 24px;
+        }
+
+            table.table td a.add {
+                color: #27C46B;
+            }
+
+            table.table td a.edit {
+                color: #FFC107;
+            }
+
+            table.table td a.delete {
+                color: #E34724;
+            }
+
+        table.table td i {
+            font-size: 19px;
+        }
+
+        table.table td a.add i {
+            font-size: 24px;
+            margin-right: -1px;
+            position: relative;
+            top: 3px;
+        }
+
+
+        table.table .form-control {
+            height: 32px;
+            line-height: 32px;
+            box-shadow: none;
+            border-radius: 2px;
+        }
+
+            table.table .form-control.error {
+                border-color: #f50000;
+            }
+
+        table.table td .add {
+            display: none;
+        }
+        .background-image {
+  background-image : url('@Url.Content("~/images/food.jpg")');
+  background-size: cover;
+  display: block;
+  /*filter: blur(5px);*/
+    /*-webkit-filter: blur(5px);*/
+
+  height: 1300px;
+  /*left: 0;
+  position: fixed;
+  right: 0;
+  z-index: 1;*/
+}
+</style>
+
+
+@*<h2>Create</h2>*@
+<body style="height:100%">
+    <div class="background-image">
+        <div class="row" style="padding-top:10px;">
+            <div class="col-sm-1">
+
+            </div>
+            <div class="col-sm-2 day-Name">
+                <h1 style="color:red">Sunday</h1>
+
+            </div>
+
+            <div class="col-sm-2 day-Name">
+                <h1 style="color:red">Monday</h1>
+
+            </div>
+
+            <div class="col-sm-2 day-Name">
+                <h1 style="color:red">Tuesday</h1>
+
+            </div>
+
+            <div class="col-sm-2 day-Name">
+                <h1 style="color:red">Wednesday</h1>
+
+            </div>
+
+            <div class="col-sm-2 day-Name">
+                <h1 style="color:red">Thursday</h1>
+
+            </div>
+
+            <div class="col-sm-1">
+
+            </div>
+
+        </div>
+        <div class="row">
+            <div class="col-sm-1">
+
+            </div>
+            <div class="col-sm-2">
+                @*<div class="card chart-card" style="height:auto; background:url('http://yesofcorsa.com/wp-content/uploads/2018/09/Matcha-Tea-Best-Wallpaper-1024x576.jpg');">*@
+                <div class="card chart-card" style="height:auto;">
+
+                    <!-- Card content -->
+                    <div class="card-body pb-0">
+
+                        <h4 class="card-title font-weight-bolder ">Breakfast</h4>
+
+
+                        <ul class="nav nav-tabs">
+                            <li class="active"><a data-toggle="tab" href="#home">Menu</a></li>
+                            <li><a data-toggle="tab" href="#menu1">SetMenu</a></li>
+
+                        </ul>
+
+                        <div class="tab-content">
+                            <div id="home" class="tab-pane fade in active">
+                                <br />
+
+                                @{
+                                    var SundayBreakFastMenu2 = _db.ExtraItem.Where(x => x.Day == 7 && x.MealTypeId == 1).ToList();
+                                    var SundayBreakFastSetMenu = _db.SetMenu.Where(x => x.Day == 7 && x.MealTypeId == 1).ToList();
+                                    foreach (var i in SundayBreakFastMenu2)
+                                    {
+                                        var nm = _context.StoreOutItem.Where(x => x.Id == i.StoreOutItemId).FirstOrDefault();
+                                        <div class="row">
+
+                                            @if (editableId == i.Id)
+                                            {
+                                                <div class="col-sm-5">
+
+                                                    <input class="form-control" value="@nm.Name" />
+                                                </div>
+                                                <div class="col-sm-3">
+
+                                                    <input class="form-control" value="@i.Price" />
+                                                </div>
+
+
+                                            }
+                                            else
+                                            {
+                                                string pr = @i.Price + "Tk";
+                                                <div class="col-sm-5" style="padding-right:0px;">
+
+                                                    <p class="item-Text">@i.StoreOutItem.Name</p>
+                                                </div>
+                                                <div class="col-sm-3" style="padding-right:0px;">
+                                                    <p class="price-Text">@pr</p>
+                                                </div>
+
+                                            }
+
+
+                                            <div class="col-sm-2">
+                                                <form asp-action="EditDayMenu" asp-route-StrItmId="@i.Id" asp-controller="AdminMenu">
+
+                                                    <button type="submit" class="btn">
+                                                        <i class="fa fa-edit"></i>
+
+                                                    </button>
+
+                                                </form>
+
+                                            </div>
+                                            <div class="col-sm-2">
+                                                <form asp-action="DeleteDayMenu" asp-route-StrItmId="@i.Id" asp-controller="AdminMenu">
+
+                                                    <button type="submit" class="btn">
+                                                        <i class="fa fa-trash"></i>
+
+                                                    </button>
+
+                                                </form>
+
+                                            </div>
+                                        </div>
+                                        <hr class="divider" />
+
+                                    }
+                                }
+                                <div id="item">
+                                        <a class="add" title="Add" onclick="AddItem()" data-toggle="tooltip"><i class="material-icons">&#xE03B;</i></a>
+
+                                 
+
+                                </div>
+
+
+
+                                <div id="NewItem" style="margin-bottom:15px">
+                                    <select id="itm" class="form-control border-radius-none col-sm-8" asp-items="@(new SelectList(_ddlHelper.GetStoreOutItem().Prepend(new KeyValuePair<string, string>("-1","--Item--")),"Key","Value",""))"></select>
+
+                                   
+                                    <a href="#" onclick="AddSaveItem(7,1)"><i class="fas fa-plus" style="font-size:15px;color:red;padding-left:10px;padding-top:10px;"></i></a>
+
+
+                      
+                                </div>
+                            </div>
+                            <div id="menu1" class="tab-pane fade">
+
+                                @if (SundayBreakFastSetMenu != null)
+                                {
+                                    if (SundayBreakFastSetMenu.Count > 0)
+                                    {
+                                        int srl = 0;
+
+                                        foreach (var item in SundayBreakFastSetMenu)
+                                        {
+
+
+
+                                            var SundayBreakFastSetMenuDtl = _db.SetMenuDetails.Where(x => x.SetMenuId == item.Id).ToList();
+                                            srl++;
+                                            int l = 0;
+                                            <div class="row">
+
+                                                @*<div class="col-sm-1">
+                            <p>@srl</p>
+                        </div>*@
+                                                <div class="col-sm-4" style="padding-right:0px;">
+                                                    <p style="font-weight:bold;font-size:12px;color:coral">@item.SetMenuDate.ToString("dd/MM/yyyy")</p>
+                                                </div>
+                                                <div class="col-sm-6" style="padding-right:0px;">
+                                                    <p style="font-weight:bold;font-size:12px;color:brown">
+                                                        @foreach (var i in SundayBreakFastSetMenuDtl)
+                                                        {
+                                                            l++;
+                                                            @i.StoreOutItem.Name
+                                                            if (l != SundayBreakFastSetMenuDtl.Count)
+                                                            {
+                                                                <small> , </small>
+                                                            }
+
+                                                        }
+                                                    </p>
+
+                                                </div>
+                                                <div class="col-sm-2">
+
+                                                    <form asp-action="DeleteSetMenu" asp-route-SetMenuId="@item.Id" asp-controller="AdminMenu">
+
+                                                        <button type="submit" class="btn">
+                                                            <i class="fa fa-trash"></i>
+
+                                                        </button>
+
+
+                                                    </form>
+
+                                                </div>
+
+
+
+                                            </div>
+
+
+                                            <hr class="divider" />
+
+
+
+
+                                        }
+                                    }
+                                }
+                                <div id="sm">
+                                    <a class="add" title="Add" onclick="AddSetmenu()" data-toggle="tooltip"><i class="material-icons">&#xE03B;</i></a>
+
+
+
+                                </div>
+
+
+
+
+                                <div id="SetMenu">
+                                    @{
+                                        int ll = 0;
+                                    }
+                                    <input type="date" id="SetMenuDate" class="form-control " style="padding-top:unset">
+
+                                    <div style="display:inline-flex">
+
+                                        @foreach (var item in SundayBreakFastMenu2)
+                                        {
+                                            ll++;
+
+
+
+
+                                            <div class="custom-control custom-checkbox" style="margin-top: 2.5%;padding-right:5px;">
+                                                <input type="checkbox" class="custom-control-input" style="padding-top:10px;" id="checkadded_@item.Id" name="checkboxAdded" value="@item.StoreOutItemId" />
+                                                <label class="custom-control-label" for="checkadded_@item.Id">@item.StoreOutItem.Name</label>
+                                            </div>
+                                            @if (ll == SundayBreakFastMenu2.Count)
+                                            {
+                                                @*<a href="#" onclick="AddSaveSetMenu(7,1)"><i class="fas fa-plus" style="font-size:20px;color:red;padding-left:20px;padding-top:5px;"></i></a>*@
+
+                                                <a href="#" onclick="AddSaveSetMenu(7,1)"><i class="fas fa-plus" style="font-size:15px;color:red;padding-left:10px;padding-top:10px;"></i></a>
+
+                                            }
+                                        }
+
+
+
+
+
+                                    </div>
+
+
+                                </div>
+
+
+                            </div> <!-- Classic tabs -->
+
+                                        </div>
+                    </div>
+                </div>
+
+
+
+            </div>
+            <div class="col-sm-2">
+                <div class="card chart-card" style="height:auto; background:url('http://yesofcorsa.com/wp-content/uploads/2018/09/Matcha-Tea-Best-Wallpaper-1024x576.jpg');">
+
+                    <!-- Card content -->
+                    <div class="card-body pb-0">
+
+                        <h4 class="card-title font-weight-bolder ">Breakfast</h4>
+
+
+                        <ul class="nav nav-tabs">
+                            <li class="active"><a data-toggle="tab" href="#home">Menu</a></li>
+                            <li><a data-toggle="tab" href="#menu1">SetMenu</a></li>
+
+                        </ul>
+
+                        <div class="tab-content">
+                            <div id="home" class="tab-pane fade in active">
+                                <br />
+                                @{
+                                    var MondayBreakFastMenu2 = _db.ExtraItem.Where(x => x.Day == 1 && x.MealTypeId == 1).ToList();
+                                    var MondayBreakFastSetMenu = _db.SetMenu.Where(x => x.Day == 1 && x.MealTypeId == 1).ToList();
+                                    foreach (var i in MondayBreakFastMenu2)
+                                    {
+                                        var nm = _context.StoreOutItem.Where(x => x.Id == i.StoreOutItemId).FirstOrDefault();
+                                        <div class="row">
+
+                                            @if (editableId == i.Id)
+                                            {
+                                                <div class="col-sm-5">
+
+                                                    <input class="form-control" value="@nm.Name" />
+                                                </div>
+                                                <div class="col-sm-3">
+
+                                                    <input class="form-control" value="@i.Price" />
+                                                </div>
+
+
+                                            }
+                                            else
+                                            {
+                                                string pr = @i.Price + "Tk";
+                                                <div class="col-sm-5" style="padding-right:0px;">
+
+                                                    <p class="item-Text">@i.StoreOutItem.Name</p>
+                                                </div>
+                                                <div class="col-sm-3" style="padding-right:0px;">
+                                                    <p class="price-Text">@pr</p>
+                                                </div>
+
+                                            }
+
+
+                                            <div class="col-sm-2">
+                                                <form asp-action="EditDayMenu" asp-route-StrItmId="@i.Id" asp-controller="AdminMenu">
+
+                                                    <button type="submit" class="btn">
+                                                        <i class="fa fa-edit"></i>
+
+                                                    </button>
+
+                                                </form>
+
+                                            </div>
+                                            <div class="col-sm-2">
+                                                <form asp-action="DeleteDayMenu" asp-route-StrItmId="@i.Id" asp-controller="AdminMenu">
+
+                                                    <button type="submit" class="btn">
+                                                        <i class="fa fa-trash"></i>
+
+                                                    </button>
+
+                                                </form>
+
+                                            </div>
+                                        </div>
+                                        <hr class="divider" />
+
+                                    }
+                                }
+                                <div id="item2">
+                                    <a class="add" title="Add" onclick="AddItem2()" data-toggle="tooltip"><i class="material-icons">&#xE03B;</i></a>
+
+
+
+                                </div>
+
+
+
+                                <div id="NewItem2" style="margin-bottom:15px">
+                                    <select id="itm2" class="form-control border-radius-none col-sm-8" asp-items="@(new SelectList(_ddlHelper.GetStoreOutItem().Prepend(new KeyValuePair<string, string>("-1","--Item--")),"Key","Value",""))"></select>
+
+
+                                    <a href="#" onclick="AddSaveItem(1,1)"><i class="fas fa-plus" style="font-size:15px;color:red;padding-left:10px;padding-top:10px;"></i></a>
+
+
+
+                                </div>
+
+                                @*<div id="NewItem" style="margin-bottom:10px">
+            <select id="itm" class="form-control border-radius-none col-sm-5" asp-items="@(new SelectList(_ddlHelper.GetStoreOutItem().Prepend(new KeyValuePair<string, string>("-1","--Item--")),"Key","Value",""))"></select>
+
+
+            <a href="#" onclick="AddSaveItem(7,1)"><i class="fas fa-plus" style="font-size:20px;color:red;padding-left:20px;padding-top:5px;"></i></a>
+
+            <br />
+
+
+        </div>*@
+                            </div>
+                            <div id="menu1" class="tab-pane fade">
+                                <table class="table table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th class="col-sm-1"><p style="font-weight:bold;font-size:15px;">#</p></th>
+                                            <th><p style="font-weight:bold;font-size:15px;">Date</p></th>
+                                            <th><p style="font-weight:bold;font-size:15px;">Item</p></th>
+
+                                            <th>
+                                                <a href="#" class="add" onclick="AddSetMenu()" title="Add" data-toggle="tooltip"><i class="material-icons">&#xE03B;</i></a>
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @if (MondayBreakFastSetMenu != null)
+                                        {
+                                            @if (MondayBreakFastSetMenu.Count > 0)
+                                            {
+                                                int srl = 0;
+
+                                                foreach (var item in MondayBreakFastSetMenu)
+                                                {
+                                                    srl++;
+                                                    int l = 0;
+                                                    <tr>
+                                                        <td class="col-sm-1"><p style="font-weight:bold;font-size:12px;">@srl</p></td>
+                                                        <td><p style="font-weight:bold;font-size:12px;">@item.SetMenuDate.ToShortDateString()</p></td>
+                                                        <td>
+                                                            @{var SundayBreakFastSetMenuDtl = _db.SetMenuDetails.Where(x => x.SetMenuId == item.Id).ToList();
+                                                                <p style="font-weight:bold;font-size:10px;">
+                                                                    @foreach (var i in SundayBreakFastSetMenuDtl)
+                                                                    {
+                                                                        l++;
+                                                                        @i.StoreOutItem.Name
+                                                                        if (l != SundayBreakFastSetMenuDtl.Count)
+                                                                        {
+                                                                            <small> , </small>
+                                                                        }
+
+                                                                    }
+                                                                </p>
+
+                                                            }
+
+                                                        </td>
+                                                        <form id="dltSt" asp-action="DeleteSetMenu" asp-route-StrItmId="@item.Id" asp-controller="AdminMenu" method="post">
+                                                            <td>
+
+                                                                @*<a class="add" title="Add" data-toggle="tooltip"><i class="material-icons">&#xE03B;</i></a>*@
+                                                                @*<a class="edit" title="Edit" data-toggle="tooltip"><i class="material-icons">&#xE254;</i></a>*@
+                                                                @*<button type="submit" name="submit" value="Delete" >*@
+                                                                <a href="#" class="delete" title="Delete" data-toggle="tooltip" onclick="document.getElementById('dltSt').submit()">
+                                                                    <i class="material-icons">&#xE872;</i>
+                                                                </a>
+                                                                @*</button>*@
+                                                            </td>
+                                                        </form>
+                                                    </tr>
+
+                                                }
+                                            }
+                                        }
+
+
+
+                                    </tbody>
+                                </table>
+                                <div id="SetMenu">
+                                    @{
+                                        int l2 = 0;
+                                    }
+                                    <input type="date" id="SetMenuDate" class="form-control " style="padding-top:unset">
+
+                                    <div style="display:inline-flex">
+
+                                        @foreach (var item in MondayBreakFastMenu2)
+                                        {
+                                            l2++;
+
+
+
+
+                                            <div class="custom-control custom-checkbox" style="margin-top: 2.5%;">
+                                                <input type="checkbox" class="custom-control-input" id="checkadded_@item.Id" name="checkboxAdded" value="@item.StoreOutItemId" />
+                                                <label class="custom-control-label" for="checkadded_@item.Id">@item.StoreOutItem.Name</label>
+                                            </div>
+                                            @if (l2 == MondayBreakFastMenu2.Count)
+                                            {
+                                                <a href="#" onclick="AddSaveSetMenu(7,1)"><i class="fas fa-plus" style="font-size:20px;color:red;padding-left:20px;padding-top:5px;"></i></a>
+
+
+                                            }
+                                        }
+
+
+
+
+
+                                    </div>
+
+
+                                </div>
+
+
+                            </div> <!-- Classic tabs -->
+
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            <div class="col-sm-2">
+
+                <div class="card chart-card" style="height:auto; background:url('http://yesofcorsa.com/wp-content/uploads/2018/09/Matcha-Tea-Best-Wallpaper-1024x576.jpg');">
+
+                    <!-- Card content -->
+                    <div class="card-body pb-0">
+
+                        <h4 class="card-title font-weight-bolder ">Breakfast</h4>
+
+
+                        <ul class="nav nav-tabs">
+                            <li class="active"><a data-toggle="tab" href="#home">Menu</a></li>
+                            <li><a data-toggle="tab" href="#menu1">SetMenu</a></li>
+
+                        </ul>
+
+                        <div class="tab-content">
+                            <div id="home" class="tab-pane fade in active">
+                                <br />
+                                @{
+                                    var TuesdayBreakFastMenu2 = _db.ExtraItem.Where(x => x.Day == 2 && x.MealTypeId == 1).ToList();
+                                    var TuesdayBreakFastSetMenu = _db.SetMenu.Where(x => x.Day == 2 && x.MealTypeId == 1).ToList();
+                                    foreach (var i in TuesdayBreakFastMenu2)
+                                    {
+                                        var nm = _context.StoreOutItem.Where(x => x.Id == i.StoreOutItemId).FirstOrDefault();
+                                        <div class="row">
+
+                                            @if (editableId == i.Id)
+                                            {
+                                                <div class="col-sm-5">
+
+                                                    <input class="form-control" value="@nm.Name" />
+                                                </div>
+                                                <div class="col-sm-3">
+
+                                                    <input class="form-control" value="@i.Price" />
+                                                </div>
+
+
+                                            }
+                                            else
+                                            {
+                                                string pr = @i.Price + "Tk";
+                                                <div class="col-sm-5" style="padding-right:0px;">
+
+                                                    <p class="item-Text">@i.StoreOutItem.Name</p>
+                                                </div>
+                                                <div class="col-sm-3" style="padding-right:0px;">
+                                                    <p class="price-Text">@pr</p>
+                                                </div>
+
+                                            }
+
+
+                                            <div class="col-sm-2">
+                                                <form asp-action="EditDayMenu" asp-route-StrItmId="@i.Id" asp-controller="AdminMenu">
+
+                                                    <button type="submit" class="btn">
+                                                        <i class="fa fa-edit"></i>
+
+                                                    </button>
+
+                                                </form>
+
+                                            </div>
+                                            <div class="col-sm-2">
+                                                <form asp-action="DeleteDayMenu" asp-route-StrItmId="@i.Id" asp-controller="AdminMenu">
+
+                                                    <button type="submit" class="btn">
+                                                        <i class="fa fa-trash"></i>
+
+                                                    </button>
+
+                                                </form>
+
+                                            </div>
+                                        </div>
+                                        <hr class="divider" />
+
+                                    }
+                                }
+                                <div id="item3">
+                                    <a class="add" title="Add" onclick="AddItem3()" data-toggle="tooltip"><i class="material-icons">&#xE03B;</i></a>
+
+
+
+                                </div>
+
+
+
+                                <div id="NewItem3" style="margin-bottom:15px">
+                                    <select id="itm3" class="form-control border-radius-none col-sm-8" asp-items="@(new SelectList(_ddlHelper.GetStoreOutItem().Prepend(new KeyValuePair<string, string>("-1","--Item--")),"Key","Value",""))"></select>
+
+
+                                    <a href="#" onclick="AddSaveItem(2,1)"><i class="fas fa-plus" style="font-size:15px;color:red;padding-left:10px;padding-top:10px;"></i></a>
+
+
+
+                                </div>
+                                @*<div id="NewItem" style="margin-bottom:10px">
+            <select id="itm" class="form-control border-radius-none col-sm-5" asp-items="@(new SelectList(_ddlHelper.GetStoreOutItem().Prepend(new KeyValuePair<string, string>("-1","--Item--")),"Key","Value",""))"></select>
+
+            <a href="#" onclick="AddSaveItem(7,1)"><i class="fas fa-plus" style="font-size:20px;color:red;padding-left:20px;padding-top:5px;"></i></a>
+
+            <br />
+
+
+        </div>*@
+                            </div>
+                            <div id="menu1" class="tab-pane fade">
+                                <table class="table table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th class="col-sm-1"><p style="font-weight:bold;font-size:15px;">#</p></th>
+                                            <th><p style="font-weight:bold;font-size:15px;">Date</p></th>
+                                            <th><p style="font-weight:bold;font-size:15px;">Item</p></th>
+
+                                            <th>
+                                                <a href="#" class="add" onclick="AddSetMenu()" title="Add" data-toggle="tooltip"><i class="material-icons">&#xE03B;</i></a>
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @if (TuesdayBreakFastSetMenu != null)
+                                        {
+                                            @if (TuesdayBreakFastSetMenu.Count > 0)
+                                            {
+                                                int srl = 0;
+
+                                                foreach (var item in TuesdayBreakFastSetMenu)
+                                                {
+                                                    srl++;
+                                                    int l = 0;
+                                                    <tr>
+                                                        <td class="col-sm-1"><p style="font-weight:bold;font-size:12px;">@srl</p></td>
+                                                        <td><p style="font-weight:bold;font-size:12px;">@item.SetMenuDate.ToShortDateString()</p></td>
+                                                        <td>
+                                                            @{var TuesdayBreakFastSetMenuDtl = _db.SetMenuDetails.Where(x => x.SetMenuId == item.Id).ToList();
+                                                                <p style="font-weight:bold;font-size:10px;">
+                                                                    @foreach (var i in TuesdayBreakFastSetMenuDtl)
+                                                                    {
+                                                                        l++;
+                                                                        @i.StoreOutItem.Name
+                                                                        if (l != TuesdayBreakFastSetMenuDtl.Count)
+                                                                        {
+                                                                            <small> , </small>
+                                                                        }
+
+                                                                    }
+                                                                </p>
+
+                                                            }
+
+                                                        </td>
+                                                        <form id="dltSt" asp-action="DeleteSetMenu" asp-route-StrItmId="@item.Id" asp-controller="AdminMenu" method="post">
+                                                            <td>
+
+                                                                @*<a class="add" title="Add" data-toggle="tooltip"><i class="material-icons">&#xE03B;</i></a>*@
+                                                                @*<a class="edit" title="Edit" data-toggle="tooltip"><i class="material-icons">&#xE254;</i></a>*@
+                                                                @*<button type="submit" name="submit" value="Delete" >*@
+                                                                <a href="#" class="delete" title="Delete" data-toggle="tooltip" onclick="document.getElementById('dltSt').submit()">
+                                                                    <i class="material-icons">&#xE872;</i>
+                                                                </a>
+                                                                @*</button>*@
+                                                            </td>
+                                                        </form>
+                                                    </tr>
+
+                                                }
+                                            }
+                                        }
+
+
+
+                                    </tbody>
+                                </table>
+                                <div id="SetMenu">
+                                    @{
+                                        int l3 = 0;
+                                    }
+                                    <input type="date" id="SetMenuDate" class="form-control " style="padding-top:unset">
+
+                                    <div style="display:inline-flex">
+
+                                        @foreach (var item in TuesdayBreakFastMenu2)
+                                        {
+                                            l3++;
+
+
+
+
+                                            <div class="custom-control custom-checkbox" style="margin-top: 2.5%;">
+                                                <input type="checkbox" class="custom-control-input" id="checkadded_@item.Id" name="checkboxAdded" value="@item.StoreOutItemId" />
+                                                <label class="custom-control-label" for="checkadded_@item.Id">@item.StoreOutItem.Name</label>
+                                            </div>
+                                            @if (l3 == TuesdayBreakFastMenu2.Count)
+                                            {
+                                                <a href="#" onclick="AddSaveSetMenu(7,1)"><i class="fas fa-plus" style="font-size:20px;color:red;padding-left:20px;padding-top:5px;"></i></a>
+
+
+                                            }
+                                        }
+
+
+
+
+
+                                    </div>
+
+
+                                </div>
+
+
+                            </div> <!-- Classic tabs -->
+
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            <div class="col-sm-2">
+                <div class="card chart-card" style="height:auto; background:url('http://yesofcorsa.com/wp-content/uploads/2018/09/Matcha-Tea-Best-Wallpaper-1024x576.jpg');">
+
+                    <!-- Card content -->
+                    <div class="card-body pb-0">
+
+                        <h4 class="card-title font-weight-bolder ">Breakfast</h4>
+
+
+                        <ul class="nav nav-tabs">
+                            <li class="active"><a data-toggle="tab" href="#home">Menu</a></li>
+                            <li><a data-toggle="tab" href="#menu1">SetMenu</a></li>
+
+                        </ul>
+
+                        <div class="tab-content">
+                            <div id="home" class="tab-pane fade in active">
+                                <br />
+                                @{
+                                    var WednesdayBreakFastMenu2 = _db.ExtraItem.Where(x => x.Day == 3 && x.MealTypeId == 1).ToList();
+                                    var WednesdayBreakFastSetMenu = _db.SetMenu.Where(x => x.Day == 3 && x.MealTypeId == 1).ToList();
+                                    foreach (var i in WednesdayBreakFastMenu2)
+                                    {
+                                        var nm = _context.StoreOutItem.Where(x => x.Id == i.StoreOutItemId).FirstOrDefault();
+                                        <div class="row">
+
+                                            @if (editableId == i.Id)
+                                            {
+                                                <div class="col-sm-5">
+
+                                                    <input class="form-control" value="@nm.Name" />
+                                                </div>
+                                                <div class="col-sm-3">
+
+                                                    <input class="form-control" value="@i.Price" />
+                                                </div>
+
+
+                                            }
+                                            else
+                                            {
+                                                string pr = @i.Price + "Tk";
+                                                <div class="col-sm-5" style="padding-right:0px;">
+
+                                                    <p class="item-Text">@i.StoreOutItem.Name</p>
+                                                </div>
+                                                <div class="col-sm-3" style="padding-right:0px;">
+                                                    <p class="price-Text">@pr</p>
+                                                </div>
+
+                                            }
+
+
+                                            <div class="col-sm-2">
+                                                <form asp-action="EditDayMenu" asp-route-StrItmId="@i.Id" asp-controller="AdminMenu">
+
+                                                    <button type="submit" class="btn">
+                                                        <i class="fa fa-edit"></i>
+
+                                                    </button>
+
+                                                </form>
+
+                                            </div>
+                                            <div class="col-sm-2">
+                                                <form asp-action="DeleteDayMenu" asp-route-StrItmId="@i.Id" asp-controller="AdminMenu">
+
+                                                    <button type="submit" class="btn">
+                                                        <i class="fa fa-trash"></i>
+
+                                                    </button>
+
+                                                </form>
+
+                                            </div>
+                                        </div>
+                                        <hr class="divider" />
+
+                                    }
+                                }
+                                <div id="item4">
+                                    <a class="add" title="Add" onclick="AddItem4()" data-toggle="tooltip"><i class="material-icons">&#xE03B;</i></a>
+
+
+
+                                </div>
+
+
+
+                                <div id="NewItem4" style="margin-bottom:15px">
+                                    <select id="itm4" class="form-control border-radius-none col-sm-8" asp-items="@(new SelectList(_ddlHelper.GetStoreOutItem().Prepend(new KeyValuePair<string, string>("-1","--Item--")),"Key","Value",""))"></select>
+
+
+                                    <a href="#" onclick="AddSaveItem(3,1)"><i class="fas fa-plus" style="font-size:15px;color:red;padding-left:10px;padding-top:10px;"></i></a>
+
+
+
+                                </div>
+                            </div>
+                            <div id="menu1" class="tab-pane fade">
+                                <table class="table table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th class="col-sm-1"><p style="font-weight:bold;font-size:15px;">#</p></th>
+                                            <th><p style="font-weight:bold;font-size:15px;">Date</p></th>
+                                            <th><p style="font-weight:bold;font-size:15px;">Item</p></th>
+
+                                            <th>
+                                                <a href="#" class="add" onclick="AddSetMenu()" title="Add" data-toggle="tooltip"><i class="material-icons">&#xE03B;</i></a>
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @if (WednesdayBreakFastSetMenu != null)
+                                        {
+                                            @if (WednesdayBreakFastSetMenu.Count > 0)
+                                            {
+                                                int srl = 0;
+
+                                                foreach (var item in WednesdayBreakFastSetMenu)
+                                                {
+                                                    srl++;
+                                                    int l = 0;
+                                                    <tr>
+                                                        <td class="col-sm-1"><p style="font-weight:bold;font-size:12px;">@srl</p></td>
+                                                        <td><p style="font-weight:bold;font-size:12px;">@item.SetMenuDate.ToShortDateString()</p></td>
+                                                        <td>
+                                                            @{var WednesdayBreakFastSetMenuDtl = _db.SetMenuDetails.Where(x => x.SetMenuId == item.Id).ToList();
+                                                                <p style="font-weight:bold;font-size:10px;">
+                                                                    @foreach (var i in WednesdayBreakFastSetMenuDtl)
+                                                                    {
+                                                                        l++;
+                                                                        @i.StoreOutItem.Name
+                                                                        if (l != WednesdayBreakFastSetMenuDtl.Count)
+                                                                        {
+                                                                            <small> , </small>
+                                                                        }
+
+                                                                    }
+                                                                </p>
+
+                                                            }
+
+                                                        </td>
+                                                        <form id="dltSt" asp-action="DeleteSetMenu" asp-route-StrItmId="@item.Id" asp-controller="AdminMenu" method="post">
+                                                            <td>
+
+                                                                @*<a class="add" title="Add" data-toggle="tooltip"><i class="material-icons">&#xE03B;</i></a>*@
+                                                                @*<a class="edit" title="Edit" data-toggle="tooltip"><i class="material-icons">&#xE254;</i></a>*@
+                                                                @*<button type="submit" name="submit" value="Delete" >*@
+                                                                <a href="#" class="delete" title="Delete" data-toggle="tooltip" onclick="document.getElementById('dltSt').submit()">
+                                                                    <i class="material-icons">&#xE872;</i>
+                                                                </a>
+                                                                @*</button>*@
+                                                            </td>
+                                                        </form>
+                                                    </tr>
+
+                                                }
+                                            }
+                                        }
+
+
+
+                                    </tbody>
+                                </table>
+                                <div id="SetMenu">
+                                    @{
+                                        int l4 = 0;
+                                    }
+                                    <input type="date" id="SetMenuDate" class="form-control " style="padding-top:unset">
+
+                                    <div style="display:inline-flex">
+
+                                        @foreach (var item in WednesdayBreakFastMenu2)
+                                        {
+                                            l4++;
+
+
+
+
+                                            <div class="custom-control custom-checkbox" style="margin-top: 2.5%;">
+                                                <input type="checkbox" class="custom-control-input" id="checkadded_@item.Id" name="checkboxAdded" value="@item.StoreOutItemId" />
+                                                <label class="custom-control-label" for="checkadded_@item.Id">@item.StoreOutItem.Name</label>
+                                            </div>
+                                            @if (l4 == WednesdayBreakFastMenu2.Count)
+                                            {
+                                                <a href="#" onclick="AddSaveSetMenu(7,1)"><i class="fas fa-plus" style="font-size:20px;color:red;padding-left:20px;padding-top:5px;"></i></a>
+
+
+                                            }
+                                        }
+
+
+
+
+
+                                    </div>
+
+
+                                </div>
+
+
+                            </div> <!-- Classic tabs -->
+
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+
+            <div class="col-sm-2">
+                <div class="card chart-card" style="height:auto; background:url('http://yesofcorsa.com/wp-content/uploads/2018/09/Matcha-Tea-Best-Wallpaper-1024x576.jpg');">
+
+                    <!-- Card content -->
+                    <div class="card-body pb-0">
+
+                        <h4 class="card-title font-weight-bolder ">Breakfast</h4>
+
+
+                        <ul class="nav nav-tabs">
+                            <li class="active"><a data-toggle="tab" href="#home">Menu</a></li>
+                            <li><a data-toggle="tab" href="#menu1">SetMenu</a></li>
+
+                        </ul>
+
+                        <div class="tab-content">
+                            <div id="home" class="tab-pane fade in active">
+                                <br />
+                                @{
+                                    var ThursdayBreakFastMenu2 = _db.ExtraItem.Where(x => x.Day == 4 && x.MealTypeId == 1).ToList();
+                                    var ThursdayBreakFastSetMenu = _db.SetMenu.Where(x => x.Day == 4 && x.MealTypeId == 1).ToList();
+                                    foreach (var i in ThursdayBreakFastMenu2)
+                                    {
+                                        var nm = _context.StoreOutItem.Where(x => x.Id == i.StoreOutItemId).FirstOrDefault();
+                                        <div class="row">
+
+                                            @if (editableId == i.Id)
+                                            {
+                                                <div class="col-sm-5">
+
+                                                    <input class="form-control" value="@nm.Name" />
+                                                </div>
+                                                <div class="col-sm-3">
+
+                                                    <input class="form-control" value="@i.Price" />
+                                                </div>
+
+
+                                            }
+                                            else
+                                            {
+                                                string pr = @i.Price + "Tk";
+                                                <div class="col-sm-5" style="padding-right:0px;">
+
+                                                    <p class="item-Text">@i.StoreOutItem.Name</p>
+                                                </div>
+                                                <div class="col-sm-3" style="padding-right:0px;">
+                                                    <p class="price-Text">@pr</p>
+                                                </div>
+
+                                            }
+
+
+                                            <div class="col-sm-2">
+                                                <form asp-action="EditDayMenu" asp-route-StrItmId="@i.Id" asp-controller="AdminMenu">
+
+                                                    <button type="submit" class="btn">
+                                                        <i class="fa fa-edit"></i>
+
+                                                    </button>
+
+                                                </form>
+
+                                            </div>
+                                            <div class="col-sm-2">
+                                                <form asp-action="DeleteDayMenu" asp-route-StrItmId="@i.Id" asp-controller="AdminMenu">
+
+                                                    <button type="submit" class="btn">
+                                                        <i class="fa fa-trash"></i>
+
+                                                    </button>
+
+                                                </form>
+
+                                            </div>
+                                        </div>
+                                        <hr class="divider" />
+
+                                    }
+                                }
+                                <div id="item5">
+                                    <a class="add" title="Add" onclick="AddItem5()" data-toggle="tooltip"><i class="material-icons">&#xE03B;</i></a>
+
+
+
+                                </div>
+
+
+
+                                <div id="NewItem5" style="margin-bottom:15px">
+                                    <select id="itm5" class="form-control border-radius-none col-sm-8" asp-items="@(new SelectList(_ddlHelper.GetStoreOutItem().Prepend(new KeyValuePair<string, string>("-1","--Item--")),"Key","Value",""))"></select>
+
+
+                                    <a href="#" onclick="AddSaveItem(4,1)"><i class="fas fa-plus" style="font-size:15px;color:red;padding-left:10px;padding-top:10px;"></i></a>
+
+
+
+                                </div>
+                            </div>
+                            <div id="menu1" class="tab-pane fade">
+                                <table class="table table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th class="col-sm-1"><p style="font-weight:bold;font-size:15px;">#</p></th>
+                                            <th><p style="font-weight:bold;font-size:15px;">Date</p></th>
+                                            <th><p style="font-weight:bold;font-size:15px;">Item</p></th>
+
+                                            <th>
+                                                <a href="#" class="add" onclick="AddSetMenu()" title="Add" data-toggle="tooltip"><i class="material-icons">&#xE03B;</i></a>
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @if (WednesdayBreakFastSetMenu != null)
+                                        {
+                                            @if (WednesdayBreakFastSetMenu.Count > 0)
+                                            {
+                                                int srl = 0;
+
+                                                foreach (var item in WednesdayBreakFastSetMenu)
+                                                {
+                                                    srl++;
+                                                    int l = 0;
+                                                    <tr>
+                                                        <td class="col-sm-1"><p style="font-weight:bold;font-size:12px;">@srl</p></td>
+                                                        <td><p style="font-weight:bold;font-size:12px;">@item.SetMenuDate.ToShortDateString()</p></td>
+                                                        <td>
+                                                            @{var WednesdayBreakFastSetMenuDtl = _db.SetMenuDetails.Where(x => x.SetMenuId == item.Id).ToList();
+                                                                <p style="font-weight:bold;font-size:10px;">
+                                                                    @foreach (var i in WednesdayBreakFastSetMenuDtl)
+                                                                    {
+                                                                        l++;
+                                                                        @i.StoreOutItem.Name
+                                                                        if (l != WednesdayBreakFastSetMenuDtl.Count)
+                                                                        {
+                                                                            <small> , </small>
+                                                                        }
+
+                                                                    }
+                                                                </p>
+
+                                                            }
+
+                                                        </td>
+                                                        <form id="dltSt" asp-action="DeleteSetMenu" asp-route-StrItmId="@item.Id" asp-controller="AdminMenu" method="post">
+                                                            <td>
+
+                                                                @*<a class="add" title="Add" data-toggle="tooltip"><i class="material-icons">&#xE03B;</i></a>*@
+                                                                @*<a class="edit" title="Edit" data-toggle="tooltip"><i class="material-icons">&#xE254;</i></a>*@
+                                                                @*<button type="submit" name="submit" value="Delete" >*@
+                                                                <a href="#" class="delete" title="Delete" data-toggle="tooltip" onclick="document.getElementById('dltSt').submit()">
+                                                                    <i class="material-icons">&#xE872;</i>
+                                                                </a>
+                                                                @*</button>*@
+                                                            </td>
+                                                        </form>
+                                                    </tr>
+
+                                                }
+                                            }
+                                        }
+
+
+
+                                    </tbody>
+                                </table>
+                                <div id="SetMenu">
+                                    @{
+                                        int l5 = 0;
+                                    }
+                                    <input type="date" id="SetMenuDate" class="form-control " style="padding-top:unset">
+
+                                    <div style="display:inline-flex">
+
+                                        @foreach (var item in WednesdayBreakFastMenu2)
+                                        {
+                                            l5++;
+
+
+
+
+                                            <div class="custom-control custom-checkbox" style="margin-top: 2.5%;">
+                                                <input type="checkbox" class="custom-control-input" id="checkadded_@item.Id" name="checkboxAdded" value="@item.StoreOutItemId" />
+                                                <label class="custom-control-label" for="checkadded_@item.Id">@item.StoreOutItem.Name</label>
+                                            </div>
+                                            @if (l5 == WednesdayBreakFastMenu2.Count)
+                                            {
+                                                <a href="#" onclick="AddSaveSetMenu(7,1)"><i class="fas fa-plus" style="font-size:20px;color:red;padding-left:20px;padding-top:5px;"></i></a>
+
+
+                                            }
+                                        }
+
+
+
+
+
+                                    </div>
+
+
+                                </div>
+
+
+                            </div> <!-- Classic tabs -->
+
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+            <div class="col-sm-1">
+
+            </div>
+        </div>
+        <br />
+        <div class="row">
+            <div class="col-sm-1">
+
+            </div>
+            <div class="col-sm-2">
+                @*<div class="card chart-card" style="height:auto; background:url('http://yesofcorsa.com/wp-content/uploads/2018/09/Matcha-Tea-Best-Wallpaper-1024x576.jpg');">*@
+                <div class="card chart-card" style="height:auto;">
+
+                    <!-- Card content -->
+                    <div class="card-body pb-0">
+
+                        <h4 class="card-title font-weight-bolder ">TeaBreak</h4>
+
+
+                        <ul class="nav nav-tabs">
+                            <li class="active"><a data-toggle="tab" href="#home">Menu</a></li>
+                            <li><a data-toggle="tab" href="#menu1">SetMenu</a></li>
+
+                        </ul>
+
+                        <div class="tab-content">
+                            <div id="home" class="tab-pane fade in active">
+                                <br />
+                                @{
+                                    var SundayTeabreakMenu2 = _db.ExtraItem.Where(x => x.Day == 7 && x.MealTypeId == 3).ToList();
+                                    var SundayTeabreakSetMenu = _db.SetMenu.Where(x => x.Day == 7 && x.MealTypeId == 3).ToList();
+                                    foreach (var i in SundayTeabreakMenu2)
+                                    {
+                                        var nm = _context.StoreOutItem.Where(x => x.Id == i.StoreOutItemId).FirstOrDefault();
+                                        <div class="row">
+
+                                            @if (editableId == i.Id)
+                                            {
+                                                <div class="col-sm-5" style="padding-right:0px;">
+
+                                                    <input class="form-control" value="@nm.Name" />
+                                                </div>
+                                                <div class="col-sm-3">
+
+                                                    <input class="form-control" value="@i.Price" />
+                                                </div>
+
+
+                                            }
+                                            else
+                                            {
+                                                string pr = @i.Price + "Tk";
+                                                <div class="col-sm-5" style="padding-right:0px;">
+
+                                                    <p class="item-Text">@i.StoreOutItem.Name</p>
+                                                </div>
+                                                <div class="col-sm-3" style="padding-right:0px;">
+                                                    <p class="price-Text">@pr</p>
+                                                </div>
+
+                                            }
+
+
+                                            <div class="col-sm-2">
+                                                <form asp-action="EditDayMenu" asp-route-StrItmId="@i.Id" asp-controller="AdminMenu">
+
+                                                    <button type="submit" class="btn">
+                                                        <i class="fa fa-edit"></i>
+
+                                                    </button>
+
+                                                </form>
+
+                                            </div>
+                                            <div class="col-sm-2">
+                                                <form asp-action="DeleteDayMenu" asp-route-StrItmId="@i.Id" asp-controller="AdminMenu">
+
+                                                    <button type="submit" class="btn">
+                                                        <i class="fa fa-trash"></i>
+
+                                                    </button>
+
+                                                </form>
+
+                                            </div>
+                                        </div>
+                                        <hr class="divider" />
+
+                                    }
+                                }
+
+
+
+                                <div id="item6">
+                                    <a class="add" title="Add" onclick="AddItem6()" data-toggle="tooltip"><i class="material-icons">&#xE03B;</i></a>
+
+
+
+                                </div>
+
+
+
+                                <div id="NewItem6" style="margin-bottom:15px">
+                                    <select id="itm6" class="form-control border-radius-none col-sm-8" asp-items="@(new SelectList(_ddlHelper.GetStoreOutItem().Prepend(new KeyValuePair<string, string>("-1","--Item--")),"Key","Value",""))"></select>
+
+
+                                    <a href="#" onclick="AddSaveItem(7,3)"><i class="fas fa-plus" style="font-size:15px;color:red;padding-left:10px;padding-top:10px;"></i></a>
+
+
+
+                                </div>
+                            </div>
+                            <div id="menu1" class="tab-pane fade">
+                                <table class="table table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th class="col-sm-1"><p style="font-weight:bold;font-size:15px;">#</p></th>
+                                            <th><p style="font-weight:bold;font-size:15px;">Date</p></th>
+                                            <th><p style="font-weight:bold;font-size:15px;">Item</p></th>
+
+                                            <th>
+                                                <a href="#" class="add" onclick="AddSetMenu()" title="Add" data-toggle="tooltip"><i class="material-icons">&#xE03B;</i></a>
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @if (SundayBreakFastSetMenu != null)
+                                        {
+                                            @if (SundayBreakFastSetMenu.Count > 0)
+                                            {
+                                                int srl = 0;
+
+                                                foreach (var item in SundayBreakFastSetMenu)
+                                                {
+                                                    srl++;
+                                                    int l = 0;
+                                                    <tr>
+                                                        <td class="col-sm-1"><p style="font-weight:bold;font-size:12px;">@srl</p></td>
+                                                        <td><p style="font-weight:bold;font-size:12px;">@item.SetMenuDate.ToShortDateString()</p></td>
+                                                        <td>
+                                                            @{var SundayBreakFastSetMenuDtl = _db.SetMenuDetails.Where(x => x.SetMenuId == item.Id).ToList();
+                                                                <p style="font-weight:bold;font-size:10px;">
+                                                                    @foreach (var i in SundayBreakFastSetMenuDtl)
+                                                                    {
+                                                                        l++;
+                                                                        @i.StoreOutItem.Name
+                                                                        if (l != SundayBreakFastSetMenuDtl.Count)
+                                                                        {
+                                                                            <small> , </small>
+                                                                        }
+
+                                                                    }
+                                                                </p>
+
+                                                            }
+
+                                                        </td>
+                                                        <form id="dltSt" asp-action="DeleteSetMenu" asp-route-StrItmId="@item.Id" asp-controller="AdminMenu" method="post">
+                                                            <td>
+
+                                                                @*<a class="add" title="Add" data-toggle="tooltip"><i class="material-icons">&#xE03B;</i></a>*@
+                                                                @*<a class="edit" title="Edit" data-toggle="tooltip"><i class="material-icons">&#xE254;</i></a>*@
+                                                                @*<button type="submit" name="submit" value="Delete" >*@
+                                                                <a href="#" class="delete" title="Delete" data-toggle="tooltip" onclick="document.getElementById('dltSt').submit()">
+                                                                    <i class="material-icons">&#xE872;</i>
+                                                                </a>
+                                                                @*</button>*@
+                                                            </td>
+                                                        </form>
+                                                    </tr>
+
+                                                }
+                                            }
+                                        }
+
+
+
+                                    </tbody>
+                                </table>
+                                @*<div id="SetMenu">
+                    @{
+                        int ll = 0;
+                    }
+                    <input type="date" id="SetMenuDate" class="form-control " style="padding-top:unset">
+
+                    <div style="display:inline-flex">
+
+                        @foreach (var item in SundayBreakFastMenu2)
+                        {
+                            ll++;
+
+
+
+
+                            <div class="custom-control custom-checkbox" style="margin-top: 2.5%;">
+                                <input type="checkbox" class="custom-control-input" id="checkadded_@item.Id" name="checkboxAdded" value="@item.StoreOutItemId" />
+                                <label class="custom-control-label" for="checkadded_@item.Id">@item.StoreOutItem.Name</label>
+                            </div>
+                            @if (ll == SundayBreakFastMenu2.Count)
+                            {
+                                <a href="#" onclick="AddSaveSetMenu(7,1)"><i class="fas fa-plus" style="font-size:20px;color:red;padding-left:20px;padding-top:5px;"></i></a>
+
+
+                            }
+                        }
+
+
+
+
+
+                    </div>
+
+
+                </div>*@
+
+
+                            </div> <!-- Classic tabs -->
+
+                        </div>
+                    </div>
+                </div>
+
+
+
+            </div>
+            <div class="col-sm-2">
+                <div class="card chart-card" style="height:auto; background:url('http://yesofcorsa.com/wp-content/uploads/2018/09/Matcha-Tea-Best-Wallpaper-1024x576.jpg');">
+
+                    <!-- Card content -->
+                    <div class="card-body pb-0">
+
+                        <h4 class="card-title font-weight-bolder ">TeaBreak</h4>
+
+
+                        <ul class="nav nav-tabs">
+                            <li class="active"><a data-toggle="tab" href="#home">Menu</a></li>
+                            <li><a data-toggle="tab" href="#menu1">SetMenu</a></li>
+
+                        </ul>
+
+                        <div class="tab-content">
+                            <div id="home" class="tab-pane fade in active">
+                                <br />
+                                @{
+                                    var MondayTeabreakMenu2 = _db.ExtraItem.Where(x => x.Day == 1 && x.MealTypeId == 3).ToList();
+                                    var MondayTeabreakSetMenu = _db.SetMenu.Where(x => x.Day == 1 && x.MealTypeId == 3).ToList();
+                                    foreach (var i in MondayTeabreakMenu2)
+                                    {
+                                        var nm = _context.StoreOutItem.Where(x => x.Id == i.StoreOutItemId).FirstOrDefault();
+                                        <div class="row">
+
+                                            @if (editableId == i.Id)
+                                            {
+                                                <div class="col-sm-5">
+
+                                                    <input class="form-control" value="@nm.Name" />
+                                                </div>
+                                                <div class="col-sm-3">
+
+                                                    <input class="form-control" value="@i.Price" />
+                                                </div>
+
+
+                                            }
+                                            else
+                                            {
+                                                string pr = @i.Price + "Tk";
+                                                <div class="col-sm-5" style="padding-right:0px;">
+
+                                                    <p class="item-Text">@i.StoreOutItem.Name</p>
+                                                </div>
+                                                <div class="col-sm-3" style="padding-right:0px;">
+                                                    <p class="price-Text">@pr</p>
+                                                </div>
+
+                                            }
+                                            <div class="col-sm-2">
+                                                <form asp-action="EditDayMenu" asp-route-StrItmId="@i.Id" asp-controller="AdminMenu">
+
+                                                    <button type="submit" class="btn">
+                                                        <i class="fa fa-edit"></i>
+
+                                                    </button>
+
+                                                </form>
+
+                                            </div>
+                                            <div class="col-sm-2">
+                                                <form asp-action="DeleteDayMenu" asp-route-StrItmId="@i.Id" asp-controller="AdminMenu">
+
+                                                    <button type="submit" class="btn">
+                                                        <i class="fa fa-trash"></i>
+
+                                                    </button>
+
+                                                </form>
+
+                                            </div>
+                                        </div>
+                                        <hr class="divider" />
+
+                                    }
+                                }
+
+                                <div id="item7">
+                                    <a class="add" title="Add" onclick="AddItem7()" data-toggle="tooltip"><i class="material-icons">&#xE03B;</i></a>
+
+
+
+                                </div>
+
+
+
+                                <div id="NewItem7" style="margin-bottom:15px">
+                                    <select id="itm7" class="form-control border-radius-none col-sm-8" asp-items="@(new SelectList(_ddlHelper.GetStoreOutItem().Prepend(new KeyValuePair<string, string>("-1","--Item--")),"Key","Value",""))"></select>
+
+
+                                    <a href="#" onclick="AddSaveItem(1,3)"><i class="fas fa-plus" style="font-size:15px;color:red;padding-left:10px;padding-top:10px;"></i></a>
+
+
+
+                                </div>
+                            </div>
+                            <div id="menu1" class="tab-pane fade">
+                                <table class="table table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th class="col-sm-1"><p style="font-weight:bold;font-size:15px;">#</p></th>
+                                            <th><p style="font-weight:bold;font-size:15px;">Date</p></th>
+                                            <th><p style="font-weight:bold;font-size:15px;">Item</p></th>
+
+                                            <th>
+                                                <a href="#" class="add" onclick="AddSetMenu()" title="Add" data-toggle="tooltip"><i class="material-icons">&#xE03B;</i></a>
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @if (MondayBreakFastSetMenu != null)
+                                        {
+                                            @if (MondayBreakFastSetMenu.Count > 0)
+                                            {
+                                                int srl = 0;
+
+                                                foreach (var item in MondayBreakFastSetMenu)
+                                                {
+                                                    srl++;
+                                                    int l = 0;
+                                                    <tr>
+                                                        <td class="col-sm-1"><p style="font-weight:bold;font-size:12px;">@srl</p></td>
+                                                        <td><p style="font-weight:bold;font-size:12px;">@item.SetMenuDate.ToShortDateString()</p></td>
+                                                        <td>
+                                                            @{var SundayBreakFastSetMenuDtl = _db.SetMenuDetails.Where(x => x.SetMenuId == item.Id).ToList();
+                                                                <p style="font-weight:bold;font-size:10px;">
+                                                                    @foreach (var i in SundayBreakFastSetMenuDtl)
+                                                                    {
+                                                                        l++;
+                                                                        @i.StoreOutItem.Name
+                                                                        if (l != SundayBreakFastSetMenuDtl.Count)
+                                                                        {
+                                                                            <small> , </small>
+                                                                        }
+
+                                                                    }
+                                                                </p>
+
+                                                            }
+
+                                                        </td>
+                                                        <form id="dltSt" asp-action="DeleteSetMenu" asp-route-StrItmId="@item.Id" asp-controller="AdminMenu" method="post">
+                                                            <td>
+
+                                                                @*<a class="add" title="Add" data-toggle="tooltip"><i class="material-icons">&#xE03B;</i></a>*@
+                                                                @*<a class="edit" title="Edit" data-toggle="tooltip"><i class="material-icons">&#xE254;</i></a>*@
+                                                                @*<button type="submit" name="submit" value="Delete" >*@
+                                                                <a href="#" class="delete" title="Delete" data-toggle="tooltip" onclick="document.getElementById('dltSt').submit()">
+                                                                    <i class="material-icons">&#xE872;</i>
+                                                                </a>
+                                                                @*</button>*@
+                                                            </td>
+                                                        </form>
+                                                    </tr>
+
+                                                }
+                                            }
+                                        }
+
+
+
+                                    </tbody>
+                                </table>
+                                @*<div id="SetMenu">
+                    @{
+                        int l2 = 0;
+                    }
+                    <input type="date" id="SetMenuDate" class="form-control " style="padding-top:unset">
+
+                    <div style="display:inline-flex">
+
+                        @foreach (var item in MondayBreakFastMenu2)
+                        {
+                            l2++;
+
+
+
+
+                            <div class="custom-control custom-checkbox" style="margin-top: 2.5%;">
+                                <input type="checkbox" class="custom-control-input" id="checkadded_@item.Id" name="checkboxAdded" value="@item.StoreOutItemId" />
+                                <label class="custom-control-label" for="checkadded_@item.Id">@item.StoreOutItem.Name</label>
+                            </div>
+                            @if (l2 == MondayBreakFastMenu2.Count)
+                            {
+                                <a href="#" onclick="AddSaveSetMenu(7,1)"><i class="fas fa-plus" style="font-size:20px;color:red;padding-left:20px;padding-top:5px;"></i></a>
+
+
+                            }
+                        }
+
+
+
+
+
+                    </div>
+
+
+                </div>*@
+
+
+                            </div> <!-- Classic tabs -->
+
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            <div class="col-sm-2">
+
+                <div class="card chart-card" style="height:auto; background:url('http://yesofcorsa.com/wp-content/uploads/2018/09/Matcha-Tea-Best-Wallpaper-1024x576.jpg');">
+
+                    <!-- Card content -->
+                    <div class="card-body pb-0">
+
+                        <h4 class="card-title font-weight-bolder ">TeaBreak</h4>
+
+
+                        <ul class="nav nav-tabs">
+                            <li class="active"><a data-toggle="tab" href="#home">Menu</a></li>
+                            <li><a data-toggle="tab" href="#menu1">SetMenu</a></li>
+
+                        </ul>
+
+                        <div class="tab-content">
+                            <div id="home" class="tab-pane fade in active">
+                                <br />
+                                @{
+                                    var TuesdayTeabreakMenu2 = _db.ExtraItem.Where(x => x.Day == 2 && x.MealTypeId == 3).ToList();
+                                    var TuesdayTeabreakSetMenu = _db.SetMenu.Where(x => x.Day == 2 && x.MealTypeId == 3).ToList();
+                                    foreach (var i in TuesdayTeabreakMenu2)
+                                    {
+                                        var nm = _context.StoreOutItem.Where(x => x.Id == i.StoreOutItemId).FirstOrDefault();
+                                        <div class="row">
+
+                                            @if (editableId == i.Id)
+                                            {
+                                                <div class="col-sm-5">
+
+                                                    <input class="form-control" value="@nm.Name" />
+                                                </div>
+                                                <div class="col-sm-3">
+
+                                                    <input class="form-control" value="@i.Price" />
+                                                </div>
+
+
+                                            }
+                                            else
+                                            {
+                                                string pr = @i.Price + "Tk";
+                                                <div class="col-sm-5" style="padding-right:0px;">
+
+                                                    <p class="item-Text">@i.StoreOutItem.Name</p>
+                                                </div>
+                                                <div class="col-sm-3" style="padding-right:0px;">
+                                                    <p class="price-Text">@pr</p>
+                                                </div>
+
+                                            }
+
+                                            <div class="col-sm-2">
+                                                <form asp-action="EditDayMenu" asp-route-StrItmId="@i.Id" asp-controller="AdminMenu">
+
+                                                    <button type="submit" class="btn">
+                                                        <i class="fa fa-edit"></i>
+
+                                                    </button>
+
+                                                </form>
+
+                                            </div>
+                                            <div class="col-sm-2">
+                                                <form asp-action="DeleteDayMenu" asp-route-StrItmId="@i.Id" asp-controller="AdminMenu">
+
+                                                    <button type="submit" class="btn">
+                                                        <i class="fa fa-trash"></i>
+
+                                                    </button>
+
+                                                </form>
+
+                                            </div>
+                                        </div>
+                                        <hr class="divider" />
+
+                                    }
+                                }
+                                <div id="item8">
+                                    <a class="add" title="Add" onclick="AddItem8()" data-toggle="tooltip"><i class="material-icons">&#xE03B;</i></a>
+
+
+
+                                </div>
+
+
+
+                                <div id="NewItem8" style="margin-bottom:15px">
+                                    <select id="itm8" class="form-control border-radius-none col-sm-8" asp-items="@(new SelectList(_ddlHelper.GetStoreOutItem().Prepend(new KeyValuePair<string, string>("-1","--Item--")),"Key","Value",""))"></select>
+
+
+                                    <a href="#" onclick="AddSaveItem(2,3)"><i class="fas fa-plus" style="font-size:15px;color:red;padding-left:10px;padding-top:10px;"></i></a>
+
+
+
+                                </div>
+                            </div>
+                            <div id="menu1" class="tab-pane fade">
+                                <table class="table table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th class="col-sm-1"><p style="font-weight:bold;font-size:15px;">#</p></th>
+                                            <th><p style="font-weight:bold;font-size:15px;">Date</p></th>
+                                            <th><p style="font-weight:bold;font-size:15px;">Item</p></th>
+
+                                            <th>
+                                                <a href="#" class="add" onclick="AddSetMenu()" title="Add" data-toggle="tooltip"><i class="material-icons">&#xE03B;</i></a>
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @if (TuesdayBreakFastSetMenu != null)
+                                        {
+                                            @if (TuesdayBreakFastSetMenu.Count > 0)
+                                            {
+                                                int srl = 0;
+
+                                                foreach (var item in TuesdayBreakFastSetMenu)
+                                                {
+                                                    srl++;
+                                                    int l = 0;
+                                                    <tr>
+                                                        <td class="col-sm-1"><p style="font-weight:bold;font-size:12px;">@srl</p></td>
+                                                        <td><p style="font-weight:bold;font-size:12px;">@item.SetMenuDate.ToShortDateString()</p></td>
+                                                        <td>
+                                                            @{var TuesdayBreakFastSetMenuDtl = _db.SetMenuDetails.Where(x => x.SetMenuId == item.Id).ToList();
+                                                                <p style="font-weight:bold;font-size:10px;">
+                                                                    @foreach (var i in TuesdayBreakFastSetMenuDtl)
+                                                                    {
+                                                                        l++;
+                                                                        @i.StoreOutItem.Name
+                                                                        if (l != TuesdayBreakFastSetMenuDtl.Count)
+                                                                        {
+                                                                            <small> , </small>
+                                                                        }
+
+                                                                    }
+                                                                </p>
+
+                                                            }
+
+                                                        </td>
+                                                        <form id="dltSt" asp-action="DeleteSetMenu" asp-route-StrItmId="@item.Id" asp-controller="AdminMenu" method="post">
+                                                            <td>
+
+                                                                @*<a class="add" title="Add" data-toggle="tooltip"><i class="material-icons">&#xE03B;</i></a>*@
+                                                                @*<a class="edit" title="Edit" data-toggle="tooltip"><i class="material-icons">&#xE254;</i></a>*@
+                                                                @*<button type="submit" name="submit" value="Delete" >*@
+                                                                <a href="#" class="delete" title="Delete" data-toggle="tooltip" onclick="document.getElementById('dltSt').submit()">
+                                                                    <i class="material-icons">&#xE872;</i>
+                                                                </a>
+                                                                @*</button>*@
+                                                            </td>
+                                                        </form>
+                                                    </tr>
+
+                                                }
+                                            }
+                                        }
+
+
+
+                                    </tbody>
+                                </table>
+                                @*<div id="SetMenu">
+                    @{
+                        int l3 = 0;
+                    }
+                    <input type="date" id="SetMenuDate" class="form-control " style="padding-top:unset">
+
+                    <div style="display:inline-flex">
+
+                        @foreach (var item in TuesdayBreakFastMenu2)
+                        {
+                            l3++;
+
+
+
+
+                            <div class="custom-control custom-checkbox" style="margin-top: 2.5%;">
+                                <input type="checkbox" class="custom-control-input" id="checkadded_@item.Id" name="checkboxAdded" value="@item.StoreOutItemId" />
+                                <label class="custom-control-label" for="checkadded_@item.Id">@item.StoreOutItem.Name</label>
+                            </div>
+                            @if (l3 == TuesdayBreakFastMenu2.Count)
+                            {
+                                <a href="#" onclick="AddSaveSetMenu(7,1)"><i class="fas fa-plus" style="font-size:20px;color:red;padding-left:20px;padding-top:5px;"></i></a>
+
+
+                            }
+                        }
+
+
+
+
+
+                    </div>
+
+
+                </div>*@
+
+
+                            </div> <!-- Classic tabs -->
+
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            <div class="col-sm-2">
+                <div class="card chart-card" style="height:auto; background:url('http://yesofcorsa.com/wp-content/uploads/2018/09/Matcha-Tea-Best-Wallpaper-1024x576.jpg');">
+
+                    <!-- Card content -->
+                    <div class="card-body pb-0">
+
+                        <h4 class="card-title font-weight-bolder ">TeaBreak</h4>
+
+
+                        <ul class="nav nav-tabs">
+                            <li class="active"><a data-toggle="tab" href="#home">Menu</a></li>
+                            <li><a data-toggle="tab" href="#menu1">SetMenu</a></li>
+
+                        </ul>
+
+                        <div class="tab-content">
+                            <div id="home" class="tab-pane fade in active">
+                                <br />
+                                @{
+                                    var WednesdayTeabreakMenu2 = _db.ExtraItem.Where(x => x.Day == 3 && x.MealTypeId == 3).ToList();
+                                    var WednesdayTeabreakSetMenu = _db.SetMenu.Where(x => x.Day == 3 && x.MealTypeId == 3).ToList();
+                                    foreach (var i in WednesdayTeabreakMenu2)
+                                    {
+                                        var nm = _context.StoreOutItem.Where(x => x.Id == i.StoreOutItemId).FirstOrDefault();
+                                        <div class="row">
+
+                                            @if (editableId == i.Id)
+                                            {
+                                                <div class="col-sm-5">
+
+                                                    <input class="form-control" value="@nm.Name" />
+                                                </div>
+                                                <div class="col-sm-3">
+
+                                                    <input class="form-control" value="@i.Price" />
+                                                </div>
+
+
+                                            }
+                                            else
+                                            {
+                                                string pr = @i.Price + "Tk";
+                                                <div class="col-sm-5" style="padding-right:0px;">
+
+                                                    <p class="item-Text">@i.StoreOutItem.Name</p>
+                                                </div>
+                                                <div class="col-sm-3" style="padding-right:0px;">
+                                                    <p class="price-Text">@pr</p>
+                                                </div>
+
+                                            }
+
+
+                                            <div class="col-sm-2">
+                                                <form asp-action="EditDayMenu" asp-route-StrItmId="@i.Id" asp-controller="AdminMenu">
+
+                                                    <button type="submit" class="btn">
+                                                        <i class="fa fa-edit"></i>
+
+                                                    </button>
+
+                                                </form>
+
+                                            </div>
+                                            <div class="col-sm-2">
+                                                <form asp-action="DeleteDayMenu" asp-route-StrItmId="@i.Id" asp-controller="AdminMenu">
+
+                                                    <button type="submit" class="btn">
+                                                        <i class="fa fa-trash"></i>
+
+                                                    </button>
+
+                                                </form>
+
+                                            </div>
+                                        </div>
+                                        <hr class="divider" />
+
+                                    }
+                                }
+                                <div id="item9">
+                                    <a class="add" title="Add" onclick="AddItem9()" data-toggle="tooltip"><i class="material-icons">&#xE03B;</i></a>
+
+
+
+                                </div>
+
+
+
+                                <div id="NewItem9" style="margin-bottom:15px">
+                                    <select id="itm9" class="form-control border-radius-none col-sm-8" asp-items="@(new SelectList(_ddlHelper.GetStoreOutItem().Prepend(new KeyValuePair<string, string>("-1","--Item--")),"Key","Value",""))"></select>
+
+
+                                    <a href="#" onclick="AddSaveItem(3,3)"><i class="fas fa-plus" style="font-size:15px;color:red;padding-left:10px;padding-top:10px;"></i></a>
+
+
+
+                                </div>
+                            </div>
+                            <div id="menu1" class="tab-pane fade">
+                                <table class="table table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th class="col-sm-1"><p style="font-weight:bold;font-size:15px;">#</p></th>
+                                            <th><p style="font-weight:bold;font-size:15px;">Date</p></th>
+                                            <th><p style="font-weight:bold;font-size:15px;">Item</p></th>
+
+                                            <th>
+                                                <a href="#" class="add" onclick="AddSetMenu()" title="Add" data-toggle="tooltip"><i class="material-icons">&#xE03B;</i></a>
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @if (WednesdayBreakFastSetMenu != null)
+                                        {
+                                            @if (WednesdayBreakFastSetMenu.Count > 0)
+                                            {
+                                                int srl = 0;
+
+                                                foreach (var item in WednesdayBreakFastSetMenu)
+                                                {
+                                                    srl++;
+                                                    int l = 0;
+                                                    <tr>
+                                                        <td class="col-sm-1"><p style="font-weight:bold;font-size:12px;">@srl</p></td>
+                                                        <td><p style="font-weight:bold;font-size:12px;">@item.SetMenuDate.ToShortDateString()</p></td>
+                                                        <td>
+                                                            @{var WednesdayBreakFastSetMenuDtl = _db.SetMenuDetails.Where(x => x.SetMenuId == item.Id).ToList();
+                                                                <p style="font-weight:bold;font-size:10px;">
+                                                                    @foreach (var i in WednesdayBreakFastSetMenuDtl)
+                                                                    {
+                                                                        l++;
+                                                                        @i.StoreOutItem.Name
+                                                                        if (l != WednesdayBreakFastSetMenuDtl.Count)
+                                                                        {
+                                                                            <small> , </small>
+                                                                        }
+
+                                                                    }
+                                                                </p>
+
+                                                            }
+
+                                                        </td>
+                                                        <form id="dltSt" asp-action="DeleteSetMenu" asp-route-StrItmId="@item.Id" asp-controller="AdminMenu" method="post">
+                                                            <td>
+
+                                                                @*<a class="add" title="Add" data-toggle="tooltip"><i class="material-icons">&#xE03B;</i></a>*@
+                                                                @*<a class="edit" title="Edit" data-toggle="tooltip"><i class="material-icons">&#xE254;</i></a>*@
+                                                                @*<button type="submit" name="submit" value="Delete" >*@
+                                                                <a href="#" class="delete" title="Delete" data-toggle="tooltip" onclick="document.getElementById('dltSt').submit()">
+                                                                    <i class="material-icons">&#xE872;</i>
+                                                                </a>
+                                                                @*</button>*@
+                                                            </td>
+                                                        </form>
+                                                    </tr>
+
+                                                }
+                                            }
+                                        }
+
+
+
+                                    </tbody>
+                                </table>
+                                @*<div id="SetMenu">
+                    @{
+                        int l4 = 0;
+                    }
+                    <input type="date" id="SetMenuDate" class="form-control " style="padding-top:unset">
+
+                    <div style="display:inline-flex">
+
+                        @foreach (var item in WednesdayBreakFastMenu2)
+                        {
+                            l4++;
+
+
+
+
+                            <div class="custom-control custom-checkbox" style="margin-top: 2.5%;">
+                                <input type="checkbox" class="custom-control-input" id="checkadded_@item.Id" name="checkboxAdded" value="@item.StoreOutItemId" />
+                                <label class="custom-control-label" for="checkadded_@item.Id">@item.StoreOutItem.Name</label>
+                            </div>
+                            @if (l4 == WednesdayBreakFastMenu2.Count)
+                            {
+                                <a href="#" onclick="AddSaveSetMenu(7,1)"><i class="fas fa-plus" style="font-size:20px;color:red;padding-left:20px;padding-top:5px;"></i></a>
+
+
+                            }
+                        }
+
+
+
+
+
+                    </div>
+
+
+                </div>*@
+
+
+                            </div> <!-- Classic tabs -->
+
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            <div class="col-sm-2">
+                <div class="card chart-card" style="height:auto; background:url('http://yesofcorsa.com/wp-content/uploads/2018/09/Matcha-Tea-Best-Wallpaper-1024x576.jpg');">
+
+                    <!-- Card content -->
+                    <div class="card-body pb-0">
+
+                        <h4 class="card-title font-weight-bolder ">TeaBreak</h4>
+
+
+                        <ul class="nav nav-tabs">
+                            <li class="active"><a data-toggle="tab" href="#home">Menu</a></li>
+                            <li><a data-toggle="tab" href="#menu1">SetMenu</a></li>
+
+                        </ul>
+
+                        <div class="tab-content">
+                            <div id="home" class="tab-pane fade in active">
+                                <br />
+                                @{
+                                    var ThursdayTeabreakMenu2 = _db.ExtraItem.Where(x => x.Day == 4 && x.MealTypeId == 3).ToList();
+                                    var ThursdayTeabreakSetMenu = _db.SetMenu.Where(x => x.Day == 4 && x.MealTypeId == 3).ToList();
+                                    foreach (var i in ThursdayTeabreakMenu2)
+                                    {
+                                        var nm = _context.StoreOutItem.Where(x => x.Id == i.StoreOutItemId).FirstOrDefault();
+                                        <div class="row">
+
+                                            @if (editableId == i.Id)
+                                            {
+                                                <div class="col-sm-5">
+
+                                                    <input class="form-control" value="@nm.Name" />
+                                                </div>
+                                                <div class="col-sm-3">
+
+                                                    <input class="form-control" value="@i.Price" />
+                                                </div>
+
+
+                                            }
+                                            else
+                                            {
+                                                string pr = @i.Price + "Tk";
+                                                <div class="col-sm-5" style="padding-right:0px;">
+
+                                                    <p class="item-Text">@i.StoreOutItem.Name</p>
+                                                </div>
+                                                <div class="col-sm-3" style="padding-right:0px;">
+                                                    <p class="price-Text">@pr</p>
+                                                </div>
+
+                                            }
+
+
+                                            <div class="col-sm-2">
+                                                <form asp-action="EditDayMenu" asp-route-StrItmId="@i.Id" asp-controller="AdminMenu">
+
+                                                    <button type="submit" class="btn">
+                                                        <i class="fa fa-edit"></i>
+
+                                                    </button>
+
+                                                </form>
+
+                                            </div>
+                                            <div class="col-sm-2">
+                                                <form asp-action="DeleteDayMenu" asp-route-StrItmId="@i.Id" asp-controller="AdminMenu">
+
+                                                    <button type="submit" class="btn">
+                                                        <i class="fa fa-trash"></i>
+
+                                                    </button>
+
+                                                </form>
+
+                                            </div>
+                                        </div>
+                                        <hr class="divider" />
+
+                                    }
+                                }
+                                <div id="item10">
+                                    <a class="add" title="Add" onclick="AddItem10()" data-toggle="tooltip"><i class="material-icons">&#xE03B;</i></a>
+
+
+
+                                </div>
+
+
+
+                                <div id="NewItem10" style="margin-bottom:15px">
+                                    <select id="itm10" class="form-control border-radius-none col-sm-8" asp-items="@(new SelectList(_ddlHelper.GetStoreOutItem().Prepend(new KeyValuePair<string, string>("-1","--Item--")),"Key","Value",""))"></select>
+
+
+                                    <a href="#" onclick="AddSaveItem(4,3)"><i class="fas fa-plus" style="font-size:15px;color:red;padding-left:10px;padding-top:10px;"></i></a>
+
+
+
+                                </div>
+                            </div>
+                            <div id="menu1" class="tab-pane fade">
+                                <table class="table table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th class="col-sm-1"><p style="font-weight:bold;font-size:15px;">#</p></th>
+                                            <th><p style="font-weight:bold;font-size:15px;">Date</p></th>
+                                            <th><p style="font-weight:bold;font-size:15px;">Item</p></th>
+
+                                            <th>
+                                                <a href="#" class="add" onclick="AddSetMenu()" title="Add" data-toggle="tooltip"><i class="material-icons">&#xE03B;</i></a>
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @if (WednesdayBreakFastSetMenu != null)
+                                        {
+                                            @if (WednesdayBreakFastSetMenu.Count > 0)
+                                            {
+                                                int srl = 0;
+
+                                                foreach (var item in WednesdayBreakFastSetMenu)
+                                                {
+                                                    srl++;
+                                                    int l = 0;
+                                                    <tr>
+                                                        <td class="col-sm-1"><p style="font-weight:bold;font-size:12px;">@srl</p></td>
+                                                        <td><p style="font-weight:bold;font-size:12px;">@item.SetMenuDate.ToShortDateString()</p></td>
+                                                        <td>
+                                                            @{var WednesdayBreakFastSetMenuDtl = _db.SetMenuDetails.Where(x => x.SetMenuId == item.Id).ToList();
+                                                                <p style="font-weight:bold;font-size:10px;">
+                                                                    @foreach (var i in WednesdayBreakFastSetMenuDtl)
+                                                                    {
+                                                                        l++;
+                                                                        @i.StoreOutItem.Name
+                                                                        if (l != WednesdayBreakFastSetMenuDtl.Count)
+                                                                        {
+                                                                            <small> , </small>
+                                                                        }
+
+                                                                    }
+                                                                </p>
+
+                                                            }
+
+                                                        </td>
+                                                        <form id="dltSt" asp-action="DeleteSetMenu" asp-route-StrItmId="@item.Id" asp-controller="AdminMenu" method="post">
+                                                            <td>
+
+                                                                @*<a class="add" title="Add" data-toggle="tooltip"><i class="material-icons">&#xE03B;</i></a>*@
+                                                                @*<a class="edit" title="Edit" data-toggle="tooltip"><i class="material-icons">&#xE254;</i></a>*@
+                                                                @*<button type="submit" name="submit" value="Delete" >*@
+                                                                <a href="#" class="delete" title="Delete" data-toggle="tooltip" onclick="document.getElementById('dltSt').submit()">
+                                                                    <i class="material-icons">&#xE872;</i>
+                                                                </a>
+                                                                @*</button>*@
+                                                            </td>
+                                                        </form>
+                                                    </tr>
+
+                                                }
+                                            }
+                                        }
+
+
+
+                                    </tbody>
+                                </table>
+                                @*<div id="SetMenu">
+                    @{
+                        int l5 = 0;
+                    }
+                    <input type="date" id="SetMenuDate" class="form-control " style="padding-top:unset">
+
+                    <div style="display:inline-flex">
+
+                        @foreach (var item in WednesdayBreakFastMenu2)
+                        {
+                            l5++;
+
+
+
+
+                            <div class="custom-control custom-checkbox" style="margin-top: 2.5%;">
+                                <input type="checkbox" class="custom-control-input" id="checkadded_@item.Id" name="checkboxAdded" value="@item.StoreOutItemId" />
+                                <label class="custom-control-label" for="checkadded_@item.Id">@item.StoreOutItem.Name</label>
+                            </div>
+                            @if (l5 == WednesdayBreakFastMenu2.Count)
+                            {
+                                <a href="#" onclick="AddSaveSetMenu(7,1)"><i class="fas fa-plus" style="font-size:20px;color:red;padding-left:20px;padding-top:5px;"></i></a>
+
+
+                            }
+                        }
+
+
+
+
+
+                    </div>
+
+
+                </div>*@
+
+
+                            </div> <!-- Classic tabs -->
+
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+            <div class="col-sm-1">
+
+            </div>
+        </div>
+
+        <br />
+        <div class="row">
+            <div class="col-sm-1">
+
+            </div>
+            <div class="col-sm-2">
+                @*<div class="card chart-card" style="height:auto; background:url('http://yesofcorsa.com/wp-content/uploads/2018/09/Matcha-Tea-Best-Wallpaper-1024x576.jpg');">*@
+                <div class="card chart-card" style="height:auto;">
+
+                    <!-- Card content -->
+                    <div class="card-body pb-0">
+
+                        <h4 class="card-title font-weight-bolder ">Lunch</h4>
+
+
+                        <ul class="nav nav-tabs">
+                            <li class="active"><a data-toggle="tab" href="#home">Menu</a></li>
+                            <li><a data-toggle="tab" href="#menu1">SetMenu</a></li>
+
+                        </ul>
+
+                        <div class="tab-content">
+                            <div id="home" class="tab-pane fade in active">
+                                <br />
+                                @{
+                                    var SundayLunchMenu2 = _db.ExtraItem.Where(x => x.Day == 7 && x.MealTypeId == 2).ToList();
+                                    var SundayLunchSetMenu = _db.SetMenu.Where(x => x.Day == 7 && x.MealTypeId == 2).ToList();
+                                    foreach (var i in SundayLunchMenu2)
+                                    {
+                                        var nm = _context.StoreOutItem.Where(x => x.Id == i.StoreOutItemId).FirstOrDefault();
+                                        <div class="row">
+
+                                            @if (editableId == i.Id)
+                                            {
+                                                <div class="col-sm-5">
+
+                                                    <input class="form-control" value="@nm.Name" />
+                                                </div>
+                                                <div class="col-sm-3">
+
+                                                    <input class="form-control" value="@i.Price" />
+                                                </div>
+
+
+                                            }
+                                            else
+                                            {
+                                                string pr = @i.Price + "Tk";
+                                                <div class="col-sm-5" style="padding-right:0px;">
+
+                                                    <p class="item-Text">@i.StoreOutItem.Name</p>
+                                                </div>
+                                                <div class="col-sm-3" style="padding-right:0px;">
+                                                    <p class="price-Text">@pr</p>
+                                                </div>
+
+                                            }
+
+
+                                            <div class="col-sm-2">
+                                                <form asp-action="EditDayMenu" asp-route-StrItmId="@i.Id" asp-controller="AdminMenu">
+
+                                                    <button type="submit" class="btn">
+                                                        <i class="fa fa-edit"></i>
+
+                                                    </button>
+
+                                                </form>
+
+                                            </div>
+                                            <div class="col-sm-2">
+                                                <form asp-action="DeleteDayMenu" asp-route-StrItmId="@i.Id" asp-controller="AdminMenu">
+
+                                                    <button type="submit" class="btn">
+                                                        <i class="fa fa-trash"></i>
+
+                                                    </button>
+
+                                                </form>
+
+                                            </div>
+                                        </div>
+                                        <hr class="divider" />
+
+                                    }
+                                }
+
+
+
+                                <div id="item11">
+                                    <a class="add" title="Add" onclick="AddItem11()" data-toggle="tooltip"><i class="material-icons">&#xE03B;</i></a>
+
+
+
+                                </div>
+
+
+
+                                <div id="NewItem11" style="margin-bottom:15px">
+                                    <select id="itm11" class="form-control border-radius-none col-sm-8" asp-items="@(new SelectList(_ddlHelper.GetStoreOutItem().Prepend(new KeyValuePair<string, string>("-1","--Item--")),"Key","Value",""))"></select>
+
+
+                                    <a href="#" onclick="AddSaveItem(7,2)"><i class="fas fa-plus" style="font-size:15px;color:red;padding-left:10px;padding-top:10px;"></i></a>
+
+
+
+                                </div>
+                            </div>
+                            <div id="menu1" class="tab-pane fade">
+                                <table class="table table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th class="col-sm-1"><p style="font-weight:bold;font-size:15px;">#</p></th>
+                                            <th><p style="font-weight:bold;font-size:15px;">Date</p></th>
+                                            <th><p style="font-weight:bold;font-size:15px;">Item</p></th>
+
+                                            <th>
+                                                <a href="#" class="add" onclick="AddSetMenu()" title="Add" data-toggle="tooltip"><i class="material-icons">&#xE03B;</i></a>
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @if (SundayBreakFastSetMenu != null)
+                                        {
+                                            @if (SundayBreakFastSetMenu.Count > 0)
+                                            {
+                                                int srl = 0;
+
+                                                foreach (var item in SundayBreakFastSetMenu)
+                                                {
+                                                    srl++;
+                                                    int l = 0;
+                                                    <tr>
+                                                        <td class="col-sm-1"><p style="font-weight:bold;font-size:12px;">@srl</p></td>
+                                                        <td><p style="font-weight:bold;font-size:12px;">@item.SetMenuDate.ToShortDateString()</p></td>
+                                                        <td>
+                                                            @{var SundayBreakFastSetMenuDtl = _db.SetMenuDetails.Where(x => x.SetMenuId == item.Id).ToList();
+                                                                <p style="font-weight:bold;font-size:10px;">
+                                                                    @foreach (var i in SundayBreakFastSetMenuDtl)
+                                                                    {
+                                                                        l++;
+                                                                        @i.StoreOutItem.Name
+                                                                        if (l != SundayBreakFastSetMenuDtl.Count)
+                                                                        {
+                                                                            <small> , </small>
+                                                                        }
+
+                                                                    }
+                                                                </p>
+
+                                                            }
+
+                                                        </td>
+                                                        <form id="dltSt" asp-action="DeleteSetMenu" asp-route-StrItmId="@item.Id" asp-controller="AdminMenu" method="post">
+                                                            <td>
+
+                                                                @*<a class="add" title="Add" data-toggle="tooltip"><i class="material-icons">&#xE03B;</i></a>*@
+                                                                @*<a class="edit" title="Edit" data-toggle="tooltip"><i class="material-icons">&#xE254;</i></a>*@
+                                                                @*<button type="submit" name="submit" value="Delete" >*@
+                                                                <a href="#" class="delete" title="Delete" data-toggle="tooltip" onclick="document.getElementById('dltSt').submit()">
+                                                                    <i class="material-icons">&#xE872;</i>
+                                                                </a>
+                                                                @*</button>*@
+                                                            </td>
+                                                        </form>
+                                                    </tr>
+
+                                                }
+                                            }
+                                        }
+
+
+
+                                    </tbody>
+                                </table>
+                                @*<div id="SetMenu">
+                    @{
+                        int ll = 0;
+                    }
+                    <input type="date" id="SetMenuDate" class="form-control " style="padding-top:unset">
+
+                    <div style="display:inline-flex">
+
+                        @foreach (var item in SundayBreakFastMenu2)
+                        {
+                            ll++;
+
+
+
+
+                            <div class="custom-control custom-checkbox" style="margin-top: 2.5%;">
+                                <input type="checkbox" class="custom-control-input" id="checkadded_@item.Id" name="checkboxAdded" value="@item.StoreOutItemId" />
+                                <label class="custom-control-label" for="checkadded_@item.Id">@item.StoreOutItem.Name</label>
+                            </div>
+                            @if (ll == SundayBreakFastMenu2.Count)
+                            {
+                                <a href="#" onclick="AddSaveSetMenu(7,1)"><i class="fas fa-plus" style="font-size:20px;color:red;padding-left:20px;padding-top:5px;"></i></a>
+
+
+                            }
+                        }
+
+
+
+
+
+                    </div>
+
+
+                </div>*@
+
+
+                            </div> <!-- Classic tabs -->
+
+                        </div>
+                    </div>
+                </div>
+
+
+
+            </div>
+            <div class="col-sm-2">
+                <div class="card chart-card" style="height:auto; background:url('http://yesofcorsa.com/wp-content/uploads/2018/09/Matcha-Tea-Best-Wallpaper-1024x576.jpg');">
+
+                    <!-- Card content -->
+                    <div class="card-body pb-0">
+
+                        <h4 class="card-title font-weight-bolder ">Lunch</h4>
+
+
+                        <ul class="nav nav-tabs">
+                            <li class="active"><a data-toggle="tab" href="#home">Menu</a></li>
+                            <li><a data-toggle="tab" href="#menu1">SetMenu</a></li>
+
+                        </ul>
+
+                        <div class="tab-content">
+                            <div id="home" class="tab-pane fade in active">
+                                <br />
+                                @{
+                                    var MondayLunchMenu2 = _db.ExtraItem.Where(x => x.Day == 1 && x.MealTypeId == 2).ToList();
+                                    var MondayLunchSetMenu = _db.SetMenu.Where(x => x.Day == 1 && x.MealTypeId == 2).ToList();
+                                    foreach (var i in MondayTeabreakMenu2)
+                                    {
+                                        var nm = _context.StoreOutItem.Where(x => x.Id == i.StoreOutItemId).FirstOrDefault();
+                                        <div class="row">
+
+                                            @if (editableId == i.Id)
+                                            {
+                                                <div class="col-sm-5">
+
+                                                    <input class="form-control" value="@nm.Name" />
+                                                </div>
+                                                <div class="col-sm-3">
+
+                                                    <input class="form-control" value="@i.Price" />
+                                                </div>
+
+
+                                            }
+                                            else
+                                            {
+                                                string pr = @i.Price + "Tk";
+                                                <div class="col-sm-5" style="padding-right:0px;">
+
+                                                    <p class="item-Text">@i.StoreOutItem.Name</p>
+                                                </div>
+                                                <div class="col-sm-3" style="padding-right:0px;">
+                                                    <p class="price-Text">@pr</p>
+                                                </div>
+
+                                            }
+
+
+                                            <div class="col-sm-2">
+                                                <form asp-action="EditDayMenu" asp-route-StrItmId="@i.Id" asp-controller="AdminMenu">
+
+                                                    <button type="submit" class="btn">
+                                                        <i class="fa fa-edit"></i>
+
+                                                    </button>
+
+                                                </form>
+
+                                            </div>
+                                            <div class="col-sm-2">
+                                                <form asp-action="DeleteDayMenu" asp-route-StrItmId="@i.Id" asp-controller="AdminMenu">
+
+                                                    <button type="submit" class="btn">
+                                                        <i class="fa fa-trash"></i>
+
+                                                    </button>
+
+                                                </form>
+
+                                            </div>
+                                        </div>
+                                        <hr class="divider" />
+
+                                    }
+                                }
+
+                                <div id="item12">
+                                    <a class="add" title="Add" onclick="AddItem12()" data-toggle="tooltip"><i class="material-icons">&#xE03B;</i></a>
+
+
+
+                                </div>
+
+
+
+                                <div id="NewItem12" style="margin-bottom:15px">
+                                    <select id="itm12" class="form-control border-radius-none col-sm-8" asp-items="@(new SelectList(_ddlHelper.GetStoreOutItem().Prepend(new KeyValuePair<string, string>("-1","--Item--")),"Key","Value",""))"></select>
+
+
+                                    <a href="#" onclick="AddSaveItem(1,2)"><i class="fas fa-plus" style="font-size:15px;color:red;padding-left:10px;padding-top:10px;"></i></a>
+
+
+
+                                </div>
+                            </div>
+                            <div id="menu1" class="tab-pane fade">
+                                <table class="table table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th class="col-sm-1"><p style="font-weight:bold;font-size:15px;">#</p></th>
+                                            <th><p style="font-weight:bold;font-size:15px;">Date</p></th>
+                                            <th><p style="font-weight:bold;font-size:15px;">Item</p></th>
+
+                                            <th>
+                                                <a href="#" class="add" onclick="AddSetMenu()" title="Add" data-toggle="tooltip"><i class="material-icons">&#xE03B;</i></a>
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @if (MondayBreakFastSetMenu != null)
+                                        {
+                                            @if (MondayBreakFastSetMenu.Count > 0)
+                                            {
+                                                int srl = 0;
+
+                                                foreach (var item in MondayBreakFastSetMenu)
+                                                {
+                                                    srl++;
+                                                    int l = 0;
+                                                    <tr>
+                                                        <td class="col-sm-1"><p style="font-weight:bold;font-size:12px;">@srl</p></td>
+                                                        <td><p style="font-weight:bold;font-size:12px;">@item.SetMenuDate.ToShortDateString()</p></td>
+                                                        <td>
+                                                            @{var SundayBreakFastSetMenuDtl = _db.SetMenuDetails.Where(x => x.SetMenuId == item.Id).ToList();
+                                                                <p style="font-weight:bold;font-size:10px;">
+                                                                    @foreach (var i in SundayBreakFastSetMenuDtl)
+                                                                    {
+                                                                        l++;
+                                                                        @i.StoreOutItem.Name
+                                                                        if (l != SundayBreakFastSetMenuDtl.Count)
+                                                                        {
+                                                                            <small> , </small>
+                                                                        }
+
+                                                                    }
+                                                                </p>
+
+                                                            }
+
+                                                        </td>
+                                                        <form id="dltSt" asp-action="DeleteSetMenu" asp-route-StrItmId="@item.Id" asp-controller="AdminMenu" method="post">
+                                                            <td>
+
+                                                                @*<a class="add" title="Add" data-toggle="tooltip"><i class="material-icons">&#xE03B;</i></a>*@
+                                                                @*<a class="edit" title="Edit" data-toggle="tooltip"><i class="material-icons">&#xE254;</i></a>*@
+                                                                @*<button type="submit" name="submit" value="Delete" >*@
+                                                                <a href="#" class="delete" title="Delete" data-toggle="tooltip" onclick="document.getElementById('dltSt').submit()">
+                                                                    <i class="material-icons">&#xE872;</i>
+                                                                </a>
+                                                                @*</button>*@
+                                                            </td>
+                                                        </form>
+                                                    </tr>
+
+                                                }
+                                            }
+                                        }
+
+
+
+                                    </tbody>
+                                </table>
+                                @*<div id="SetMenu">
+                    @{
+                        int l2 = 0;
+                    }
+                    <input type="date" id="SetMenuDate" class="form-control " style="padding-top:unset">
+
+                    <div style="display:inline-flex">
+
+                        @foreach (var item in MondayBreakFastMenu2)
+                        {
+                            l2++;
+
+
+
+
+                            <div class="custom-control custom-checkbox" style="margin-top: 2.5%;">
+                                <input type="checkbox" class="custom-control-input" id="checkadded_@item.Id" name="checkboxAdded" value="@item.StoreOutItemId" />
+                                <label class="custom-control-label" for="checkadded_@item.Id">@item.StoreOutItem.Name</label>
+                            </div>
+                            @if (l2 == MondayBreakFastMenu2.Count)
+                            {
+                                <a href="#" onclick="AddSaveSetMenu(7,1)"><i class="fas fa-plus" style="font-size:20px;color:red;padding-left:20px;padding-top:5px;"></i></a>
+
+
+                            }
+                        }
+
+
+
+
+
+                    </div>
+
+
+                </div>*@
+
+
+                            </div> <!-- Classic tabs -->
+
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            <div class="col-sm-2">
+
+                <div class="card chart-card" style="height:auto; background:url('http://yesofcorsa.com/wp-content/uploads/2018/09/Matcha-Tea-Best-Wallpaper-1024x576.jpg');">
+
+                    <!-- Card content -->
+                    <div class="card-body pb-0">
+
+                        <h4 class="card-title font-weight-bolder ">Lunch</h4>
+
+
+                        <ul class="nav nav-tabs">
+                            <li class="active"><a data-toggle="tab" href="#home">Menu</a></li>
+                            <li><a data-toggle="tab" href="#menu1">SetMenu</a></li>
+
+                        </ul>
+
+                        <div class="tab-content">
+                            <div id="home" class="tab-pane fade in active">
+                                <br />
+                                @{
+                                    var TuesdayLunchMenu2 = _db.ExtraItem.Where(x => x.Day == 2 && x.MealTypeId == 2).ToList();
+                                    var TuesdayLunchSetMenu = _db.SetMenu.Where(x => x.Day == 2 && x.MealTypeId == 2).ToList();
+                                    foreach (var i in TuesdayLunchMenu2)
+                                    {
+                                        var nm = _context.StoreOutItem.Where(x => x.Id == i.StoreOutItemId).FirstOrDefault();
+                                        <div class="row">
+
+                                            @if (editableId == i.Id)
+                                            {
+                                                <div class="col-sm-5">
+
+                                                    <input class="form-control" value="@nm.Name" />
+                                                </div>
+                                                <div class="col-sm-3">
+
+                                                    <input class="form-control" value="@i.Price" />
+                                                </div>
+
+
+                                            }
+                                            else
+                                            {
+                                                string pr = @i.Price + "Tk";
+                                                <div class="col-sm-5" style="padding-right:0px;">
+
+                                                    <p class="item-Text">@i.StoreOutItem.Name</p>
+                                                </div>
+                                                <div class="col-sm-3" style="padding-right:0px;">
+                                                    <p class="price-Text">@pr</p>
+                                                </div>
+
+                                            }
+                                            <div class="col-sm-2">
+                                                <form asp-action="EditDayMenu" asp-route-StrItmId="@i.Id" asp-controller="AdminMenu">
+
+                                                    <button type="submit" class="btn">
+                                                        <i class="fa fa-edit"></i>
+
+                                                    </button>
+
+                                                </form>
+
+                                            </div>
+                                            <div class="col-sm-2">
+                                                <form asp-action="DeleteDayMenu" asp-route-StrItmId="@i.Id" asp-controller="AdminMenu">
+
+                                                    <button type="submit" class="btn">
+                                                        <i class="fa fa-trash"></i>
+
+                                                    </button>
+
+                                                </form>
+
+                                            </div>
+                                        </div>
+                                        <hr class="divider" />
+
+                                    }
+                                }
+                                <div id="item13">
+                                    <a class="add" title="Add" onclick="AddItem13()" data-toggle="tooltip"><i class="material-icons">&#xE03B;</i></a>
+
+
+
+                                </div>
+
+
+
+                                <div id="NewItem13" style="margin-bottom:15px">
+                                    <select id="itm13" class="form-control border-radius-none col-sm-8" asp-items="@(new SelectList(_ddlHelper.GetStoreOutItem().Prepend(new KeyValuePair<string, string>("-1","--Item--")),"Key","Value",""))"></select>
+
+
+                                    <a href="#" onclick="AddSaveItem(2,2)"><i class="fas fa-plus" style="font-size:15px;color:red;padding-left:10px;padding-top:10px;"></i></a>
+
+
+
+                                </div>
+                            </div>
+                            <div id="menu1" class="tab-pane fade">
+                                <table class="table table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th class="col-sm-1"><p style="font-weight:bold;font-size:15px;">#</p></th>
+                                            <th><p style="font-weight:bold;font-size:15px;">Date</p></th>
+                                            <th><p style="font-weight:bold;font-size:15px;">Item</p></th>
+
+                                            <th>
+                                                <a href="#" class="add" onclick="AddSetMenu()" title="Add" data-toggle="tooltip"><i class="material-icons">&#xE03B;</i></a>
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @if (TuesdayBreakFastSetMenu != null)
+                                        {
+                                            @if (TuesdayBreakFastSetMenu.Count > 0)
+                                            {
+                                                int srl = 0;
+
+                                                foreach (var item in TuesdayBreakFastSetMenu)
+                                                {
+                                                    srl++;
+                                                    int l = 0;
+                                                    <tr>
+                                                        <td class="col-sm-1"><p style="font-weight:bold;font-size:12px;">@srl</p></td>
+                                                        <td><p style="font-weight:bold;font-size:12px;">@item.SetMenuDate.ToShortDateString()</p></td>
+                                                        <td>
+                                                            @{var TuesdayBreakFastSetMenuDtl = _db.SetMenuDetails.Where(x => x.SetMenuId == item.Id).ToList();
+                                                                <p style="font-weight:bold;font-size:10px;">
+                                                                    @foreach (var i in TuesdayBreakFastSetMenuDtl)
+                                                                    {
+                                                                        l++;
+                                                                        @i.StoreOutItem.Name
+                                                                        if (l != TuesdayBreakFastSetMenuDtl.Count)
+                                                                        {
+                                                                            <small> , </small>
+                                                                        }
+
+                                                                    }
+                                                                </p>
+
+                                                            }
+
+                                                        </td>
+                                                        <form id="dltSt" asp-action="DeleteSetMenu" asp-route-StrItmId="@item.Id" asp-controller="AdminMenu" method="post">
+                                                            <td>
+
+                                                                @*<a class="add" title="Add" data-toggle="tooltip"><i class="material-icons">&#xE03B;</i></a>*@
+                                                                @*<a class="edit" title="Edit" data-toggle="tooltip"><i class="material-icons">&#xE254;</i></a>*@
+                                                                @*<button type="submit" name="submit" value="Delete" >*@
+                                                                <a href="#" class="delete" title="Delete" data-toggle="tooltip" onclick="document.getElementById('dltSt').submit()">
+                                                                    <i class="material-icons">&#xE872;</i>
+                                                                </a>
+                                                                @*</button>*@
+                                                            </td>
+                                                        </form>
+                                                    </tr>
+
+                                                }
+                                            }
+                                        }
+
+
+
+                                    </tbody>
+                                </table>
+                                @*<div id="SetMenu">
+                    @{
+                        int l3 = 0;
+                    }
+                    <input type="date" id="SetMenuDate" class="form-control " style="padding-top:unset">
+
+                    <div style="display:inline-flex">
+
+                        @foreach (var item in TuesdayBreakFastMenu2)
+                        {
+                            l3++;
+
+
+
+
+                            <div class="custom-control custom-checkbox" style="margin-top: 2.5%;">
+                                <input type="checkbox" class="custom-control-input" id="checkadded_@item.Id" name="checkboxAdded" value="@item.StoreOutItemId" />
+                                <label class="custom-control-label" for="checkadded_@item.Id">@item.StoreOutItem.Name</label>
+                            </div>
+                            @if (l3 == TuesdayBreakFastMenu2.Count)
+                            {
+                                <a href="#" onclick="AddSaveSetMenu(7,1)"><i class="fas fa-plus" style="font-size:20px;color:red;padding-left:20px;padding-top:5px;"></i></a>
+
+
+                            }
+                        }
+
+
+
+
+
+                    </div>
+
+
+                </div>*@
+
+
+                            </div> <!-- Classic tabs -->
+
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            <div class="col-sm-2">
+                <div class="card chart-card" style="height:auto; background:url('http://yesofcorsa.com/wp-content/uploads/2018/09/Matcha-Tea-Best-Wallpaper-1024x576.jpg');">
+
+                    <!-- Card content -->
+                    <div class="card-body pb-0">
+
+                        <h4 class="card-title font-weight-bolder ">Lunch</h4>
+
+
+                        <ul class="nav nav-tabs">
+                            <li class="active"><a data-toggle="tab" href="#home">Menu</a></li>
+                            <li><a data-toggle="tab" href="#menu1">SetMenu</a></li>
+
+                        </ul>
+
+                        <div class="tab-content">
+                            <div id="home" class="tab-pane fade in active">
+                                <br />
+                                @{
+                                    var WednesdayLunchMenu2 = _db.ExtraItem.Where(x => x.Day == 3 && x.MealTypeId == 2).ToList();
+                                    var WednesdayLunchSetMenu = _db.SetMenu.Where(x => x.Day == 3 && x.MealTypeId == 2).ToList();
+                                    foreach (var i in WednesdayLunchMenu2)
+                                    {
+                                        var nm = _context.StoreOutItem.Where(x => x.Id == i.StoreOutItemId).FirstOrDefault();
+                                        <div class="row">
+
+                                            @if (editableId == i.Id)
+                                            {
+                                                <div class="col-sm-5">
+
+                                                    <input class="form-control" value="@nm.Name" />
+                                                </div>
+                                                <div class="col-sm-3">
+
+                                                    <input class="form-control" value="@i.Price" />
+                                                </div>
+
+
+                                            }
+                                            else
+                                            {
+                                                string pr = @i.Price + "Tk";
+                                                <div class="col-sm-5" style="padding-right:0px;">
+
+                                                    <p class="item-Text">@i.StoreOutItem.Name</p>
+                                                </div>
+                                                <div class="col-sm-3" style="padding-right:0px;">
+                                                    <p class="price-Text">@pr</p>
+                                                </div>
+
+                                            }
+
+
+                                            <div class="col-sm-2">
+                                                <form asp-action="EditDayMenu" asp-route-StrItmId="@i.Id" asp-controller="AdminMenu">
+
+                                                    <button type="submit" class="btn">
+                                                        <i class="fa fa-edit"></i>
+
+                                                    </button>
+
+                                                </form>
+
+                                            </div>
+                                            <div class="col-sm-2">
+                                                <form asp-action="DeleteDayMenu" asp-route-StrItmId="@i.Id" asp-controller="AdminMenu">
+
+                                                    <button type="submit" class="btn">
+                                                        <i class="fa fa-trash"></i>
+
+                                                    </button>
+
+                                                </form>
+
+                                            </div>
+                                        </div>
+                                        <hr class="divider" />
+
+                                    }
+                                }
+                                <div id="item14">
+                                    <a class="add" title="Add" onclick="AddItem14()" data-toggle="tooltip"><i class="material-icons">&#xE03B;</i></a>
+
+
+
+                                </div>
+
+
+
+                                <div id="NewItem14" style="margin-bottom:15px">
+                                    <select id="itm14" class="form-control border-radius-none col-sm-8" asp-items="@(new SelectList(_ddlHelper.GetStoreOutItem().Prepend(new KeyValuePair<string, string>("-1","--Item--")),"Key","Value",""))"></select>
+
+
+                                    <a href="#" onclick="AddSaveItem(3,2)"><i class="fas fa-plus" style="font-size:15px;color:red;padding-left:10px;padding-top:10px;"></i></a>
+
+
+
+                                </div>
+                            </div>
+                            <div id="menu1" class="tab-pane fade">
+                                <table class="table table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th class="col-sm-1"><p style="font-weight:bold;font-size:15px;">#</p></th>
+                                            <th><p style="font-weight:bold;font-size:15px;">Date</p></th>
+                                            <th><p style="font-weight:bold;font-size:15px;">Item</p></th>
+
+                                            <th>
+                                                <a href="#" class="add" onclick="AddSetMenu()" title="Add" data-toggle="tooltip"><i class="material-icons">&#xE03B;</i></a>
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @if (WednesdayBreakFastSetMenu != null)
+                                        {
+                                            @if (WednesdayBreakFastSetMenu.Count > 0)
+                                            {
+                                                int srl = 0;
+
+                                                foreach (var item in WednesdayBreakFastSetMenu)
+                                                {
+                                                    srl++;
+                                                    int l = 0;
+                                                    <tr>
+                                                        <td class="col-sm-1"><p style="font-weight:bold;font-size:12px;">@srl</p></td>
+                                                        <td><p style="font-weight:bold;font-size:12px;">@item.SetMenuDate.ToShortDateString()</p></td>
+                                                        <td>
+                                                            @{var WednesdayBreakFastSetMenuDtl = _db.SetMenuDetails.Where(x => x.SetMenuId == item.Id).ToList();
+                                                                <p style="font-weight:bold;font-size:10px;">
+                                                                    @foreach (var i in WednesdayBreakFastSetMenuDtl)
+                                                                    {
+                                                                        l++;
+                                                                        @i.StoreOutItem.Name
+                                                                        if (l != WednesdayBreakFastSetMenuDtl.Count)
+                                                                        {
+                                                                            <small> , </small>
+                                                                        }
+
+                                                                    }
+                                                                </p>
+
+                                                            }
+
+                                                        </td>
+                                                        <form id="dltSt" asp-action="DeleteSetMenu" asp-route-StrItmId="@item.Id" asp-controller="AdminMenu" method="post">
+                                                            <td>
+
+                                                                @*<a class="add" title="Add" data-toggle="tooltip"><i class="material-icons">&#xE03B;</i></a>*@
+                                                                @*<a class="edit" title="Edit" data-toggle="tooltip"><i class="material-icons">&#xE254;</i></a>*@
+                                                                @*<button type="submit" name="submit" value="Delete" >*@
+                                                                <a href="#" class="delete" title="Delete" data-toggle="tooltip" onclick="document.getElementById('dltSt').submit()">
+                                                                    <i class="material-icons">&#xE872;</i>
+                                                                </a>
+                                                                @*</button>*@
+                                                            </td>
+                                                        </form>
+                                                    </tr>
+
+                                                }
+                                            }
+                                        }
+
+
+
+                                    </tbody>
+                                </table>
+                                @*<div id="SetMenu">
+                    @{
+                        int l4 = 0;
+                    }
+                    <input type="date" id="SetMenuDate" class="form-control " style="padding-top:unset">
+
+                    <div style="display:inline-flex">
+
+                        @foreach (var item in WednesdayBreakFastMenu2)
+                        {
+                            l4++;
+
+
+
+
+                            <div class="custom-control custom-checkbox" style="margin-top: 2.5%;">
+                                <input type="checkbox" class="custom-control-input" id="checkadded_@item.Id" name="checkboxAdded" value="@item.StoreOutItemId" />
+                                <label class="custom-control-label" for="checkadded_@item.Id">@item.StoreOutItem.Name</label>
+                            </div>
+                            @if (l4 == WednesdayBreakFastMenu2.Count)
+                            {
+                                <a href="#" onclick="AddSaveSetMenu(7,1)"><i class="fas fa-plus" style="font-size:20px;color:red;padding-left:20px;padding-top:5px;"></i></a>
+
+
+                            }
+                        }
+
+
+
+
+
+                    </div>
+
+
+                </div>*@
+
+
+                            </div> <!-- Classic tabs -->
+
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            <div class="col-sm-2">
+                <div class="card chart-card" style="height:auto; background:url('http://yesofcorsa.com/wp-content/uploads/2018/09/Matcha-Tea-Best-Wallpaper-1024x576.jpg');">
+
+                    <!-- Card content -->
+                    <div class="card-body pb-0">
+
+                        <h4 class="card-title font-weight-bolder ">Lunch</h4>
+
+
+                        <ul class="nav nav-tabs">
+                            <li class="active"><a data-toggle="tab" href="#home">Menu</a></li>
+                            <li><a data-toggle="tab" href="#menu1">SetMenu</a></li>
+
+                        </ul>
+
+                        <div class="tab-content">
+                            <div id="home" class="tab-pane fade in active">
+                                <br />
+                                @{
+                                    var ThursdayLunchMenu2 = _db.ExtraItem.Where(x => x.Day == 4 && x.MealTypeId == 2).ToList();
+                                    var ThursdayLunchSetMenu = _db.SetMenu.Where(x => x.Day == 4 && x.MealTypeId == 2).ToList();
+                                    foreach (var i in ThursdayLunchMenu2)
+                                    {
+                                        var nm = _context.StoreOutItem.Where(x => x.Id == i.StoreOutItemId).FirstOrDefault();
+                                        <div class="row">
+
+                                            @if (editableId == i.Id)
+                                            {
+                                                <div class="col-sm-5">
+
+                                                    <input class="form-control" value="@nm.Name" />
+                                                </div>
+                                                <div class="col-sm-3">
+
+                                                    <input class="form-control" value="@i.Price" />
+                                                </div>
+
+
+                                            }
+                                            else
+                                            {
+                                                string pr = @i.Price + "Tk";
+                                                <div class="col-sm-5" style="padding-right:0px;">
+
+                                                    <p class="item-Text">@i.StoreOutItem.Name</p>
+                                                </div>
+                                                <div class="col-sm-3" style="padding-right:0px;">
+                                                    <p class="price-Text">@pr</p>
+                                                </div>
+
+                                            }
+
+
+                                            <div class="col-sm-2">
+                                                <form asp-action="EditDayMenu" asp-route-StrItmId="@i.Id" asp-controller="AdminMenu">
+
+                                                    <button type="submit" class="btn">
+                                                        <i class="fa fa-edit"></i>
+
+                                                    </button>
+
+                                                </form>
+
+                                            </div>
+                                            <div class="col-sm-2">
+                                                <form asp-action="DeleteDayMenu" asp-route-StrItmId="@i.Id" asp-controller="AdminMenu">
+
+                                                    <button type="submit" class="btn">
+                                                        <i class="fa fa-trash"></i>
+
+                                                    </button>
+
+                                                </form>
+
+                                            </div>
+                                        </div>
+                                        <hr class="divider" />
+
+                                    }
+                                }
+                                <div id="item15">
+                                    <a class="add" title="Add" onclick="AddItem15()" data-toggle="tooltip"><i class="material-icons">&#xE03B;</i></a>
+
+
+
+                                </div>
+
+
+
+                                <div id="NewItem15" style="margin-bottom:15px">
+                                    <select id="itm15" class="form-control border-radius-none col-sm-8" asp-items="@(new SelectList(_ddlHelper.GetStoreOutItem().Prepend(new KeyValuePair<string, string>("-1","--Item--")),"Key","Value",""))"></select>
+
+
+                                    <a href="#" onclick="AddSaveItem(4,2)"><i class="fas fa-plus" style="font-size:15px;color:red;padding-left:10px;padding-top:10px;"></i></a>
+
+
+
+                                </div>
+                            </div>
+                            <div id="menu1" class="tab-pane fade">
+                                <table class="table table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th class="col-sm-1"><p style="font-weight:bold;font-size:15px;">#</p></th>
+                                            <th><p style="font-weight:bold;font-size:15px;">Date</p></th>
+                                            <th><p style="font-weight:bold;font-size:15px;">Item</p></th>
+
+                                            <th>
+                                                <a href="#" class="add" onclick="AddSetMenu()" title="Add" data-toggle="tooltip"><i class="material-icons">&#xE03B;</i></a>
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @if (WednesdayBreakFastSetMenu != null)
+                                        {
+                                            @if (WednesdayBreakFastSetMenu.Count > 0)
+                                            {
+                                                int srl = 0;
+
+                                                foreach (var item in WednesdayBreakFastSetMenu)
+                                                {
+                                                    srl++;
+                                                    int l = 0;
+                                                    <tr>
+                                                        <td class="col-sm-1"><p style="font-weight:bold;font-size:12px;">@srl</p></td>
+                                                        <td><p style="font-weight:bold;font-size:12px;">@item.SetMenuDate.ToShortDateString()</p></td>
+                                                        <td>
+                                                            @{var WednesdayBreakFastSetMenuDtl = _db.SetMenuDetails.Where(x => x.SetMenuId == item.Id).ToList();
+                                                                <p style="font-weight:bold;font-size:10px;">
+                                                                    @foreach (var i in WednesdayBreakFastSetMenuDtl)
+                                                                    {
+                                                                        l++;
+                                                                        @i.StoreOutItem.Name
+                                                                        if (l != WednesdayBreakFastSetMenuDtl.Count)
+                                                                        {
+                                                                            <small> , </small>
+                                                                        }
+
+                                                                    }
+                                                                </p>
+
+                                                            }
+
+                                                        </td>
+                                                        <form id="dltSt" asp-action="DeleteSetMenu" asp-route-StrItmId="@item.Id" asp-controller="AdminMenu" method="post">
+                                                            <td>
+
+                                                                @*<a class="add" title="Add" data-toggle="tooltip"><i class="material-icons">&#xE03B;</i></a>*@
+                                                                @*<a class="edit" title="Edit" data-toggle="tooltip"><i class="material-icons">&#xE254;</i></a>*@
+                                                                @*<button type="submit" name="submit" value="Delete" >*@
+                                                                <a href="#" class="delete" title="Delete" data-toggle="tooltip" onclick="document.getElementById('dltSt').submit()">
+                                                                    <i class="material-icons">&#xE872;</i>
+                                                                </a>
+                                                                @*</button>*@
+                                                            </td>
+                                                        </form>
+                                                    </tr>
+
+                                                }
+                                            }
+                                        }
+
+
+
+                                    </tbody>
+                                </table>
+                                @*<div id="SetMenu">
+                    @{
+                        int l5 = 0;
+                    }
+                    <input type="date" id="SetMenuDate" class="form-control " style="padding-top:unset">
+
+                    <div style="display:inline-flex">
+
+                        @foreach (var item in WednesdayBreakFastMenu2)
+                        {
+                            l5++;
+
+
+
+
+                            <div class="custom-control custom-checkbox" style="margin-top: 2.5%;">
+                                <input type="checkbox" class="custom-control-input" id="checkadded_@item.Id" name="checkboxAdded" value="@item.StoreOutItemId" />
+                                <label class="custom-control-label" for="checkadded_@item.Id">@item.StoreOutItem.Name</label>
+                            </div>
+                            @if (l5 == WednesdayBreakFastMenu2.Count)
+                            {
+                                <a href="#" onclick="AddSaveSetMenu(7,1)"><i class="fas fa-plus" style="font-size:20px;color:red;padding-left:20px;padding-top:5px;"></i></a>
+
+
+                            }
+                        }
+
+
+
+
+
+                    </div>
+
+
+                </div>*@
+
+
+                            </div> <!-- Classic tabs -->
+
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+            <div class="col-sm-1">
+
+            </div>
+        </div>
+        <div class="row" style="padding-top:10px;">
+            <div class="col-sm-1">
+
+            </div>
+            <div class="col-sm-2 day-Name">
+                <h1 style="color:red">Sunday</h1>
+
+            </div>
+
+            <div class="col-sm-2 day-Name">
+                <h1 style="color:red">Monday</h1>
+
+            </div>
+
+            <div class="col-sm-2 day-Name">
+                <h1 style="color:red">Tuesday</h1>
+
+            </div>
+
+            <div class="col-sm-2 day-Name">
+                <h1 style="color:red">Wednesday</h1>
+
+            </div>
+
+            <div class="col-sm-2 day-Name">
+                <h1 style="color:red">Thursday</h1>
+
+            </div>
+
+            <div class="col-sm-1">
+
+            </div>
+
+        </div>
+
+
+
+
+
+
+
+
+    </div>
+
+
+        <!-- Card -->
+
+    </body>
+    @*<div style = "background:url('https://www.tibits.co.uk/assets/images/8/Autumn%20table%20%287%29-80f4ecc9.jpg');"   >
+
+        </div>*@
+
+
+
+
+
+
+
+    @*<script src="https://ajax.aspnetcdn.com/ajax/jquery/jquery-3.3.1.min.js"
+                asp-fallback-src="~/lib/jquery/dist/jquery.min.js"
+                asp-fallback-test="window.jQuery"
+                crossorigin="anonymous"
+                integrity="sha384-tsQFqpEReu7ZLhBV2VZlAu7zcOV+rXbYlF2cqB8txI/8aZajjp4Bqd+V6D5IgvKT">
+        </script>*@
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
+
+
+
+
+
+    <script>
+    // Line
+    $("#NewItem").hide();
+        $("#NewItem2").hide();
+    $("#NewItem3").hide();
+    $("#NewItem4").hide();
+    $("#NewItem5").hide();
+    $("#NewItem6").hide();
+    $("#NewItem7").hide();
+    $("#NewItem8").hide();
+    $("#NewItem9").hide();
+    $("#NewItem10").hide();
+    $("#NewItem11").hide();
+    $("#NewItem12").hide();
+    $("#NewItem13").hide();
+    $("#NewItem14").hide();
+        $("#NewItem15").hide();
+    //$("#NewItem").hide();
+    //$("#NewItem").hide();
+    //$("#NewItem").hide();
+
+
+    $("#SetMenu").hide();
+
+
+
+    function AddItem() {
+        $("#NewItem").show();
+        $("#item").hide();
+
+
+    }
+      function AddSetmenu() {
+          $("#SetMenu").show();
+          $("#sm").hide();
+
+        }
+
+     function AddSaveItem( day,mealId) {
+
+
+         if (day == "7" && mealId == "1") {
+             $("#NewItem").hide();
+             $("#item").show();
+
+
+
+
+             var ddlCategory = document.getElementById("itm");
+             var item = ddlCategory.options[ddlCategory.selectedIndex].value.toString();
+             //var item = document.getElementById("item").value.toString();
+             //var item = document.getElementById("item").value;
+             //var item = dropdown.options[dropdown.selectedIndex].value;
+             //console.log(item);
+
+         }
+         if (day == "7" && mealId == "3") {
+             $("#NewItem2").hide();
+             $("#Add2").show();
+             var ddlCategory = document.getElementById("itm2");
+             var item = ddlCategory.options[ddlCategory.selectedIndex].value.toString();
+         }
+         if (day == "7" && mealId == "2") {
+             $("#NewItem3").hide();
+             $("#Add3").show();
+             var ddlCategory = document.getElementById("itm3");
+             var item = ddlCategory.options[ddlCategory.selectedIndex].value.toString();
+         }
+         if (day == "1" && mealId == "1") {
+             $("#NewItem4").hide();
+             $("#Add4").show();
+             var ddlCategory = document.getElementById("itm4");
+             var item = ddlCategory.options[ddlCategory.selectedIndex].value.toString();
+         }
+         if (day == "1" && mealId == "3") {
+             $("#NewItem5").hide();
+             $("#Add5").show();
+             var ddlCategory = document.getElementById("itm5");
+             var item = ddlCategory.options[ddlCategory.selectedIndex].value.toString();
+         }
+         if (day == "1" && mealId == "2") {
+             $("#NewItem6").hide();
+             $("#Add6").show();
+             var ddlCategory = document.getElementById("itm6");
+             var item = ddlCategory.options[ddlCategory.selectedIndex].value.toString();
+         }
+         if (day == "2" && mealId == "1") {
+             $("#NewItem7").hide();
+             $("#Add7").show();
+             var ddlCategory = document.getElementById("itm7");
+             var item = ddlCategory.options[ddlCategory.selectedIndex].value.toString();
+         }
+         if (day == "2" && mealId == "3") {
+             $("#NewItem8").hide();
+             $("#Add8").show();
+             var ddlCategory = document.getElementById("itm8");
+             var item = ddlCategory.options[ddlCategory.selectedIndex].value.toString();
+         }
+         if (day == "2" && mealId == "2") {
+             $("#NewItem9").hide();
+             $("#Add9").show();
+             var ddlCategory = document.getElementById("itm9");
+             var item = ddlCategory.options[ddlCategory.selectedIndex].value.toString();
+        }
+           if (day == "3" && mealId == "1") {
+            $("#NewItem10").hide();
+            $("#Add10").show();
+   var ddlCategory = document.getElementById("itm10");
+                   var item = ddlCategory.options[ddlCategory.selectedIndex].value.toString();
+        }
+           if (day == "3" && mealId == "3") {
+            $("#NewItem11").hide();
+            $("#Add11").show();
+   var ddlCategory = document.getElementById("itm11");
+                   var item = ddlCategory.options[ddlCategory.selectedIndex].value.toString();
+        }
+           if (day == "3" && mealId == "2") {
+            $("#NewItem12").hide();
+            $("#Add12").show();
+   var ddlCategory = document.getElementById("itm12");
+                   var item = ddlCategory.options[ddlCategory.selectedIndex].value.toString();
+        }
+         if (day == "4" && mealId == "1") {
+            $("#NewItem13").hide();
+            $("#Add13").show();
+   var ddlCategory = document.getElementById("itm13");
+                   var item = ddlCategory.options[ddlCategory.selectedIndex].value.toString();
+        }
+        if (day == "4" && mealId == "3") {
+            $("#NewItem14").hide();
+            $("#Add14").show();
+   var ddlCategory = document.getElementById("itm14");
+                   var item = ddlCategory.options[ddlCategory.selectedIndex].value.toString();
+        }
+        if (day == "4" && mealId == "2") {
+            $("#NewItem15").hide();
+            $("#Add15").show();
+   var ddlCategory = document.getElementById("itm15");
+                   var item = ddlCategory.options[ddlCategory.selectedIndex].value.toString();
+        }
+         $.ajax({
+
+        url: '@Url.Action("SaveNewMenuItem", "AdminMenu")',
+        type: "POST",
+        data: { Day:day,MealTypeId:mealId,Item:item },
+        success: function (response) {
+            if (response.success) {
+                                window.location.reload(true);
+
+                     // alert(response.responseText);
+
+
+
+
+            } else {
+                // DoSomethingElse()
+                alert(response.responseText);
+            }
+        }
+
+
+    })
+
+
+        }
+
+
+    function AddSaveSetMenu(day,mealId) {
+
+        console.log(day);
+   
+
+
+
+                    if (day == "7" && mealId == "1")
+                    {
+
+                         var dateTime = document.getElementById("SetMenuDate").value.toString();
+        var checkBoxAdded = document.getElementsByName("checkboxAdded");
+                $("#SetMenu").hide();
+
+                        $("#sm").show();
+
+
+                }
+                           if (day == "7" && mealId == "3")
+                           {
+                                var dateTime = document.getElementById("SetMenuDate2").value.toString();
+        var checkBoxAdded = document.getElementsByName("checkboxAdded2");
+                               $("#NewItem2").hide();
+                               $("#SetMenu2").hide();
+
+             $("#Add2").show();
+
+        }
+        if (day == "7" && mealId == "2") {
+            var dateTime = document.getElementById("SetMenuDate3").value.toString();
+            var checkBoxAdded = document.getElementsByName("checkboxAdded3");
+            $("#NewItem3").hide();
+            $("#SetMenu3").hide();
+
+            $("#Add3").show();
+
+        }
+        if (day == "1" && mealId == "1") {
+            var dateTime = document.getElementById("SetMenuDate4").value.toString();
+            var checkBoxAdded = document.getElementsByName("checkboxAdded4");
+            $("#NewItem4").hide();
+            $("#SetMenu4").hide();
+
+            $("#Add4").show();
+
+        }
+
+        if (day == "1" && mealId == "3") {
+            var dateTime = document.getElementById("SetMenuDate5").value.toString();
+            var checkBoxAdded = document.getElementsByName("checkboxAdded5");
+            $("#NewItem5").hide();
+            $("#SetMenu5").hide();
+
+            $("#Add5").show();
+
+        }
+        if (day == "1" && mealId == "2") {
+            var dateTime = document.getElementById("SetMenuDate6").value.toString();
+            var checkBoxAdded = document.getElementsByName("checkboxAdded6");
+            $("#NewItem6").hide();
+            $("#SetMenu6").hide();
+
+            $("#Add6").show();
+
+        }
+         if (day == "2" && mealId == "1") {
+            var dateTime = document.getElementById("SetMenuDate7").value.toString();
+            var checkBoxAdded = document.getElementsByName("checkboxAdded7");
+            $("#NewItem7").hide();
+            $("#SetMenu7").hide();
+
+            $("#Add7").show();
+
+        }
+        if (day == "2" && mealId == "3") {
+            var dateTime = document.getElementById("SetMenuDate8").value.toString();
+            var checkBoxAdded = document.getElementsByName("checkboxAdded8");
+            $("#NewItem8").hide();
+            $("#SetMenu8").hide();
+
+            $("#Add8").show();
+
+        }
+        if (day == "2" && mealId == "2") {
+            var dateTime = document.getElementById("SetMenuDate9").value.toString();
+            var checkBoxAdded = document.getElementsByName("checkboxAdded9");
+            $("#NewItem9").hide();
+            $("#SetMenu9").hide();
+
+            $("#Add9").show();
+
+        }
+           if (day == "3" && mealId == "1") {
+            var dateTime = document.getElementById("SetMenuDate10").value.toString();
+            var checkBoxAdded = document.getElementsByName("checkboxAdded10");
+            $("#NewItem10").hide();
+            $("#SetMenu10").hide();
+
+            $("#Add10").show();
+
+        }
+
+           if (day == "3" && mealId == "3") {
+            var dateTime = document.getElementById("SetMenuDate11").value.toString();
+            var checkBoxAdded = document.getElementsByName("checkboxAdded11");
+            $("#NewItem11").hide();
+            $("#SetMenu11").hide();
+
+            $("#Add11").show();
+        }
+        if (day == "3" && mealId == "2") {
+            var dateTime = document.getElementById("SetMenuDate12").value.toString();
+            var checkBoxAdded = document.getElementsByName("checkboxAdded12");
+            $("#NewItem12").hide();
+            $("#SetMenu12").hide();
+
+            $("#Add12").show();
+
+        }
+        if (day == "4" && mealId == "1") {
+            var dateTime = document.getElementById("SetMenuDate13").value.toString();
+            var checkBoxAdded = document.getElementsByName("checkboxAdded13");
+            $("#NewItem13").hide();
+            $("#SetMenu13").hide();
+
+            $("#Add13").show();
+
+        }
+        if (day == "4" && mealId == "3") {
+            var dateTime = document.getElementById("SetMenuDate14").value.toString();
+            var checkBoxAdded = document.getElementsByName("checkboxAdded14");
+            $("#NewItem14").hide();
+            $("#SetMenu14").hide();
+
+            $("#Add14").show();
+
+        }
+        if (day == "4" && mealId == "2") {
+            var dateTime = document.getElementById("SetMenuDate15").value.toString();
+            var checkBoxAdded = document.getElementsByName("checkboxAdded15");
+            $("#NewItem15").hide();
+            $("#SetMenu15").hide();
+
+            $("#Add15").show();
+
+        }
+        var checkBoxLengthAdded = checkBoxAdded.length;
+        var addedItem = [];
+        var tempItemValueAdded;
+        for (var i = 0; i < checkBoxLengthAdded; i++) {
+
+            if (checkBoxAdded[i].checked == true) {
+
+                //tempPriceValueAdded = textsAdded[i].value.toString();
+                tempItemValueAdded = checkBoxAdded[i].value.toString();
+                var itemId = checkBoxAdded[i].value.toString();
+                var obj = { ItemId: itemId };
+                addedItem.push(obj);
+
+            }
+
+        }
+         $.ajax({
+
+        url: '@Url.Action("SaveSetMenu", "AdminMenu")',
+             type: "POST",
+             data: { Day: day, MealTypeId: mealId, Date: dateTime, SetMenuItem: JSON.stringify(addedItem) },
+        success: function (response) {
+            if (response.success) {
+
+               // alert(response.responseText);
+                window.location.reload(true);
+                $("#NewItem").hide();
+                $("#SetMenu").hide();
+
+        $("#Add").show();
+
+
+            } else {
+                // DoSomethingElse()
+                alert(response.responseText);
+            }
+        }
+
+
+    })
+        console.log(dateTime);
+        console.log(addedItem);
+
+
+
+
+
+    }
+
+
+
+
+
+    </script>

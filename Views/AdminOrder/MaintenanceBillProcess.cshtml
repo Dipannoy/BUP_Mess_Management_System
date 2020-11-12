@@ -1,0 +1,284 @@
+﻿@inject ApplicationDbContext _context
+@inject Microsoft.AspNetCore.Identity.UserManager<ApplicationUser> _userManager
+@inject ApplicationDbContext _db
+@inject IDDLHelper _ddlHelper
+
+@inject IDDLHelper _ddlhelper
+@{
+    ViewData["Title"] = "MaintenanceBillProcess";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    var from = this.Context.Request.Query["from"];
+    var to = this.Context.Request.Query["to"];
+    var UserId = this.Context.Request.Query["UserId"];
+    bool showtable = false;
+    var months = new Dictionary<int, string>()
+{
+        {1, "January" },
+        {2, "February" },
+        {3, "March" },
+        {4, "April" },
+        {5, "May" },
+        {6, "June" },
+        {7, "July" },
+        {8, "August" },
+        {9, "September" },
+        {10, "October" },
+        {11, "November" },
+        {12, "December" },
+
+
+
+
+
+    };
+
+
+    var user = await _userManager.GetUserAsync(User);
+    var preOrderScheduleList = _db.PreOrderSchedule.Include(x => x.MealType).Include(x => x.ApplicationUser).ToList();
+    var setMenuList = _db.SetMenu.Include(x => x.SetMenuDetailsList).Include(a => a.MealType).Where(x => x.SetMenuDate.ToShortDateString() == DateTime.Now.ToShortDateString()).ToList();
+
+    var allMeals = _db.MealType.Where(x => x.Id > 0).ToList();
+    string Message = "";
+    int m = 0;
+    long y = 0;
+
+    if (ViewBag.DuplicateMessage != null)
+    {
+        Message = ViewBag.DuplicateMessage;
+    }
+    if (ViewBag.SuccessMessage != null)
+    {
+        Message = ViewBag.SuccessMessage;
+        m = ViewBag.Month;
+        y = ViewBag.Year;
+        showtable = true;
+    }
+
+
+
+
+
+
+}
+
+
+<div class="container-fluid">
+
+
+    <h2>Maintenance Bill Process</h2>
+    <hr />
+
+
+
+    <div class="row">
+        @if (Message != "")
+        {
+            <div class="alert alert-success" role="alert"><b>  @Message</b></div>
+        }
+    </div>
+
+    <div class="container-fluid">
+
+        <form asp-action="MaintenanceBillGenerate" method="post" class="d-lg-inline-flex">
+            <div class="row">
+                <div class="col-md-4">
+                    <label class="control-label">Year:</label>
+                    <select name="year">
+                        <option value="">Select a year</option>
+                        <option value="2010">2010</option>
+                        <option value="2011">2011</option>
+                        <option value="2012">2012</option>
+                        <option value="2013">2013</option>
+                        <option value="2014">2014</option>
+                        <option value="2015">2015</option>
+                        <option value="2016">2016</option>
+                        <option value="2017">2017</option>
+                        <option value="2018">2018</option>
+                        <option value="2019">2019</option>
+                        <option value="2020">2021</option>
+                        <option value="2022">2022</option>
+
+                    </select>
+
+                </div>
+                <div class="col-md-4">
+                    <label class="control-label">Month:</label>
+                    <select name="month">
+                        <option value="">Select a month</option>
+                        <option value="1">January</option>
+                        <option value="2">February</option>
+                        <option value="3">March</option>
+                        <option value="4">April</option>
+                        <option value="5">May</option>
+                        <option value="6">June</option>
+                        <option value="7">July</option>
+                        <option value="8">August</option>
+                        <option value="9">September</option>
+                        <option value="10">October</option>
+                        <option value="11">November</option>
+                        <option value="12">December</option>
+
+                    </select>
+
+                </div>
+                <div class="col-md-2">
+                    <label class="control-label">Cost:</label>
+                    <input type="number" name="MCost" id="MCost" class="col-sm-7" />
+
+
+
+
+
+                </div>
+                <div class="col-md-2">
+                    <input class="btn btn-sm btn-primary" type="submit" id="Process" style="margin:1px" value="Process" />
+
+                </div>
+
+                @*<div class="form-group">
+                        <label class="control-label">Date:</label>
+                        <input type="date" name="date2" id="textStoreDate2" class="col-sm-5" />
+                        <button class="btn btn-sm btn-primary" type="submit" style="margin-left: 0px;"> Load </button> |
+
+                    </div>*@
+            </div>
+
+        </form>
+
+    </div>
+
+    <br />
+    @if (showtable)
+    {
+        <hr />
+        <table class="table table-striped table-bordered">
+            <thead class="grey lighten-2">
+                <tr>
+                    <th scope="col">
+                        UserName
+                    </th>
+                    <th scope="col">
+                        Month
+                    </th>
+                    <th scope="col">
+                        Year
+                    </th>
+                    <th scope="col">
+                        Maintenance Bill
+                    </th>
+
+                </tr>
+            </thead>
+            <tbody>
+                @{
+                    var maintenanceList = _context.MaintenanceBillHistory.Include(x => x.ApplicationUser).Where(x => x.Month == m && x.Year == y).ToList();
+                    foreach (var item in maintenanceList)
+                    {
+                        <tr>
+                            <td scope="row">
+                                @item.ApplicationUser.BUPFullName
+                            </td>
+                            <td scope="row">
+                                @months[item.Month]
+                            </td>
+                            <td scope="row">
+                                @item.Year
+                            </td>
+                            <td scope="row">
+                                @item.BillAmount
+                            </td>
+                        </tr>
+                    }
+                }
+
+            </tbody>
+
+
+        </table>
+    }
+
+
+</div>
+
+
+<script src="https://ajax.aspnetcdn.com/ajax/jquery/jquery-3.3.1.min.js"
+        asp-fallback-src="~/lib/jquery/dist/jquery.min.js"
+        asp-fallback-test="window.jQuery"
+        crossorigin="anonymous"
+        integrity="sha384-tsQFqpEReu7ZLhBV2VZlAu7zcOV+rXbYlF2cqB8txI/8aZajjp4Bqd+V6D5IgvKT">
+</script>
+
+
+
+<script>
+      var date = new Date();
+    var date2 = new Date();
+
+
+    var day = date.getDate();
+    var month = date.getMonth() + 1;
+    var year = date.getFullYear();
+
+    var day2 = date2.getDate();
+    var month2 = date2.getMonth() + 1;
+    var year2 = date2.getFullYear();
+
+    if (month < 10) month = "0" + month;
+    if (day < 10) day = "0" + day;
+
+    if (month2 < 10) month2 = "0" + month2;
+    if (day2 < 10) day2 = "0" + day2;
+
+    var today = year + "-" + month + "-" + day;
+    var today2 = year2 + "-" + month2 + "-" + day2;
+
+
+
+
+    document.getElementById('textStoreDate').value = today;
+    document.getElementById('textStoreDate2').value = today2;
+
+    function CreateOrderHistoryOfSetMenu() {
+
+
+
+
+
+
+        var ddlCategory = document.getElementById("DDLCategory");
+        var categoryId = ddlCategory.options[ddlCategory.selectedIndex].value.toString();
+        console.log(categoryId);
+
+
+        if (categoryId == "-1") {
+            alert("Please Select Category..!!");
+            document.getElementById('DDLCategory').style.borderColor = "red";
+            return false;
+        }
+
+    $.ajax({
+
+        url: '@Url.Action("CreateOrderHistoryOfSetMenu", "UserBill")',
+        type: "POST",
+        data: { MealTypeId: categoryId },
+        success: function (response) {
+            if (response.success) {
+
+               //jQuery("#messageUp").append('<div class="alert alert-success" role="alert"><b>"' + response.responseText + '"</b></div>');
+
+                window.alert(response.responseText);
+                        //jQuery("#messageUp").append('<div class="alert alert-success" role="alert"><b>"' + response.responseText + '"</b></div>');
+                window.location.reload(true);
+
+
+            } else {
+                // DoSomethingElse()
+                //alert(response.responseText);
+            }
+        }
+
+
+    })
+}
+</script>
+

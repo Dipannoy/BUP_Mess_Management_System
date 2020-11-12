@@ -1,0 +1,124 @@
+﻿@model IEnumerable<SetMenu>
+@inject ApplicationDbContext _db
+
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+<div class="container-fluid">
+
+    <h2>Set-Menu</h2>
+
+    <p>
+        <a asp-action="Create" class="btn btn-success btn-sm">Create New Set-Menu</a>
+    </p>
+
+
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>
+                    #
+                </th>
+                <th>
+                    Date
+                </th>
+                <th>
+                    Menu Details
+                </th>
+                <th>
+                    Extra Items
+                </th>
+                <th>
+                    Action
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model != null)
+            {
+                var i = 0;
+                @foreach (var gr1 in Model.GroupBy(x => x.SetMenuDate))
+                {
+                    i = i + 1;
+                    <tr>
+                        <td>@i</td>
+                        <td>
+                            @gr1.Key.ToShortDateString()
+                        </td>
+                        <td>
+                            @if (Model.Count(a => a.SetMenuDate == gr1.Key) > 0)
+                            {
+                                @foreach (var mtg in Model.Where(a => a.SetMenuDate == gr1.Key).GroupBy(a => a.MealType))
+                                {
+                                    @if (Model.Count(a => a.SetMenuDate == gr1.Key && a.MealTypeId == mtg.Key.Id) > 0)
+                                    {
+                                        <div class="container-fluid">
+                                            @mtg.Key.Name <strong>(@Model.Where(a => a.SetMenuDate == gr1.Key && a.MealTypeId == mtg.Key.Id).FirstOrDefault().SetMenuPrice Tk.)</strong>
+                                            <div class="container-fluid">
+                                                @{ var i2 = 0;}
+                                                @foreach (var mi in Model.Where(a => a.SetMenuDate == gr1.Key && a.MealTypeId == mtg.Key.Id).FirstOrDefault().SetMenuDetailsList)
+                                                {
+                                                    i2 = i2 + 1;
+                                                    var soi = _db.StoreOutItem.Find(mi.StoreOutItemId);
+                                                    <span class="badge badge-primary">@i2. @soi.Name</span>
+                                                }
+                                            </div>
+                                        </div>
+                                    }
+                                }
+
+                            }
+                        </td>
+                        <td>
+                            @if (Model.Count(a => a.SetMenuDate == gr1.Key) > 0)
+                            {
+                                @foreach (var mtg in Model.Where(a => a.SetMenuDate == gr1.Key).GroupBy(a => a.MealType))
+                                {
+                                    @if (Model.Count(a => a.SetMenuDate == gr1.Key && a.MealTypeId == mtg.Key.Id) > 0)
+                                    {
+                                        @if (Model.Where(a => a.SetMenuDate == gr1.Key && a.MealTypeId == mtg.Key.Id).FirstOrDefault().ExtraItemList.Count > 0)
+                                        {
+                                            <div class="container-fluid">
+                                                @mtg.Key.Name @*<strong>(@Model.Where(a => a.SetMenuDate == gr1.Key && a.MealTypeId == mtg.Key.Id).FirstOrDefault().SetMenuPrice Tk.)</strong>*@
+                                                <div class="container-fluid">
+                                                    @{ var i2 = 0;}
+                                                    @foreach (var mi in Model.Where(a => a.SetMenuDate == gr1.Key && a.MealTypeId == mtg.Key.Id).FirstOrDefault().ExtraItemList)
+                                                    {
+                                                        i2 = i2 + 1;
+                                                        var soi = _db.ExtraItem.Include(x => x.SetMenu).Include(x => x.StoreOutItem).Where(x => x.SetMenuId == mi.SetMenuId && x.StoreOutItemId == mi.StoreOutItemId).FirstOrDefault();
+                                                        <span class="badge badge-primary">@i2. @soi.StoreOutItem.Name  ( @soi.Price Tk. )</span>
+                                                    }
+                                                </div>
+                                            </div>
+                                        }
+
+                                    }
+                                }
+
+                            }
+                        </td>
+                        <td>
+                            @if (Model.Count(a => a.SetMenuDate == gr1.Key) > 0)
+                            {
+                                foreach(var ab in gr1.ToList())
+                                {
+                                    <div class="container-fluid my-3 w-100">
+                                        <a asp-action="Edit" asp-route-id="@ab.Id" class="btn btn-cyan btn-sm">Edit</a>
+                                    </div>
+                                }
+                            }
+                        </td>
+                    </tr>
+
+                }
+            }
+
+
+
+
+        </tbody>
+    </table>
+</div>
+

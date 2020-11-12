@@ -1,0 +1,125 @@
+﻿@model Tuple<List<Mess_Management_System_Alpha_V2.Models.Menu>, List<Mess_Management_System_Alpha_V2.Models.MenuSub>>
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<h2>Menu System</h2>
+
+<p>
+    <a class="btn btn-info btn-sm" asp-controller="Menu" asp-action="MenuCreate">Menu</a>
+    <a class="btn btn-warning btn-sm" asp-controller="Menu" asp-action="SubMenuCreate">Sub Menu</a>
+</p>
+
+<div class="row">
+    <div class="col-sm-12">
+        @*<div class="panel panel-primary" id="result_panel" style="border-color: #0F9D58;">
+            <div class="panel-heading" style="background-color: #0F9D58;border-color: #0F9D58;">
+                <h3 class="panel-title">Menu</h3>
+            </div>
+            <div class="panel-body">
+                
+            </div>
+        </div>*@
+
+
+        <div class="card">
+            <div class="card-header bg-secondary text-white">
+                Menu
+            </div>
+            <div class="card-body">
+                <div class="table-responsive ex3">
+                    <table class="table table-striped table-sm">
+                        <thead>
+                            <tr>
+                                <th>#SL</th>
+                                <th>Menu</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @{int i = 1;}
+                            @if (Model.Item1 != null)
+                            {
+                                @foreach (var tempData in Model.Item1.ToList())
+                                {
+                                    <tr>
+                                        <td>@(i++)</td>
+                                        <td>@tempData.MenuName</td>
+                                        <td>
+                                            <a asp-action="MenuEdit" asp-route-id="@tempData.Id" class="btn btn-info btn-sm">Edit</a> |
+                                            <a asp-action="MenuDelete" asp-route-id="@tempData.Id" class="btn btn-danger btn-sm">Delete</a>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+
+    </div>
+</div>
+
+
+<br />
+
+<div class="row">
+    <div class="col-sm-12">
+        @*<div class="panel panel-primary" id="result_panel" style="border-color: #7AD7F0;">
+            <div class="panel-heading" style="background-color: #7AD7F0;border-color: #7AD7F0;">
+                <h3 class="panel-title">Sub Menu</h3>
+            </div>
+            <div class="panel-body">
+                
+            </div>
+        </div>*@
+
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                Sub Menu
+            </div>
+            <div class="card-body">
+                <div class="table-responsive ex3">
+                    <table class="table table-striped table-sm">
+                        <thead>
+                            <tr>
+                                <th>#SL</th>
+                                <th>Menu</th>
+                                <th>Sub-Menu</th>
+                                <th>Controller</th>
+                                <th>Method</th>
+                                <th>IsActive</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @{int j = 1;}
+                            @if (Model.Item1 != null)
+                            {
+                                @foreach (var tempData in Model.Item2.ToList())
+                                {
+                                    <tr>
+                                        <td>@(j++)</td>
+                                        <td>@tempData.Menu.MenuName</td>
+                                        <td>@tempData.SubMenuName</td>
+                                        <td>@tempData.ControllerName</td>
+                                        <td>@tempData.ActionName</td>
+                                        <td>@tempData.IsActive</td>
+                                        <td>
+                                            <a asp-action="SubMenuEdit" asp-route-id="@tempData.Id" class="btn btn-info btn-sm">Edit</a> |
+                                            <a asp-action="SubMenuDelete" asp-route-id="@tempData.Id" class="btn btn-danger btn-sm">Delete</a>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>

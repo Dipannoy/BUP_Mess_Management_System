@@ -1,0 +1,538 @@
+﻿@inject ApplicationDbContext _context
+@inject Microsoft.AspNetCore.Identity.UserManager<ApplicationUser> _userManager
+@inject ApplicationDbContext _db
+@inject IDDLHelper _ddlHelper
+
+@inject IDDLHelper _ddlhelper
+@{
+    ViewData["Title"] = "Schedule";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    var from = this.Context.Request.Query["from"];
+    var person = this.Context.Request.Query["searchInput"];
+    long mealId = 0;
+
+    string OrderDate = "";
+    DateTime ODate = DateTime.Now;
+
+
+    //OrderDate = DateTime.Now.ToShortDateString();
+    string UserId = "";
+    if (ViewBag.OrderDate != null)
+    {
+        ODate = ViewBag.OrderDate;
+        OrderDate = ViewBag.OrderDate.ToShortDateString();
+    }
+    else
+    {
+        OrderDate = DateTime.Now.ToShortDateString();
+    }
+    if (ViewBag.mealId != null)
+    {
+        mealId = ViewBag.mealId;
+    }
+    else
+    {
+        mealId = 2;
+
+    }
+
+
+
+    var user = await _userManager.GetUserAsync(User);
+    var ItemForBreakFast = _db.ExtraItem.Where(x => x.MenuDate.ToShortDateString() == DateTime.Today.ToShortDateString() && x.MealTypeId == 1).ToList();
+    var ItemForLunch = _db.ExtraItem.Where(x => x.MenuDate.ToShortDateString() == DateTime.Today.ToShortDateString() && x.MealTypeId == 2).ToList();
+    var ItemForTeaBreak = _db.ExtraItem.Where(x => x.MenuDate.ToShortDateString() == DateTime.Today.ToShortDateString() && x.MealTypeId == 3).ToList();
+    var allItemForTheDay = _db.ExtraItem.Where(x => x.MenuDate.ToShortDateString() == DateTime.Today.ToShortDateString()).Select(x => x.StoreOutItemId).Distinct().ToList();
+    var PreOrderSetMenuDetailListBreakfast = _db.PreOrderSchedule.Include(x => x.SetMenu).Where(x => x.LastModifiedDate.ToShortDateString() == DateTime.Today.AddDays(-1).ToShortDateString() && x.MealTypeId == 1).ToList();
+    var PreOrderSetMenuDetailListLunch = _db.PreOrderSchedule.Include(x => x.SetMenu).Where(x => x.LastModifiedDate.ToShortDateString() == DateTime.Today.AddDays(-1).ToShortDateString() && x.MealTypeId == 2).ToList();
+    var OnSpotorderList = _db.OrderHistory.Where(x => x.OrderDate.ToShortDateString() == OrderDate && x.SetMenuId == null && x.UserId == UserId).ToList();
+    //var PreOrderSetMenuDetailListTeabreak = _db.PreOrderSchedule.Include(x => x.SetMenu).Where(x => x.LastModifiedDate.ToShortDateString() == DateTime.Today.AddDays(-1).ToShortDateString() && x.MealTypeId == 3);
+
+    //    var setmenu = _db.SetMenu.Where(x=>x.SetMenuDate.ToShortDateString() == DateTime.Today.ToShortDateString())
+    //var BillOfUser = _db.OrderHistory.Where(x => x.UserId == user.Id);
+
+    //DateTime ToDate = DateTime.Now.AddDays(20);
+    //DateTime FromDate = DateTime.Now.AddDays(20);
+    //Boolean DateCheck = false;
+    ////IQueryable<OrderHistory> theInfo = Enumerable.Empty<OrderHistory>().AsQueryable();
+    //var theInfo = _db.OrderHistory.Where(x => x.UserId == user.Id && x.OrderDate >= FromDate && x.OrderDate <= ToDate).ToList();
+
+    //List<OrderHistory> theInfo = new List<OrderHistory>();
+
+
+
+
+
+
+
+}
+
+
+@*<head>
+        <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.0/themes/smoothness/jquery-ui.css" />
+        <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+        <script src="https://code.jquery.com/ui/1.12.0/jquery-ui.min.js"></script>
+    </head>*@
+
+<style>
+    .list-group {
+        max-height: 300px;
+        margin-bottom: 10px;
+        overflow: scroll;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .text {
+        padding-left: 20px;
+    }
+
+    .date {
+        padding-left: 10px;
+    }
+
+    .meal {
+        padding-left: 20px;
+    }
+
+    .qn {
+        padding-left: 0px;
+    }
+</style>
+
+
+
+
+<h3 style="color:green;font-weight:bold;">OrderList</h3>
+<h4 style="color:green;font-weight:bold;">Meal Wise</h4>
+
+
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <a asp-controller="AdminShowOrder" asp-action="Schedule" class="btn btn-success btn-lg btn-block btn-huge">Meal Wise</a>
+    </div>
+    <div class="col-md-4">
+        <a asp-controller="AdminShowOrder" asp-action="ItemBase" class="btn btn-success btn-lg btn-block btn-huge">Item Wise</a>
+    </div>
+    <div class="col-md-4">
+        <a asp-controller="AdminShowOrder" asp-action="home" class="btn btn-success btn-lg btn-block btn-huge">Person Wise</a>
+    </div>
+
+
+
+</div>
+<hr />
+
+<div class="row">
+    <div class="col-sm-6"></div>
+    <div class="col-sm-6">
+        <form asp-action="DateMeal" asp-controller="AdminShowOrder" method="get" class="row">
+            <div class="col-sm-4">
+                <label><b> Order Date </b></label>
+                <input type="date" name="from" id="from" value="@from" class="form-control" />
+            </div>
+
+
+            <div class="col-sm-3">
+                <div class="form-group">
+                    <label><b> Meal </b></label>
+
+                    <select id="meal" name="meal" class="form-control border-radius-none" asp-items="@(new SelectList(_ddlHelper.GetMealType().Prepend(new KeyValuePair<string, string>("-1","Meal")),"Key","Value",""))"></select>
+
+                </div>
+            </div>
+            <div class="col-sm-5">
+                <br />
+                <button type="submit" class="btn btn-default btn-sm">Search</button>
+
+            </div>
+        </form>
+    </div>
+
+</div>
+<br />
+<br />
+
+<div class="row">
+
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                Schedule Based Order
+            </div>
+            <div class="card-body">
+                <ul class="list-group" id="BreakfastItemListAdded">
+                    <li class="list-group-item" style="padding:0px">
+                        <div class="row">
+                            <div class="col-sm-3">
+
+
+                                Name
+
+                            </div>
+                            <div class="col-sm-3">
+
+                                Meal
+
+                            </div>
+                            <div class="col-sm-6">
+
+                                Items
+
+                            </div>
+                        </div>
+                        <hr />
+
+                        @if (mealId == 10005)
+                        {
+                            var allOrderItem = _db.OrderHistory.Where(x => x.OrderDate.ToShortDateString() == OrderDate && x.MealTypeId == mealId && x.SetMenuId == null).ToList();
+                            var ordAllPersonExtraChit = _db.OrderHistory.Where(x => x.OrderDate.ToShortDateString() == OrderDate && x.MealTypeId == mealId && x.SetMenuId == null).Select(x => x.ApplicationUser.Id).Distinct().ToList();
+
+                            foreach (var i in ordAllPersonExtraChit)
+                            {
+                                <div class="row">
+                                    <div class="col-sm-3">
+                                        @{
+                                            var prson = _context.Users.Where(x => x.Id == i).FirstOrDefault();
+                                        }
+                                        @prson.BUPFullName
+                                    </div>
+                                    <div class="col-sm-3">
+                                        ExtraChit
+                                    </div>
+                                    @{var prsnorder = allOrderItem.Where(x => x.UserId == i).ToList();
+                                        double qnt2 = 0;
+                                        string itemdetail2 = "";
+                                        foreach (var p in prsnorder)
+                                        {
+                                            var itemnm = _context.StoreOutItem.Where(x => x.Id == p.StoreOutItemId).FirstOrDefault();
+                                            itemdetail2 += itemnm.Name + "-" + p.UnitOrdered + ", ";
+                                        }
+                                    }
+                                    <div class="col-sm-6">
+                                        @itemdetail2
+                                    </div>
+                                </div>
+                                <hr />
+
+                            }
+                        }
+                        else
+                        {
+
+
+                            var PreOrderSetMenuDetailList = _db.PreOrderSchedule.Include(x => x.SetMenu).Where(x => x.LastModifiedDate.ToShortDateString() == ODate.AddDays(-1).ToShortDateString() && x.MealTypeId == mealId).ToList();
+
+
+
+
+                            @foreach (var pb in PreOrderSetMenuDetailList)
+                            {
+                                <div class="row">
+                                    <div class="col-sm-3">
+                                        @pb.ApplicationUser.BUPFullName
+                                    </div>
+                                    <div class="col-sm-3">
+                                        @pb.MealType.Name
+                                    </div>
+                                    @{ double qnt = 0;
+                                        double pre = 0;
+                                        string itemdetail = "";
+                                        var stMenuDetail = _db.SetMenuDetails.Where(x => x.SetMenuId == pb.SetMenuId).ToList();
+                                        var ordHistoryESM = _db.OrderHistory.Where(x => x.SetMenuId == pb.SetMenuId && x.StoreOutItemId == null && x.ApplicationUser.Id == pb.ApplicationUser.Id).FirstOrDefault();
+                                        var ordHistoryECI = _db.OrderHistory.Where(x => x.SetMenuId == pb.SetMenuId && x.StoreOutItemId != null && x.ApplicationUser.Id == pb.ApplicationUser.Id).ToList();
+                                        var ordHistoryEXtraChit = _db.OrderHistory.Where(x => x.SetMenuId == null && x.OrderDate.ToShortDateString() == OrderDate && x.MealTypeId == mealId && x.StoreOutItemId != null && x.ApplicationUser.Id == pb.ApplicationUser.Id).ToList();
+
+                                        if (pb.IsPreOrderSet == true)
+                                        {
+                                            pre = 1;
+                                        }
+                                        foreach (var smd in stMenuDetail)
+                                        {
+                                            qnt = 0;
+                                            qnt += pre;
+
+                                            var itemnm = _db.StoreOutItem.Where(x => x.Id == smd.StoreOutItemId).FirstOrDefault();
+                                            if (ordHistoryESM != null)
+                                            {
+                                                qnt = qnt + ordHistoryESM.UnitOrdered;
+
+                                                itemdetail += itemnm.Name + "-" + qnt + ", ";
+                                            }
+                                            else
+                                            {
+                                                itemdetail += itemnm.Name + "-" + qnt + ", ";
+
+                                            }
+                                        }
+                                        foreach (var oec in ordHistoryECI)
+                                        {
+                                            var itemnm = _db.StoreOutItem.Where(x => x.Id == oec.StoreOutItemId).FirstOrDefault();
+
+                                            itemdetail += itemnm.Name + "-" + oec.UnitOrdered + ", ";
+
+                                        }
+                                        foreach (var ohe in ordHistoryEXtraChit)
+                                        {
+                                            var itemnm = _db.StoreOutItem.Where(x => x.Id == ohe.StoreOutItemId).FirstOrDefault();
+
+                                            itemdetail += itemnm.Name + "-" + ohe.UnitOrdered + ", ";
+
+                                        }
+                                    }
+                                    <div class="col-sm-6">
+                                        @itemdetail
+                                    </div>
+
+
+                                </div>
+                                <hr />
+                            }
+
+                            var ordHistoryEXtraChitnonPre = _db.OrderHistory.Where(x => x.SetMenuId == null && x.OrderDate.ToShortDateString() == OrderDate && x.MealTypeId == mealId && x.StoreOutItemId != null).ToList();
+                            if (ordHistoryEXtraChitnonPre.Count > 0)
+                            {
+                                foreach (var oenp in ordHistoryEXtraChitnonPre)
+                                {
+                                    var preschedule = PreOrderSetMenuDetailList.Where(x => x.ApplicationUser.Id == oenp.UserId).FirstOrDefault();
+                                    if (preschedule == null)
+                                    {
+                                        <div class="row">
+                                            <div class="col-sm-3">
+                                                @{
+                                                    var name = _userManager.Users.Where(x => x.Id == oenp.UserId).FirstOrDefault();
+                                                }
+                                                @name.BUPFullName
+                                            </div>
+                                            <div class="col-sm-3">
+                                                @oenp.MealType.Name
+                                            </div>
+                                            <div class="col-sm-6">
+                                                @oenp.StoreOutItem.Name - @oenp.UnitOrdered
+                                            </div>
+
+                                        </div>
+                                        <hr />
+                                    }
+                                }
+                            }
+
+
+
+                        }
+
+
+
+
+
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@*<script src="https://ajax.aspnetcdn.com/ajax/jquery/jquery-3.3.1.min.js"
+            asp-fallback-src="~/lib/jquery/dist/jquery.min.js"
+            asp-fallback-test="window.jQuery"
+            crossorigin="anonymous"
+            integrity="sha384-tsQFqpEReu7ZLhBV2VZlAu7zcOV+rXbYlF2cqB8txI/8aZajjp4Bqd+V6D5IgvKT">
+    </script>*@
+
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.12.0/themes/smoothness/jquery-ui.css" />
+<script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+<script src="https://code.jquery.com/ui/1.12.0/jquery-ui.min.js"></script>
+
+@*<link rel="stylesheet" href="https://code.jquery.com/ui/1.12.0/themes/smoothness/jquery-ui.css" />
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.12.0/jquery-ui.min.js"></script>*@
+
+
+
+
+
+
+
+@section Scripts {
+
+
+    <script>
+                jQuery.noConflict();
+              $("#searchInput").autocomplete({
+        source: function (request, response) {
+            $.ajax({
+                url: '@Url.Action("GetSearchPerson","AdminShowOrder")',
+                dataType: "json",
+                data: { search: $("#searchInput").val() },
+                success: function (data) {
+                    console.log('Hiiii');
+                    console.log(data);
+                    var a = [];
+                    for (var i = 0; i < data.length; i++) {
+
+                        a.push(data[i].bupFullName);
+                    }
+                    console.log(a);
+
+                    response(a);
+                    $("#suggesstion-box").show();
+			//$("#suggesstion-box").html(data.BUPFullName);
+                     //return { label: data.BUPFullName, value: data.BUPFullName };
+                    //response($.map(data, function (item) {
+                    //    return { label: item.BUPFullName, value: item.BUPFullName };
+                    //}));
+                },
+                error: function (xhr, status, error) {
+                    alert("Error");
+                }
+            });
+        }
+    });
+
+        function OnspotOrder() {
+            var x = document.getElementById('Label1').innerText;
+                var ddlCategory = document.getElementById("DDLCategory");
+            var categoryId = ddlCategory.options[ddlCategory.selectedIndex].value.toString();
+            console.log(categoryId);
+            console.log(x);
+
+
+              $.ajax({
+
+        url: '@Url.Action("CreateOnspotOrder", "AdminShowOrder")',
+        type: "POST",
+        data: { MealTypeId: categoryId,ItemId:x },
+        success: function (response) {
+            if (response.success) {
+
+               //jQuery("#messageUp").append('<div class="alert alert-success" role="alert"><b>"' + response.responseText + '"</b></div>');
+
+                //window.alert(response.responseText);
+                //        //jQuery("#messageUp").append('<div class="alert alert-success" role="alert"><b>"' + response.responseText + '"</b></div>');
+                //window.location.reload(true);
+
+
+            } else {
+                // DoSomethingElse()
+                alert(response.responseText);
+            }
+        }
+
+
+    })
+
+
+        }
+
+        function UpdateSetMenuList() {
+
+            //=============== Set Menu Id =================
+            var setMenuIdTemp = $('#setMenuId').val();
+            //alert(setMenuIdTemp);
+            //=============== Set Menu Id =================
+
+
+           //=============== Set Menu Item Id =================
+            var setMenuArray = [];
+                   var setMenuPrice = document.getElementById("setMenuPrice").value.toString();
+
+            var checkBoxSetMenu = document.getElementsByName("checkMainItem");
+            var checkBoxLengthSetMenu = checkBoxSetMenu.length;
+            var tempItemValueSetMenu = "";
+            for (var i = 0; i < checkBoxLengthSetMenu; i++) {
+                if (checkBoxSetMenu[i].checked == true) {
+
+                    tempItemValueSetMenu = checkBoxSetMenu[i].value.toString();
+                    var obj = { SetMenuItemId: tempItemValueSetMenu };
+                    setMenuArray.push(obj);
+                }
+            }
+            //=============== Set Menu Item Id =================
+
+
+            //=============== Extra Item Id =================
+            var addedItem = [];
+            var checkBoxAdded = document.getElementsByName("checkExtraItem");
+            var checkBoxLengthAdded = checkBoxAdded.length;
+            var textsAdded = document.getElementsByName("extraItemPrice");
+            var tempItemValueAdded = "";
+            var tempPriceValueAdded = "";
+            for (var i = 0; i < checkBoxLengthAdded; i++) {
+                if (checkBoxAdded[i].checked == true) {
+                    tempPriceValueAdded = textsAdded[i].value.toString();
+                    tempItemValueAdded = checkBoxAdded[i].value.toString();
+                    var obj = { AddedItemId: tempItemValueAdded, AddedItemPrice: tempPriceValueAdded };
+                    addedItem.push(obj);
+                }
+            }
+            //=============== Extra Item Id =================
+
+            var tempExtraItemList = "";
+            var tempSetMenuList = "";
+            tempExtraItemList = JSON.stringify(addedItem);
+            tempSetMenuList = JSON.stringify(setMenuArray);
+
+
+
+             $.ajax({
+
+                url: '@Url.Action("UpdateSetMenuAndAddedItemList", "SetMenu")',
+                 type: "POST",
+                 data: { SetMenuList: tempSetMenuList, ExtraItemList: tempExtraItemList, SetMenuId: setMenuIdTemp, SetMenuPrice: setMenuPrice },
+                success: function (response) {
+                    if (response.success) {
+
+                        //alert(response.responseText);
+                        //window.location.reload(true);
+
+
+
+
+                        jQuery("#messageUp").append('<div class="alert alert-success" role="alert"><b>"' + response.responseText + '"</b></div>');
+                        jQuery("#messageDown").append('<div class="alert alert-success" role="alert"><b>"' + response.responseText + '"</b></div>');
+
+
+                    } else {
+                        // DoSomethingElse()
+                        //alert(response.responseText);
+                        jQuery("#messageUp").append('<div class="alert alert-danger" role="alert"><b>"' + response.responseText + '"</b></div>');
+                        jQuery("#messageDown").append('<div class="alert alert-danger" role="alert"><b>"' + response.responseText +'"</b></div>');
+                    }
+                }
+
+
+            })
+
+
+
+
+        }
+
+
+
+
+
+
+
+        //<<<<<<<<<<<<<<<<<< CleanPriceFieldOfExtraItem >>>>>>>>>>>>>>>>>>>>>>>
+        function CleanPriceFieldOfExtraItem(storeOutItemId) {
+
+            var isChecked = $('#checkadded_' + storeOutItemId).is(":checked");
+            if (isChecked == true) {
+                //alert('is checked');
+            } else {
+                //alert('is not checked');
+                $('#priceadded_' + storeOutItemId).val('');
+
+            }
+
+        }
+        //<<<<<<<<<<<<<<<<<< CleanPriceFieldOfExtraItem >>>>>>>>>>>>>>>>>>>>>>>
+
+    </script>
+}
+
+
+
+

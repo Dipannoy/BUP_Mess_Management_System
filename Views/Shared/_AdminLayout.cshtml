@@ -1,0 +1,447 @@
+﻿<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no" />
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <title>@ViewData["Title"] - Mess Management System</title>
+    <link rel="icon" type="image/png" href="~/images/favicon.png">
+
+    @*-------------------------------------------------- SideBar Styling----------------------------------------------------------------------*@
+    @*<link rel="apple-touch-icon" sizes="76x76" href="~/assets/img/apple-icon.png">
+        <link rel="icon" type="image/png" href="~/assets/img/favicon.png">*@
+    @*<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+        <title>
+            Material Dashboard by Creative Tim
+        </title>
+        <meta content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, shrink-to-fit=no' name='viewport' />*@
+
+    @*<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css" integrity="sha384-9gVQ4dYFwwWSjIDZnLEWnxCjeSWFphJiwGPXr1jddIhOegiu1FwO5qRGvFXOdJZ4" crossorigin="anonymous">*@
+
+
+    @*<script defer src="https://use.fontawesome.com/releases/v5.0.13/js/solid.js" integrity="sha384-tzzSw1/Vo+0N5UhStP3bvwWPq+uvzCMfrN1fEFe+xBmv1C/AtVX5K0uZtmcHitFZ" crossorigin="anonymous"></script>
+        <script defer src="https://use.fontawesome.com/releases/v5.0.13/js/fontawesome.js" integrity="sha384-6OIrr52G08NpOFSZdxxz1xdNSndlD4vdcf/q2myIUVO0VsqaGHJsB0RaBE01VTOY" crossorigin="anonymous"></script>
+        <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Roboto+Slab:400,700|Material+Icons" />
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/latest/css/font-awesome.min.css">*@
+
+
+
+
+
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Roboto+Slab:400,700|Material+Icons" />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/latest/css/font-awesome.min.css">
+    <link href="~/assets/css/material-dashboard.css?v=2.1.1" rel="stylesheet" />
+    <link href="~/assets/demo/demo.css" rel="stylesheet" />
+    @*-------------------------------------------------- SideBar Styling----------------------------------------------------------------------*@
+
+
+
+
+
+
+    <environment include="Development">
+
+        @*<link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Roboto+Slab:400,700|Material+Icons" />
+            <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/latest/css/font-awesome.min.css">
+            <link href="~/assets/css/material-dashboard.css?v=2.1.1" rel="stylesheet" />
+            <link href="~/assets/demo/demo.css" rel="stylesheet" />*@
+
+
+
+
+        <!-- Font Awesome -->
+        <link rel="stylesheet" href="~/lib/font-awesome/css/all.css">
+
+        <!-- Bootstrap core CSS -->
+        <link href="~/lib/bootstrap/css/bootstrap.css" rel="stylesheet">
+        <link rel="stylesheet" type="text/css" href="~/assets/css/jquery-clockpicker.min.css">
+
+        <!-- Material Design Bootstrap -->
+        <link href="~/lib/mdbootstrap/css/mdb.css" rel="stylesheet">
+        <!-- custom styles -->
+        <link href="~/css/site.css" rel="stylesheet">
+    </environment>
+    <environment exclude="Development">
+        <!-- Font Awesome -->
+        <link rel="stylesheet" href="~/lib/font-awesome/css/all.min.css">
+        <!-- Bootstrap core CSS -->
+        <link href="~/lib/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+        <!-- Material Design Bootstrap -->
+        <link href="~/lib/mdbootstrap/css/mdb.min.css" rel="stylesheet">
+        <!-- custom styles -->
+        <link href="~/css/site.min.css" rel="stylesheet">
+    </environment>
+
+</head>
+<style>
+
+    .dropdown-content a:hover {
+        background-color: #ddd;
+    }
+
+    .dropdown:hover .dropdown-content {
+        display: block;
+    }
+
+    .dropdown:hover .dropbtn {
+        background-color: #3e8e41;
+    }
+
+    .textdrp {
+        font-size: 15px;
+    }
+
+    .menu-large {
+        position: static !important;
+    }
+
+    .dropdown-container {
+        display: none;
+        background-color: #262626;
+        padding-left: 8px;
+    }
+
+    .dropdown-btn {
+        padding: 6px 8px 6px 16px;
+        text-decoration: none;
+        font-size: 20px;
+        color: #818181;
+        display: block;
+        border: none;
+        background: none;
+        width: 100%;
+        text-align: left;
+        cursor: pointer;
+        outline: none;
+    }
+</style>
+<body style="padding-top: 0px;">
+
+    <!--Navbar -->
+    @*<nav class="mb-1 navbar navbar-expand-lg lighten-1 navbar-dark primary-color" style="margin-bottom:0px">
+        <a class="navbar-brand" href="javascript:void(0);"><b class="small">Mess Management</b></a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent-555"
+                aria-controls="navbarSupportedContent-555" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>*@
+    @*<div class="collapse navbar-collapse" id="navbarSupportedContent-555">
+
+            <partial name="_NavBarMenuPartial" />
+
+        </div>*@
+    @*</nav>*@
+    <!--/.Navbar -->
+    @*<partial name="_CookieConsentPartial" />*@
+    <div class="row">
+        @*<partial name="TopNavBar" />*@
+        <nav class="navbar navbar-expand-lg navbar-transparent navbar-absolute fixed-top ">
+            <div class="container-fluid">
+                @*<div class="navbar-wrapper">
+                        <a class="navbar-brand" href="#pablo">Dashboard</a>
+                    </div>*@
+                <button class="navbar-toggler" type="button" data-toggle="collapse" aria-controls="navigation-index" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="navbar-toggler-icon icon-bar"></span>
+                    <span class="navbar-toggler-icon icon-bar"></span>
+                    <span class="navbar-toggler-icon icon-bar"></span>
+                </button>
+                <div class="collapse navbar-collapse justify-content-end">
+                    @*<form class="navbar-form">
+                        <div class="input-group no-border">
+                            <input type="text" value="" class="form-control" placeholder="Search...">
+                            <button type="submit" class="btn btn-white btn-round btn-just-icon">
+                                <i class="material-icons">search</i>
+                                <div class="ripple-container"></div>
+                            </button>
+                        </div>
+                    </form>*@
+                    <ul class="navbar-nav">
+                        @*<li class="nav-item">
+                            <a class="nav-link" href="#pablo">
+                                <i class="material-icons">dashboard</i>
+                                <p class="d-lg-none d-md-block">
+                                    Stats
+                                </p>
+                            </a>
+                        </li>*@
+                        <li class="nav-item dropdown">
+                            @*<a class="nav-link" href="http://example.com" id="navbarDropdownMenuLink" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <i class="material-icons">notifications</i>
+                                <span class="notification">5</span>
+                                <p class="d-lg-none d-md-block">
+                                    Some Actions
+                                </p>
+                            </a>*@
+                            @*<div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdownMenuLink">
+                                <a class="dropdown-item" href="#">Mike John responded to your email</a>
+                                <a class="dropdown-item" href="#">You have 5 new tasks</a>
+                                <a class="dropdown-item" href="#">You're now friend with Andrew</a>
+                                <a class="dropdown-item" href="#">Another Notification</a>
+                                <a class="dropdown-item" href="#">Another One</a>
+                            </div>*@
+                        </li>
+                        <li class="nav-item dropdown">
+                            <a class="nav-link" href="#pablo" id="navbarDropdownProfile" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                <i class="material-icons">person</i>
+                                @ViewBag.FullName
+
+                                <p class="d-lg-none d-md-block">
+                                </p>
+                            </a>
+
+                            <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdownProfile">
+                                @*<a class="dropdown-item" href="#">Profile</a>
+        <a class="dropdown-item" href="#">Settings</a>*@
+                                @*<a class="dropdown-item">
+                                    @ViewBag.FullName
+                                </a>*@
+
+                                <a class="dropdown-item" asp-action="Signout" asp-controller="AdminShowOrder">LogOut</a>
+
+                                <div class="dropdown-divider"></div>
+                                @*<form asp-action="Signout" asp-controller="AdminShowOrder" method="post" novalidate="novalidate">
+            <button type="submit" class="btn btn-light" style="color: #666;width: 100%;text-align: left;font-size: 14px;background-color: white;"><i class="material-icons" style="padding-right: 9%;">input</i>Sign Out</button>
+
+        </form>*@
+                                @*@Html.Partial("_LoginPartial")*@
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+
+    </div>
+    <div class="row">
+        <div class="col-sm-2" style="padding-right:0px;">
+            @*<partial name="_NavBarMenuPartial" />*@
+            <div class="sidebar" data-color="green" style="background: url('@Url.Content("~/images/bg3.jpg")')">
+                <!--
+
+                url('@Url.Content("~/images/food.jpg")')
+                    Tip 1: You can change the color of the sidebar using: data-color="purple | azure | green | orange | danger"
+
+                    Tip 2: you can also add an image using data-image tag
+                -->
+                <div class="logo">
+                    <a href="http://www.creative-tim.com" class="simple-text logo-normal" style="font-weight:bold;color:green">
+                        <img src="~/images/bup_logo.png" height="50" />
+
+                        BUP Mess
+                    </a>
+                </div>
+                <div class="sidebar-wrapper">
+                    <ul class="nav">
+                        <li class="nav-item">
+                            <a class="nav-link" style="font-size:15px;font-weight:bold;" asp-controller="AdminShowOrder" asp-action="Dashboard">
+                                <i class="material-icons">dashboard</i>
+                                <p>Dashboard</p>
+                            </a>
+                        </li>
+
+                        @*<li class="nav-item active">
+            <a href="#homeSubmenu" style="font-size:15px;font-weight:bold;" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle nav-link">
+                &nbsp;&nbsp;<i class="fas fa-database"></i> &nbsp; &nbsp;
+                Order
+
+            </a>
+            <ul class="collapse list-unstyled" id="homeSubmenu" style="padding-left:40px;padding-top:10px;">
+                <li>
+                    <a asp-controller="AdminShowOrder" asp-action="Schedule" style="font-weigSSht:bold;font-size:15px;color:darkgray;">Schedule Wise</a>
+                </li>
+                <li>
+                    <a asp-controller="AdminShowOrder" asp-action="ItemBase" style="font-weight:bold;font-size:15px;color:darkgray;">Item Wise</a>
+                </li>
+                <li>
+                    <a asp-controller="AdminShowOrder" asp-action="home" style="font-weight:bold;font-size:15px;color:darkgray;">Person Wise</a>
+                </li>
+            </ul>
+        </li>*@
+
+
+                        <li class="nav-item ">
+                            <a href="#homeSubmenu2" style="font-size:15px;font-weight:bold;" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle nav-link">
+                                &nbsp;<i class="fas fa-database"></i>
+                                Store
+
+                            </a>
+                            <ul class="collapse list-unstyled" id="homeSubmenu2" style="padding-left:40px;padding-top:10px;">
+                                <li>
+                                    <a asp-controller="StorageManagement" asp-action="WarehouseStorageNew" asp-route-storeId="1" style="font-weight:bold;font-size:14px;color:black;">Store In</a>
+                                </li>
+                                <li>
+                                    <a asp-controller="StorageManagement" asp-action="WarehouseStorageNew" asp-route-storeId="2" style="font-weight:bold;font-size:14px;color:black;">Store Out</a>
+                                </li>
+                                <li>
+                                    <a asp-controller="StorageManagement" asp-action="WarehouseStorageNew" asp-route-storeId="3" style="font-weight:bold;font-size:14px;color:black;">Store Out Recipe</a>
+                                </li>
+                            </ul>
+                        </li>
+
+
+                        @*<li class="">
+            <a class="nav-link dropdown-toggle" style="font-size:15px;font-weight:bold;" data-toggle="dropdown" href="#" aria-haspopup="true" aria-expanded="false"> <i class="material-icons">dashboard</i>OrderList</a>
+
+
+            <ul class="collapse list-unstyled">
+                <li>
+                    <a class="dropdown-item" asp-controller="AdminShowOrder" asp-action="Schedule">ScheduleBase</a>
+                </li>
+                <li>
+                    <a class="dropdown-item" asp-controller="AdminShowOrder" asp-action="ItemBase">ItemBase</a>
+                </li>
+                <li>
+                    <a class="dropdown-item" asp-controller="AdminShowOrder" asp-action="home">PersonBase</a>
+                </li>
+            </ul>
+        </li>*@
+                        @*<li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle textdrp" style="font-size:15px;font-weight:bold;" data-toggle="dropdown" href="#"> <i class="material-icons">dashboard</i>Store</a>
+
+
+            <div class="dropdown-menu collapse list-unstyled">
+                <a class="dropdown-item" asp-controller="StorageManagement" asp-action="WarehouseStorageIn">Store In</a>
+                <a class="dropdown-item" asp-controller="StorageManagement" asp-action="WarehouseStorageOut">Store out</a>
+                <a class="dropdown-item" asp-controller="StoreOutItemRecipe" asp-action="Index">Store Out Recipe</a>
+
+            </div>
+        </li>*@
+                        <li class="nav-item ">
+                            <a class="nav-link" style="font-size:18px;font-weight:bold;" asp-controller="AdminMenu" asp-action="Menu">
+                                <i class="material-icons">dashboard</i>
+                                <p>Food Item</p>
+                            </a>
+                        </li>
+
+                        @*<li class="nav-item ">
+            <a class="nav-link" style="font-size:18px;font-weight:bold;" asp-controller="AdminMenu" asp-action="Test">
+                <i class="material-icons">dashboard</i>
+                <p>Menu</p>
+            </a>
+        </li>*@
+
+                        <li class="nav-item ">
+                            <a class="nav-link" style="font-size:18px;font-weight:bold;" asp-controller="AdminBillGenerate" asp-action="Index">
+                                <i class="material-icons">dashboard</i>
+                                <p>Bill</p>
+                            </a>
+                        </li>
+
+                        <li class="nav-item ">
+                            <a class="nav-link" style="font-size:18px;font-weight:bold;" asp-controller="ConsumerOrder" asp-action="Index">
+                                <i class="material-icons">dashboard</i>
+                                <p>Consumer Order</p>
+                            </a>
+                        </li>
+
+                        <li class="nav-item ">
+                            <a class="nav-link" style="font-size:18px;font-weight:bold;" asp-controller="AdminShowOrder" asp-action="GoUCAM">
+                                <i class="material-icons">dashboard</i>
+                                <p>UCAM</p>
+                            </a>
+                        </li>
+
+                    </ul>
+                </div>
+            </div>
+
+        </div>
+        <div class="col-sm-10" style="padding-left:30px;">
+            @*<div class="row">
+                    <partial name="TopNavBar" />
+                </div>*@
+
+            @*<div class="row">*@
+
+            @RenderBody()
+
+            @*</div>*@
+
+
+
+
+            @*<div ng-app="">
+                    <p>Name : <input type="text" ng-model="name"></p>
+                    <h1>Hello {{name}}</h1>
+                </div>*@
+
+        </div>
+        @*<div class="col-sm-1">
+
+            </div>*@
+
+
+    </div>
+
+    @*<div class="container">
+
+            @RenderBody()
+        </div>*@
+
+    <environment include="Development">
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+        <script data-require="angular.js@1.5.3" data-semver="1.4.8" src="https://code.angularjs.org/1.4.8/angular.js"></script>
+        <script data-require="angular-resource@1.4.8" data-semver="1.4.8" src="https://code.angularjs.org/1.4.8/angular-resource.js"></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.23/angular.min.js"></script>
+        <!-- JQuery -->
+        @*<script type="text/javascript" src="~/lib/jquery/dist/jquery.js"></script>*@
+        <script src="~/assets/js/jquery-clockpicker.min.js"></script>
+
+        <!-- Bootstrap tooltips -->
+        <script type="text/javascript" src="~/lib/popper.js/umd/popper.js"></script>
+        <!-- Bootstrap core JavaScript -->
+        <script type="text/javascript" src="~/lib/bootstrap/js/bootstrap.js"></script>
+
+
+
+        <!-- Moment JavaScript -->
+        <script type="text/javascript" src="~/lib/moment.js/moment.js"></script>
+        <!-- MDB core JavaScript -->
+        <script type="text/javascript" src="~/js/site.js"></script>
+    </environment>
+    <environment exclude="Development">
+
+        <!-- JQuery -->
+        <script type="text/javascript" src="~/lib/jquery/dist/jquery.min.js"></script>
+        <!-- Bootstrap tooltips -->
+        <script type="text/javascript" src="~/lib/popper.js/umd/popper.min.js"></script>
+        <!-- Bootstrap core JavaScript -->
+        <script type="text/javascript" src="~/lib/bootstrap/js/bootstrap.min.js"></script>
+        <!-- Moment JavaScript -->
+        <script type="text/javascript" src="~/lib/moment.js/moment.min.js"></script>
+        <script type="text/javascript" src="~/assets/js/Jquery.min.js"></script>
+        <script type="text/javascript" src="~/assets/js/jquery-ui.min.js"></script>
+        <!-- MDB core JavaScript -->
+        <script type="text/javascript" src="~/js/site.min.js"></script>
+    </environment>
+    @*<script>
+            $(document).ready(function () {
+                $('li').hover(function () {
+                    $(this).children('a').stop().slideToggle(100);
+                });
+            });
+        </script>*@
+
+    @*<script>
+            var a = document.location.host;
+            alert(a);
+        </script>*@
+
+    @RenderSection("Scripts", required: false)
+
+    @*<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>*@
+
+    <script>
+
+
+
+        $(".nav a").on("click", function () {
+            $(".nav").find(".active").removeClass("active");
+            $(this).parent().addClass("active");
+        });
+    </script>
+
+</body>
+</html>

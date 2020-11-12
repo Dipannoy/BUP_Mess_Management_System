@@ -1,0 +1,1555 @@
+﻿@inject ApplicationDbContext _context
+@inject Microsoft.AspNetCore.Identity.UserManager<ApplicationUser> _userManager
+@inject ApplicationDbContext _db
+@inject IDDLHelper _ddlHelper
+
+@inject IDDLHelper _ddlhelper
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    var from = this.Context.Request.Query["from"];
+    var person = this.Context.Request.Query["searchInput"];
+    int day = 0;
+    string userName = "";
+    string itemNamePartial = "";
+    string personNamePartial = "";
+    int daay = 0;
+    int month = 0;
+    var Month = new Dictionary<string, string>();
+    var Year = new Dictionary<string, string>();
+    var userId = "";
+
+
+
+
+    Month.Add("1", "January");
+    Month.Add("2", "February");
+    Month.Add("3", "March");
+    Month.Add("4", "April");
+    Month.Add("5", "May");
+    Month.Add("6", "June");
+    Month.Add("7", "July");
+    Month.Add("8", "August");
+    Month.Add("9", "September");
+    Month.Add("10", "October");
+    Month.Add("11", "November");
+    Month.Add("12", "December");
+
+    Year.Add("2019", "2019");
+    Year.Add("2020", "2020");
+    Year.Add("2021", "2021");
+    Year.Add("2022", "2022");
+    Year.Add("2023", "2023");
+    Year.Add("2024", "2024");
+
+
+    var BillViewDictionary =  new Dictionary<string, string>();
+
+    string billDate = DateTime.Now.ToShortDateString();
+
+    int year = 0;
+
+    var DistinctUserId = _context.OrderHistoryVr2.Where(x => x.OrderDate.ToShortDateString() == billDate).Select(x => x.UserId).Distinct();
+
+
+                    var accsrBill = _context.AccessoryBill.Sum(x => x.DefaultCost);
+
+
+
+    string OrderDate = "";
+    DateTime OD = DateTime.Now;
+    int lastUpdate = 1;
+    int subMenuDetect = 1;
+    int subMenuDetect2 = 1;
+    int subMenuDetect3 = 1;
+
+
+    var cmb = new List <ConsumerMonthlyBillRecord>();
+
+    if(ViewBag.StatusUser != null)
+    {
+        int mn = ViewBag.Mnth;
+        int y = ViewBag.Yr;
+        if(ViewBag.StatusUser == "-1")
+        {
+            cmb = _context.ConsumerMonthlyBillRecord.Where(x => x.Month == mn && x.Year == y).ToList();
+        }
+        else
+        {
+            string u = ViewBag.StatusUser;
+          cmb = _context.ConsumerMonthlyBillRecord.Where(x => x.Month == mn && x.Year == y && x.UserId == u).ToList();
+
+        }
+    }
+
+
+
+
+}
+<head>
+    @*<link rel="stylesheet" type="text/css" href="~/assets2/css/bootstrap.min.css">
+        <link rel="stylesheet" type="text/css" href="~/assets2/css/github.min.css">*@
+    @*<link rel="stylesheet" type="text/css" href="~/dist2/bootstrap-clockpicker.min.css">*@
+    @*<link type="text/css" href="https://daemonite.github.io/material/css/material.min.css">
+        <link type="text/css" href="https://daemonite.github.io/material/js/material.min.js">
+        <link type="text/css" href="https://cdn.jsdelivr.net/gh/djibe/clockpicker@1d03466e3b5eebc9e7e1dc4afa47ff0d265e2f16/dist/bootstrap4-clockpicker.min.css">
+
+
+        <link type="text/css" href="https://cdn.jsdelivr.net/gh/djibe/clockpicker@6d385d49ed6cc7f58a0b23db3477f236e4c1cd3e/dist/bootstrap4-clockpicker.min.js">*@
+    @*<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>*@
+    @*<script src="https://weareoutman.github.io/clockpicker/dist/jquery-clockpicker.min.js"></script>
+        <link href="https://weareoutman.github.io/clockpicker/dist/jquery-clockpicker.min.css" rel="stylesheet" />*@
+
+    <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Roboto+Slab:400,700|Material+Icons" />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/latest/css/font-awesome.min.css">
+    <link href="~/assets/css/material-dashboard.css?v=2.1.1" rel="stylesheet" />
+    <link href="~/assets/demo/demo.css" rel="stylesheet" />
+
+
+</head>
+
+<style>
+
+    .note {
+        color: #777;
+        font-size: 0.85em;
+    }
+
+    h2 {
+        text-align: center;
+    }
+
+    table caption {
+        padding: .5em 0;
+    }
+
+    .p {
+        text-align: center;
+        padding-top: 140px;
+        font-size: 14px;
+    }
+
+    .modal {
+        display: none; /* Hidden by default */
+        position: fixed; /* Stay in place */
+        z-index: 1; /* Sit on top */
+        padding-top: 100px;
+        padding-left: 100px;/* Location of the box */
+        left: 0;
+        top: 0;
+        width: 100%; /* Full width */
+        height: 100%; /* Full height */
+        overflow: auto; /* Enable scroll if needed */
+        background-color: rgb(0,0,0); /* Fallback color */
+        background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+    }
+
+    /* Modal Content */
+    .modal-content {
+        background-color: #fefefe;
+        margin: auto;
+        padding-top: 20px;
+        padding-left:50px;
+        border: 1px solid #888;
+        width: 40%;
+    }
+
+    /* The Close Button */
+    .close {
+        color: black;
+        /*float: right;*/
+        font-size: 20px;
+        font-weight: bold;
+    }
+
+        .close:hover,
+        .close:focus {
+            color: #000;
+            text-decoration: none;
+            cursor: pointer;
+        }
+</style>
+
+<div class="content">
+    <div class="container-fluid">
+
+        <div id="myModal" class="modal">
+
+            <!-- Modal content -->
+            <div class="modal-content">
+                <form asp-action="CreateAccessoryBill" post>
+
+                    <div class="row">
+                        <div class="col-sm-8">
+
+                        </div>
+                        <div class="col-sm-4">
+                            <span class="close" style="margin-right:12px;"> <i class="fas fa-times"></i></span>
+                        </div>
+
+                    </div>
+
+                    <div class="row">
+                        <div class="form-group">
+                            <label class="bmd-label-floating">Name</label>
+                            <div style="display:inline-flex">
+
+                                <input type="text" id="AcsName" name="AcsName" class="form-control" required>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="row">
+                        <div class="form-group">
+                            <label class="bmd-label-floating">Minimum Meal</label>
+                            <div style="display:inline-flex">
+
+                                <input type="number" id="MinMeal" name="MinMeal" class="form-control">
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="row">
+                        <div class="form-group">
+                            <label class="bmd-label-floating">Minimum Meal Cost</label>
+                            <div style="display:inline-flex">
+
+                                <input type="number" id="MinMealCost" name="MinMealCost" class="form-control">
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="row">
+                        <div class="form-group">
+                            <label class="bmd-label-floating">Default Cost</label>
+                            <div style="display:inline-flex">
+
+                                <input type="number" id="DefaultCost" name="DefaultCost" class="form-control" required>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-8">
+
+                        </div>
+                        <div class="col-sm-4">
+                            <button type="submit" rel="tooltip" style="padding-left:15px;padding-right:15px;padding-top:10px;padding-bottom:10px;" class="btn-success"><i class="fas fa-plus"></i>&nbsp; Add</button>
+
+                        </div>
+
+                    </div>
+                </form>
+
+
+            </div>
+
+        </div>
+
+        <br />
+        <div id="Start" class="row">
+            <form asp-action="CreateDailyBill" asp-controller="AdminBillGenerate" method="post">
+                @*<input type="text" />*@
+                <button type="submit" rel="tooltip" class="btn">Create Today's Bill</button>
+
+
+            </form>
+            <button rel="tooltip" class="btn" onclick="PrintOptionSpace()">Bill Print</button>
+            <button rel="tooltip" class="btn" onclick="ViewBill()">Bill View</button>
+            <button rel="tooltip" class="btn" onclick="ViewAccsryBill()">Accessory Bill</button>
+            <button rel="tooltip" class="btn" onclick="ViewBillStatus()">Bill Status</button>
+
+
+
+
+
+        </div>
+
+        <div id="PrintOption" class="jumbotron" style="padding-bottom:0px;padding-left:10px;padding-right:10px;padding-top:10px;">
+
+            <div class="row">
+                <div class="col-md-5">
+                    <div class="form-group">
+                        <label class="bmd-label-floating">Person</label>
+                        <div style="display:inline-flex">
+
+                                <input type="text" name="person" id="person" class="form-control" value="" />
+                            <div id="suggesstion-box"></div>
+
+                            @*<select id="person" name="person" class="form-control border-radius-none" asp-items="@(new SelectList(_ddlHelper.GetAllUsersList().Prepend(new KeyValuePair<string, string>("-1", "")), "Key", "Value", ""))"></select>*@
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="form-group">
+                        <label class="bmd-label-floating">Month</label>
+                        <div style="display:inline-flex">
+
+                            <select id="month" name="month" class="form-control border-radius-none" asp-items="@(new SelectList(Month.Prepend(new KeyValuePair<string, string>("-1", "")), "Key", "Value", ""))"></select>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <div class="form-group">
+                        <label class="bmd-label-floating">Year</label>
+                        <div style="display:inline-flex">
+
+                            <select id="year" name="year" class="form-control border-radius-none" asp-items="@(new SelectList(Year.Prepend(new KeyValuePair<string, string>("-1", "")), "Key", "Value", ""))"></select>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <button rel="tooltip" class="btn" onclick="Print(800,1200)">Bill Print</button>
+
+
+                </div>
+            </div>
+
+        </div>
+
+
+        <div id="BillView" class="jumbotron" style="padding-bottom:0px;padding-left:10px;padding-right:10px;padding-top:10px;">
+
+            <form asp-action="ViewBill" post>
+                <div class="row">
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label class="bmd-label-floating">From</label>
+                            <div style="display:inline-flex">
+
+                                <input type="text" id="from" name="from" class="form-control" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label class="bmd-label-floating">To</label>
+                            <div style="display:inline-flex">
+
+                                <input type="text" id="to" name="to" class="form-control" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-5">
+                        <div class="form-group">
+                            <label class="bmd-label-floating">Person</label>
+                            <div style="display:inline-flex">
+
+                                <input type="text" name="person2" id="person2" class="form-control" value="" />
+                                <div id="suggesstion-box4"></div>
+
+                                @*<select id="person2" name="person2" class="form-control border-radius-none" asp-items="@(new SelectList(_ddlHelper.GetAllUsersList().Prepend(new KeyValuePair<string, string>("-1", "")), "Key", "Value", ""))"></select>*@
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-1" style="padding-left:0px;">
+                        <button rel="tooltip" type="submit" class="btn">Load</button>
+
+
+                    </div>
+                </div>
+            </form>
+
+        </div>
+        @if ((ViewBag.Form != null && ViewBag.To != null) || (ViewBag.UserId != null))
+        {
+
+
+            DateTime From = ViewBag.Form;
+            DateTime To = ViewBag.To;
+            var BillList = new List<OrderHistoryVr2>();
+            string usrName = "";
+            if (ViewBag.UserId == null)
+            {
+                BillList = 
+            _context.OrderHistoryVr2.Where(x => DateTime.Parse(x.OrderDate.ToShortDateString()) >= DateTime.Parse(From.ToShortDateString()) &&
+            DateTime.Parse(x.OrderDate.ToShortDateString()) <= DateTime.Parse(To.ToShortDateString())).ToList();
+            }
+            else
+            {
+                string usr = ViewBag.UserId;
+                userName = _userManager.Users.Where(x => x.Id == usr).FirstOrDefault().BUPFullName;
+                BillList = _context.OrderHistoryVr2.Where(x => x.OrderDate >= From && x.OrderDate <= To && x.UserId == usr).ToList();
+            }
+
+            <div id="BillViewRsp">
+            <div class="jumbotron" style="padding-bottom:0px;padding-left:10px;padding-right:10px;padding-top:10px;">
+
+                <form asp-action="ViewBill2" post>
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="bmd-label-floating">From</label>
+                                <div style="display:inline-flex">
+
+                                    <input type="text" id="from2" name="from2" value="@From.ToString("dd-MM-yyyy")" class="form-control" required>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="bmd-label-floating">To</label>
+                                <div style="display:inline-flex">
+
+                                    <input type="text" id="to2" name="to2" value="@To.ToString("dd-MM-yyyy")" class="form-control" required>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-5">
+                            <div class="form-group">
+                                <label class="bmd-label-floating">Person</label>
+                                <div style="display:inline-flex">
+
+                                    <input type="text" name="person3" id="person3" class="form-control" value="" />
+                                    <div id="suggesstion-box5"></div>
+
+                                    @*<select id="person2" name="person2" class="form-control border-radius-none" asp-items="@(new SelectList(_ddlHelper.GetAllUsersList().Prepend(new KeyValuePair<string, string>(userId, userName)), "Key", "Value", ""))"></select>*@
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-1" style="padding-left:0px;">
+                            <button rel="tooltip" type="submit" class="btn">Load</button>
+
+
+                        </div>
+                    </div>
+                </form>
+
+            </div>
+
+            @{BillList.OrderBy(x => x.OrderDate);
+                var BillListOnDateMeal =
+                from bl in BillList
+                group bl by new { bl.MealTypeId, bl.OrderDate.Date, bl.UserId } into BillMillDate
+                select new
+                {
+                    Team = BillMillDate.Key,
+                    TotalBill = BillMillDate.Sum(x => x.OrderAmount),
+                };
+                var BillListMD = BillListOnDateMeal.ToList();
+                //var accsrBill = _context.AccessoryBill.Sum(x => x.DefaultCost);
+                }
+            <table class="table table-striped table-bordered table-hover">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Date</th>
+                        <th>Name</th>
+
+                        <th>Breakfast</th>
+                        <th>Lunch</th>
+                        <th>TeaBreak</th>
+                        <th>Extra Chit</th>
+
+
+                    </tr>
+                </thead>
+                <tbody>
+                    @{
+                        int j = 0;
+
+                    }
+                    @foreach (var itm in BillListMD)
+                    {
+                        
+                        var TBill = @itm.TotalBill;
+                        string UsrId = itm.Team.UserId;
+                        double brkBill = 0;
+                        double tBrkBill = 0;
+                        double lnchBill = 0;
+                        double ecBill = 0;
+                        if (!BillViewDictionary.ContainsKey(UsrId))
+                        {
+                            j++;
+                        <tr>
+                            <td>@j</td>
+                            <td>@itm.Team.Date.ToString("dd.MM.yyyy")</td>
+
+                            <td>@_userManager.Users.Where(x => x.Id == UsrId).FirstOrDefault().BUPFullName</td>
+
+                            @{
+                                var brkBillObj = BillListMD.Where(x => x.Team.UserId == UsrId && x.Team.MealTypeId == 1).FirstOrDefault();
+                                var lnchBillObj = BillListMD.Where(x => x.Team.UserId == UsrId && x.Team.MealTypeId == 2).FirstOrDefault();
+                                var TbrkBillObj = BillListMD.Where(x => x.Team.UserId == UsrId && x.Team.MealTypeId == 3).FirstOrDefault();
+                                var ecBillObj = BillListMD.Where(x => x.Team.UserId == UsrId && x.Team.MealTypeId == 10005).FirstOrDefault();
+                                BillViewDictionary.Add(UsrId, UsrId);
+
+                                if (brkBillObj != null)
+                                {
+                                    brkBill = brkBillObj.TotalBill;
+                                    //BillListMD.Remove(brkBillObj);
+                                }
+                                if (lnchBillObj != null)
+                                {
+                                    lnchBill = lnchBillObj.TotalBill;
+                                    // BillListMD.Remove(lnchBillObj);
+                                }
+                                if (TbrkBillObj != null)
+                                {
+                                    tBrkBill = TbrkBillObj.TotalBill;
+                                    // BillListMD.Remove(TbrkBillObj);
+                                }
+                                if (ecBillObj != null)
+                                {
+                                    ecBill = ecBillObj.TotalBill;
+                                    //BillListMD.Remove(ecBillObj);
+                                }
+
+
+                             }
+
+                         
+
+                                <td> @brkBill</td>
+                        
+                          
+                                <td> @lnchBill</td>
+                            
+                         
+                                <td>@tBrkBill</td>
+                             
+                                <td> @ecBill </td>
+                            
+                        
+
+
+                        </tr>
+                                    }
+                                }
+                </tbody>
+            </table>
+                </div>
+
+        }
+
+
+        <div id="AccsryBill">
+            <table class="table table-striped table-bordered table-hover">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Name</th>
+
+                        <th>Minimum Meal</th>
+                        <th>Minimum Meal Cost</th>
+                        <th>Default Cost</th>
+                        <th colspan="2">
+                            <button id="myBtn" rel="tooltip" style="padding-left:15px;padding-right:15px;padding-top:10px;padding-bottom:10px;" onclick="OpenAccsModal()" class="btn"><i class="fas fa-plus"></i>&nbsp; Item</button>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @{
+                        int i = 0;
+                    }
+
+                    @foreach (var item in _context.AccessoryBill.Where(x => x.Id > 0).ToList())
+                    {
+                        i++;
+                        <tr>
+                            <td>@i</td>
+                            <td>@item.Name</td>
+                            @if (item.MinMeal == null)
+                            {
+                                <td>-</td>
+                            }
+                            else
+                            {
+                                <td>@item.MinMeal</td>
+                            }
+                            @if (item.CostMinMeal == null)
+                            {
+                                <td>-</td>
+                            }
+                            else
+                            {
+                                <td>@item.CostMinMeal</td>
+                            }
+                            <td>@item.DefaultCost</td>
+                            <td>
+                                <form asp-action="GetEditACId" asp-route-Id="@item.Id" post>
+                                    <button rel="tooltip" style="padding-left:2px;padding-right:2px;padding-top:2px;padding-bottom:2px;" type="submit" class="btn"><i class="fas fa-edit"></i></button>
+                                </form>
+                            </td>
+                            <td>
+                                <form asp-action="DeleteACBill" asp-route-Id="@item.Id" post>
+                                    <button rel="tooltip" style="padding-left:2px;padding-right:2px;padding-top:2px;padding-bottom:2px;" type="submit" class="btn"><i class="fas fa-trash"></i></button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+
+
+        </div>
+
+        @if (ViewBag.ACBill == 1)
+        {
+            <div id="AccsryBillRsp">
+                <table class="table table-striped table-bordered table-hover">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Name</th>
+
+                            <th>Minimum Meal</th>
+                            <th>Minimum Meal Cost</th>
+                            <th>Default Cost</th>
+                            <th>
+                                <button id="myBtn" rel="tooltip" style="padding-left:15px;padding-right:15px;padding-top:10px;padding-bottom:10px;" onclick="OpenAccsModal()" class="btn"><i class="fas fa-plus"></i>&nbsp; Item</button>
+                            </th>
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{
+                            int l = 0;
+                        }
+
+                        @foreach (var item in _context.AccessoryBill.Where(x => x.Id > 0).ToList())
+                        {
+                            l++;
+                            <tr>
+                                <td>@l</td>
+                                @if (ViewBag.ACId != null && ViewBag.ACId == item.Id)
+                                {
+                                    <form asp-action="SaveEditACId" asp-route-Id="@item.Id" post>
+
+                                        <td>
+                                            <input type="text" id="EAcsName" name="EAcsName" value="@item.Name" class="form-control">
+                                        </td>
+
+                                        @if (item.MinMeal == null)
+                                        {
+                                            <td>
+                                                <input type="number" id="EMinMeal" name="EMinMeal" value="0" class="form-control">
+                                            </td>
+                                        }
+                                        else
+                                        {
+                                            <td>
+                                                <input type="number" id="EMinMeal" name="EMinMeal" value="@item.MinMeal" class="form-control">
+                                            </td>
+                                        }
+                                        @if (item.CostMinMeal == null)
+                                        {
+                                            <td>
+                                                <input type="number" id="EMinMealCost" name="EMinMealCost" value="0" class="form-control">
+                                            </td>
+                                        }
+                                        else
+                                        {
+                                            <td>
+                                                <input type="number" id="EMinMealCost" name="EMinMealCost" value="@item.CostMinMeal" class="form-control">
+                                            </td>
+                                        }
+                                        <td>
+                                            <input type="number" id="EDefaultCost" name="EDefaultCost" value="@item.DefaultCost" class="form-control">
+                                        </td>
+                                        <td>
+                                            <button rel="tooltip" style="padding-left:2px;padding-right:2px;padding-top:2px;padding-bottom:2px;" type="submit" class="btn"><i class="fas fa-check"></i></button>
+
+
+                                        </td>
+                                    </form>
+                                    <td></td>
+
+                                }
+                                else
+                                {
+                                    <td>@item.Name</td>
+
+                                    @if (item.MinMeal == null)
+                                    {
+                                        <td>
+                                            -
+                                        </td>
+                                    }
+                                    else
+                                    {
+                                        <td>
+                                            @item.MinMeal
+                                        </td>
+                                    }
+                                    @if (item.CostMinMeal == null)
+                                    {
+                                        <td>-</td>
+                                    }
+                                    else
+                                    {
+                                        <td>@item.CostMinMeal</td>
+                                    }
+                                    <td>@item.DefaultCost</td>
+                                    <td>
+                                        <form asp-action="GetEditACId" asp-route-Id="@item.Id" post>
+                                            <button rel="tooltip" style="padding-left:2px;padding-right:2px;padding-top:2px;padding-bottom:2px;" type="submit" class="btn"><i class="fas fa-edit"></i></button>
+                                        </form>
+                                    </td>
+                                    <td>
+                                        <form asp-action="DeleteACBill" asp-route-Id="@item.Id" post>
+                                            <button rel="tooltip" style="padding-left:2px;padding-right:2px;padding-top:2px;padding-bottom:2px;" type="submit" class="btn"><i class="fas fa-trash"></i></button>
+                                        </form>
+                                    </td>
+
+                                }
+
+
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+
+        <div id="BillStatus">
+            <form asp-action="GetBillStatus" post>
+                <div class="row jumbotron" style="padding-bottom:0px;padding-left:10px;padding-right:10px;padding-top:10px;">
+                    <div class="col-md-5">
+                        <div class="form-group">
+                            <label class="bmd-label-floating">Person</label>
+                            <div style="display:inline-flex">
+
+                                <input type="text" name="stperson" id="stperson" class="form-control" value="" />
+                                <div id="suggesstion-box2"></div>
+
+                                @*<select id="stperson" name="stperson" class="form-control border-radius-none" asp-items="@(new SelectList(_ddlHelper.GetAllUsersList().Prepend(new KeyValuePair<string, string>("-1", "")), "Key", "Value", ""))"></select>*@
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label class="bmd-label-floating">Month</label>
+                            <div style="display:inline-flex">
+
+                                <select id="stmonth" name="stmonth" class="form-control border-radius-none" asp-items="@(new SelectList(Month.Prepend(new KeyValuePair<string, string>("-1", "")), "Key", "Value", ""))"></select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label class="bmd-label-floating">Year</label>
+                            <div style="display:inline-flex">
+
+                                <select id="styear" name="styear" class="form-control border-radius-none" asp-items="@(new SelectList(Year.Prepend(new KeyValuePair<string, string>("-1", "")), "Key", "Value", ""))"></select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <button rel="tooltip" type="submit" class="btn" >Search</button>
+
+
+                    </div>
+                </div>
+            </form>
+
+            @{
+                int mnth = DateTime.Now.Month;
+                int yr = DateTime.Now.Year;
+                string m = Month[mnth.ToString()];
+                var billSts = _context.ConsumerMonthlyBillRecord.Where(x => x.Month == mnth && x.Year == yr).ToList();
+                if (billSts.Count == 0)
+                {
+                    <p>No record is found for current month ( @m  ) </p>
+                }
+                else
+                {
+                    <table class="table table-striped table-bordered table-hover">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Name</th>
+                                <th>Month</th>
+                                <th>Year</th>
+                                <th>Bill</th>
+                                <th>IsPaid</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @{
+
+                                int ll = 0;
+
+
+                                foreach (var itm in billSts)
+                                {
+                                    ll++;
+                                    var bill = @itm.TotalAmount;
+                                    string check = "unchecked";
+                                    if (itm.IsPaid == true)
+                                    {
+                                        check = "checked";
+                                    }
+                                    <tr>
+                                        <td>@ll</td>
+                                        <td>@_userManager.Users.Where(x => x.Id == itm.UserId).FirstOrDefault().BUPFullName</td>
+                                        <td>@m</td>
+                                        <td>@Year[yr.ToString()]</td>
+                                        <td> @bill </td>
+                                        <td>
+                                            <div class="custom-control custom-checkbox" style="margin-top: 2.5%;">
+                                                <input type="checkbox" onchange="PaidStatusModify(@itm.Id)" id="@itm.Id" name="@itm.Id" value="" @check>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+
+
+                            }
+                        </tbody>
+                    </table>
+
+
+
+                }
+            }
+
+        </div>
+
+
+        @if (ViewBag.StatusUser != null)
+        {
+    <div id="RspBillStatus">
+        @if (cmb.Count == 0)
+        {
+            <p>No record is found</p>
+        }
+        else
+        {
+            int a = 0;
+            String inMn = Month[ViewBag.Mnth.ToString()];
+            String inY = Year[ViewBag.Yr.ToString()];
+            String usrNm = "";
+            string UId = "-1";
+            if(ViewBag.StatusUser != "-1")
+            {
+                UId = ViewBag.StatusUser;
+                usrNm = _userManager.Users.Where(x => x.Id == UId).FirstOrDefault().BUPFullName;
+            }
+
+
+
+            <form asp-action="GetBillStatus2" post>
+                <div class="row jumbotron" style="padding-bottom:0px;padding-left:10px;padding-right:10px;padding-top:10px;">
+                    <div class="col-md-5">
+                        <div class="form-group">
+                            <label class="bmd-label-floating">Person</label>
+                            <div style="display:inline-flex">
+
+                                <input type="text" name="stperson2" id="stperson2" class="form-control" value="" />
+                                <div id="suggesstion-box3"></div>
+
+                                @*<select id="stperson2" name="stperson2" class="form-control border-radius-none" asp-items="@(new SelectList(_ddlHelper.GetAllUsersList().Prepend(new KeyValuePair<string, string>(UId, usrNm)), "Key", "Value", ""))"></select>*@
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-group">
+                            <label class="bmd-label-floating">Month</label>
+                            <div style="display:inline-flex">
+
+                                <select id="stmonth2" name="stmonth2" class="form-control border-radius-none" asp-items="@(new SelectList(Month.Prepend(new KeyValuePair<string, string>(ViewBag.Mnth.ToString(), @inMn)), "Key", "Value", ""))"></select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <div class="form-group">
+                            <label class="bmd-label-floating">Year</label>
+                            <div style="display:inline-flex">
+
+                                <select id="styear2" name="styear2" class="form-control border-radius-none" asp-items="@(new SelectList(Year.Prepend(new KeyValuePair<string, string>(ViewBag.Yr.ToString(), inY)), "Key", "Value", ""))"></select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <button rel="tooltip" type="submit" class="btn">Search</button>
+
+
+                    </div>
+                </div>
+            </form>
+            <table class="table table-striped table-bordered table-hover">
+                <thead>
+                    <tr>
+                        <th>#</th>
+                        <th>Name</th>
+                        <th>Month</th>
+                        <th>Year</th>
+                        <th>Bill</th>
+                        <th>IsPaid</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var c in cmb)
+                    {
+                        a++;
+                         var bill = @c.TotalAmount ;
+
+                        string check = "unchecked";
+                        if (c.IsPaid == true)
+                        {
+                            check = "checked";
+                        }
+                        <tr>
+                            <td>@a</td>
+                            <td>@_userManager.Users.Where(x => x.Id == c.UserId).FirstOrDefault().BUPFullName</td>
+                            <td>@Month[c.Month.ToString()]</td>
+                            <td>@Year[c.Year.ToString()]</td>
+                            <td>@bill</td>
+                            <td>
+                                <div class="custom-control custom-checkbox" style="margin-top: 2.5%;">
+                                    <input type="checkbox" onchange="PaidStatusModify(@c.Id)" id="@c.Id" name="@c.Id" value="" @check>
+                                </div>
+                            </td>
+
+
+
+
+                        </tr>
+
+
+                    }
+
+                </tbody>
+            </table>
+        }
+
+
+
+    </div>
+        }
+
+
+        @if (ViewBag.msg != null)
+        {
+            <div id="DailyBillView">
+            <div class="row" id="SM">
+                <div class="col-sm-6">
+                    <div class="jumbotron" style="padding-bottom:0px;padding-left:10px;padding-right:10px;padding-top:10px;">
+                        @ViewBag.msg
+                    </div>
+                </div>
+                <div class="col-sm-6"></div>
+
+
+            </div>
+
+            <div class="bs-example container" data-example-id="striped-table">
+                <table class="table table-striped table-bordered table-hover">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Name</th>
+                            <th>Breakfast</th>
+                            <th>TeaBreak</th>
+                            <th>Lunch</th>
+                            <th>Extra Chit</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{
+                            int k = 0;
+                        }
+                        @foreach (var p in DistinctUserId)
+                        {
+                            k++;
+                            double brkcost = _context.OrderHistoryVr2.Where(x => x.OrderDate.ToShortDateString() == billDate && x.UserId == p && x.MealTypeId == 1).Select(x => x.OrderAmount).Sum();
+                            double Tbrkcost = _context.OrderHistoryVr2.Where(x => x.OrderDate.ToShortDateString() == billDate && x.UserId == p && x.MealTypeId == 3).Select(x => x.OrderAmount).Sum();
+                            double Lnccost = _context.OrderHistoryVr2.Where(x => x.OrderDate.ToShortDateString() == billDate && x.UserId == p && x.MealTypeId == 2).Select(x => x.OrderAmount).Sum();
+                            double Eccost = _context.OrderHistoryVr2.Where(x => x.OrderDate.ToShortDateString() == billDate && x.UserId == p && x.MealTypeId == 10005).Select(x => x.OrderAmount).Sum();
+
+                            <tr>
+                                <th scope="row">@k</th>
+                                <td>@_userManager.Users.Where(x => x.Id == p).FirstOrDefault().BUPFullName;</td>
+                                <td>@brkcost</td>
+                                <td>@Tbrkcost</td>
+                                <td>@Lnccost</td>
+                                <td>@Eccost</td>
+                            </tr>
+                        }
+
+                    </tbody>
+
+                </table>
+            </div>
+                </div>
+
+
+        }
+
+
+
+    </div>
+</div>
+
+
+
+
+
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.12.0/themes/smoothness/jquery-ui.css" />
+<script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+<script src="https://code.jquery.com/ui/1.12.0/jquery-ui.min.js"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.js"></script>
+
+
+@section Scripts {
+
+
+    <script>
+
+                   $("#PrintOption").hide();
+    $("#BillView").hide();
+                    $("#AccsryBill").hide();
+                 $("#BillStatus").hide();
+
+
+      $(function () {
+        $("#from").datepicker({
+            dateFormat: "dd-mm-yy"
+            , duration: "fast"
+        });
+             $("#to").datepicker({
+            dateFormat: "dd-mm-yy"
+            , duration: "fast"
+             });
+           $("#to2").datepicker({
+            dateFormat: "dd-mm-yy"
+            , duration: "fast"
+           });
+           $("#from2").datepicker({
+            dateFormat: "dd-mm-yy"
+            , duration: "fast"
+        });
+    });
+
+
+
+
+
+
+  //   $('.clockpicker').clockpicker({
+  //  'default': 'now',
+  //  vibrate: true,
+  //  placement: "top",
+  //  align: "left",
+  //  autoclose: false,
+  //  twelvehour: true
+  //});
+    //$('.clockpicker').clockpicker();
+
+                //$('#datetimepicker3').datetimepicker({
+                //    format: 'LT'
+                //});
+
+
+    function PaidStatusModify(Id) {
+
+        var check = document.getElementById(Id).checked;
+
+              $.ajax({
+
+                    url: '@Url.Action("PaidStatusModify", "AdminBillGenerate")',
+                    type: "POST",
+                    //dataType: 'json',
+                    data: { MonthRecordId : Id,Checked: check},
+                    //contentType: 'application/json; charset=utf-8',
+                    success: function (response) {
+                        if (response.success) {
+
+
+                            //alert(response.responseText);
+                            //window.location.reload(true);
+
+
+                        } else {
+                            // DoSomethingElse()
+                            alert(response.responseText);
+                            window.location.reload(true);
+                        }
+                    }
+
+
+                })
+    }
+
+    function OpenAccsModal() {
+        var modal = document.getElementById("myModal");
+
+        // Get the button that opens the modal
+
+        // Get the <span> element that closes the modal
+        var span = document.getElementsByClassName("close")[0];
+
+        // When the user clicks the button, open the modal
+        modal.style.display = "block";
+
+
+        // When the user clicks on <span> (x), close the modal
+        span.onclick = function () {
+            modal.style.display = "none";
+        }
+
+        // When the user clicks anywhere outside of the modal, close it
+        window.onclick = function (event) {
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+
+        }
+    }
+
+    function ViewBillStatus() {
+            $("#PrintOption").hide();
+    $("#BillView").hide();
+        $("#AccsryBill").hide();
+        $("#BillStatus").show();
+        $("#AccsryBillRsp").hide();
+        $("#RspBillStatus").hide();
+        $("#BillViewRsp").hide();
+                                $("#DailyBillView").hide();
+
+
+
+
+    }
+
+    function ViewAccsryBill() {
+
+
+                   $("#PrintOption").hide();
+        $("#BillView").hide();
+        $("#BillStatus").hide();
+
+                $("#AccsryBillRsp").hide();
+
+
+        $("#BillViewRsp").hide();
+                                        $("#DailyBillView").hide();
+
+
+        $("#AccsryBill").show();
+                $("#RspBillStatus").hide();
+
+
+    }
+
+    function PrintOptionSpace() {
+
+        $("#PrintOption").show();
+        $("#BillView").hide();
+        $("#AccsryBill").hide();
+        $("#AccsryBillRsp").hide();
+        $("#BillStatus").hide();
+                        $("#BillViewRsp").hide();
+
+                                        $("#DailyBillView").hide();
+
+                $("#RspBillStatus").hide();
+
+
+
+
+
+    }
+
+    function ViewBill() {
+        $("#PrintOption").hide();
+        $("#BillView").show();
+                $("#BillViewRsp").hide();
+
+            $("#AccsryBill").hide();
+        $("#AccsryBillRsp").hide();
+        $("#BillStatus").hide();
+        $("#RspBillStatus").hide();
+                                        $("#DailyBillView").hide();
+
+
+
+
+
+
+    }
+
+
+
+    function Print(height, width) {
+
+        var person = document.getElementById("person").value.toString();
+        var prsnName = $("#person option:selected").text();
+        var monthName = $("#month option:selected").text();
+        var brkCost = 0;
+        var lnchCost = 0;
+        var tbrkCost = 0;
+        var eChitCost = 0;
+
+
+
+
+        var month = document.getElementById("month").value.toString();
+                var year = document.getElementById("year").value.toString();
+
+
+
+        if (person == -1 || month == -1 || year == -1) {
+            alert("Empty field is not allowed.")
+        }
+        else {
+
+               $.ajax({
+
+        url: '@Url.Action("GetPersonBill", "AdminBillGenerate")',
+             type: "POST",
+             data: { PersonName: person, Month: month, Year:year },
+        success: function (datum) {
+            if (datum.length > 0) {
+                console.log(datum);
+
+                var data = datum[1];
+
+                var obj1 = data.find(x => x.team.mealTypeId == 1 && x.team.date.slice(0, 10).split("-")[2] == 13);
+
+                for (var i = 0; i < data.length; i++) {
+                    if (data[i].team.mealTypeId == 1) {
+                        brkCost += data[i].totalBill;
+                    }
+                    else if (data[i].team.mealTypeId == 2) {
+                        lnchCost += data[i].totalBill;
+                    }
+                          else if (data[i].team.mealTypeId == 10005) {
+                        eChitCost += data[i].totalBill;
+                    }
+                    else {
+                        tbrkCost += data[i].totalBill;
+                    }
+
+                }
+
+                console.log(obj1);
+
+
+
+                  var mywindow = window.open('', 'PRINT', 'height=' + height + ',width=' + width);
+                 mywindow.document.write('<html>    ');
+                   mywindow.document.write('<head> <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css"></head><style>');
+                    @*mywindow.document.write("@page { size: auto;  margin: 5mm; }");*@
+                    //=============================================
+
+                        mywindow.document.write('.box{ width: 300px;  height: 100px;  border: 1px solid black;margin-top:40px;}');
+
+            mywindow.document.write('.circle {width: 20px; height: 20px;border: 2px solid rgb(0,0,0);margin:0 auto;');
+                    //mywindow.document.write('.circle {width: 25px; height: 25px;border: 2px solid rgb(0,0,0);');
+
+                    mywindow.document.write('border-radius: 50%; font-size: 12px;color: black; line-height: 20px;text-align:center;}');
+                    mywindow.document.write('.diamond-shape { background: #fff;height: 15px;border: 2px solid rgb(0,0,0);');
+                    mywindow.document.write(' transform:rotate(45deg);width:15px;margin-left:20px;}');
+                    mywindow.document.write('.item-count { color: #333; transform: rotate(-45deg);');
+                    mywindow.document.write(' text-align:center;font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;font-size:10px;}');
+                    mywindow.document.write('.dottedBox { width: 50px; height: 20px;');
+                    mywindow.document.write(' border: 3px solid rgb(0,0,0);font-size: 12px;  color: black;');
+                    mywindow.document.write('line-height: 20px;text-align: center;} .samefont{font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;font-size:13px;}');
+
+                    //===================================================
+                    mywindow.document.write('div.header {display:s block;position:fixed;}  #newPage{page-break-before: always;} .npPad{padding-top:5in;} #customers{font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;font-size:13px;border-collapse: collapse;');
+                    mywindow.document.write('width:100%;}#customers thead{}#customers td{border: 1px solid rgb(0,0,0);padding: 2px; } #customers th {border: 1px solid rgb(0,0,0);');
+                    mywindow.document.write('padding:4px; text-align: center; background-color: grey;} #customers td.t{text-align:center;} #customers td.crcl{width: 20px; height: 20px;border: 2px solid rgb(0,0,0);margin-left:20px;border-radius: 50%; font-size: 12px;color: black; line-height: 20px;text-align:center;} #customers tr:nth-child(even) {  background-color: white;}');
+                    mywindow.document.write('#customers tr:hover {backgrosund-color: white;}');
+
+
+                    mywindow.document.write('#customers th {');
+                    mywindow.document.write('.downU{padding-top:.3in;}')
+                    mywindow.document.write('p.c{text-align: center;} p.aL{float: left;text-align:left;margin-bottom: 0px; font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;font-size:12px;}');
+                    mywindow.document.write('p.aC{float:left;text-align:center;}')
+                    mywindow.document.write('p.d{ margin-top: 0px; font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;font-size:13px;}');
+                    mywindow.document.write('background-color: white; color: black;} p.a {font:  bold 30px arial, sans-serif;} p.b{   margin-bottom: 0px; font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;font-size:13px;}</style>');
+
+
+                    mywindow.document.write('<body>');
+                mywindow.document.write('<div class="row">');
+                mywindow.document.write('<div class="col-sm-4"></div>');
+                mywindow.document.write('<div class="col-sm-4" style="font-size:18px;font-weight:bold;padding-left:50px;">BUP Mess</div>');
+                 mywindow.document.write('<div class="col-sm-4"></div></div>');
+
+                mywindow.document.write('<div class="row" style="padding-left:50px;">Name : ' + person + '</div>');
+                mywindow.document.write('<div class="row" style="padding-left:50px;"> Month : ' + monthName + '</div>');
+
+                    mywindow.document.write('<div class="row" style="padding-left:50px;">Year : ' + year + '</div>');
+            mywindow.document.write('<br><div class="row">');
+            mywindow.document.write('<div class="col-sm-5">');
+
+             mywindow.document.write('<table id="customers"><thead><tr><th style="width:40px;">EVENTS/HEADS</th>');
+                mywindow.document.write('<th  style="width:40px;">TAKA</th></tr></thead><tbody>');
+                var AcsTtl = 0;
+                for (var i = 0; i < datum[0].length; i++) {
+                    mywindow.document.write('<tr><td  style="width:40px;">' + datum[0][i].name + ' </td>');
+                    mywindow.document.write('<td  style="width:40px;">' + datum[0][i].defaultCost + '</td></tr>');
+                    AcsTtl += datum[0][i].defaultCost;
+
+                }
+
+
+                var ttlBill = brkCost + lnchCost + tbrkCost + AcsTtl + eChitCost + parseFloat(datum[2]);
+                var mealBillTtl = brkCost + lnchCost + tbrkCost + eChitCost;
+                var MealAccs = mealBillTtl + AcsTtl;
+
+                  mywindow.document.write('<tr><td  style="width:40px;"> Meal Bill Total</td>');
+                mywindow.document.write('<td  style="width:40px;"> ' + mealBillTtl.toFixed(2)  + ' </td></tr>');
+
+                mywindow.document.write('<tr><td  style="width:40px;"> Total</td>');
+                mywindow.document.write('<td  style="width:40px;"> ' + MealAccs.toFixed(2)  + ' </td></tr>');
+              
+            mywindow.document.write('</tbody></table><br><br>');
+                mywindow.document.write('<table id="customers"><thead><tr><th style="width:40px;">Current Mess Bill Arrear</th>');
+                mywindow.document.write('<th  style="width:40px;">' + parseFloat(datum[2]).toFixed(2) + '</th></tr>');
+                mywindow.document.write('<tr><th style="width:40px;">Bill Payable</th>')
+                mywindow.document.write('<th  style="width:40px;">' + ttlBill.toFixed(2) + '</th></tr></thead></table>');
+            mywindow.document.write('<div class="box">');
+            mywindow.document.write('<p style="text-align:center;font-size:16px;font-style">RECEIPT</p><p></p></div></div>');
+
+                //mywindow.document.write('<table id="customers"><thead><tr><th rowspan="2" style="width:40px;">Chit Date</th>');
+            mywindow.document.write('<div class="col-sm-7">');
+            mywindow.document.write('<table id="customers"><thead><tr><th rowspan="2" style="width:40px;">Chit Date</th>');
+            mywindow.document.write('<th colspan="4" style="width:40px;"></th>');
+            mywindow.document.write('<th rowspan="2" style="width:40px;">Extra Chit</th></tr>');
+            mywindow.document.write('<tr><th  style="width:40px;">B/Fast</th>');
+             mywindow.document.write('<th  style="width:40px;">Lunch</th>');
+            mywindow.document.write('<th  style="width:40px;">Dinner</th>');
+            mywindow.document.write('<th  style="width:40px;">T/Bresk</th></tr></thead><tbody>');
+
+
+                for (var i = 0; i < 31; i++) {
+
+                    var day = i + 1;
+                    var obj1 = data.find(x => x.team.mealTypeId == 1 && x.team.date.slice(0, 10).split("-")[2] == day );
+                    var obj2 = data.find(x => x.team.mealTypeId == 2 && x.team.date.slice(0, 10).split("-")[2] == day );
+                    var obj3 = data.find(x => x.team.mealTypeId == 3 && x.team.date.slice(0, 10).split("-")[2] == day );
+                    var obj4 = data.find(x => x.team.mealTypeId == 10005 && x.team.date.slice(0, 10).split("-")[2] == day );
+
+
+
+                    mywindow.document.write('<tr><td  style="width:40px;">' + (i + 1) + '</td>');
+                    if (obj1 != null) {
+                        mywindow.document.write('<td  style="width:40px;">' + obj1.totalBill.toFixed(2) + '  </td>');
+
+                    }
+                    else {
+                        mywindow.document.write('<td  style="width:40px;"> - </td>');
+                    }
+                    if (obj2 != null) {
+                        mywindow.document.write('<td  style="width:40px;">' + obj2.totalBill.toFixed(2) + '  </td>');
+
+                    }
+                    else {
+                        mywindow.document.write('<td  style="width:40px;"> - </td>');
+                    }
+                                    mywindow.document.write('<td  style="width:40px;"> - </td>');
+
+                     if (obj3 != null) {
+                        mywindow.document.write('<td  style="width:40px;">' + obj3.totalBill.toFixed(2) + '  </td>');
+
+                    }
+                    else {
+                        mywindow.document.write('<td  style="width:40px;"> - </td>');
+                    }
+                    if (obj4 != null) {
+                        mywindow.document.write('<td  style="width:40px;">' + obj4.totalBill.toFixed(2) + '  </td>');
+
+                    }
+                    else {
+                        mywindow.document.write('<td  style="width:40px;"> - </td>');
+                    }
+
+               //mywindow.document.write('<td  style="width:40px;"> - </td>');
+
+
+
+
+
+                }
+                mywindow.document.write('<tr><td  style="width:40px;"> Total </td>');
+                mywindow.document.write('<td  style="width:40px;"> ' + brkCost.toFixed(2) + '</td>');
+                mywindow.document.write('<td  style="width:40px;"> ' + lnchCost.toFixed(2) + '</td>');
+
+                mywindow.document.write('<td  style="width:40px;"> ' + '-' + '</td>');
+                mywindow.document.write('<td  style="width:40px;"> ' + tbrkCost.toFixed(2) + '</td>');
+                mywindow.document.write('<td  style="width:40px;"> ' + eChitCost.toFixed(2) + '</td></tr>');
+
+
+
+                        mywindow.document.write('</tbody></table>');
+
+                        mywindow.document.write('</body></html>');
+
+                        mywindow.focus();
+
+            } else {
+                // DoSomethingElse()
+                alert("No data Found");
+            }
+        }
+
+
+    })
+
+        }
+
+            }
+
+
+
+
+
+     jQuery.noConflict();
+              $("#person").autocomplete({
+        source: function (request, response) {
+            $.ajax({
+                url: '@Url.Action("GetSearchPerson","AdminShowOrder")',
+                dataType: "json",
+                data: { search: $("#person").val() },
+                success: function (data) {
+                    console.log('Hiiii');
+                    console.log(data);
+                    var a = [];
+                    for (var i = 0; i < data.length; i++) {
+
+                        a.push(data[i].bupFullName);
+                    }
+                    console.log(a);
+
+                    response(a);
+                    $("#suggesstion-box").show();
+
+                },
+                error: function (xhr, status, error) {
+                    alert("Error");
+                }
+            });
+        }
+              });
+                  $("#stperson").autocomplete({
+        source: function (request, response) {
+            $.ajax({
+                url: '@Url.Action("GetSearchPerson","AdminShowOrder")',
+                dataType: "json",
+                data: { search: $("#stperson").val() },
+                success: function (data) {
+                    console.log('Hiiii');
+                    console.log(data);
+
+
+                    
+                    var a = [];
+                    for (var i = 0; i < data.length; i++) {
+
+                        a.push(data[i].bupFullName);
+                    }
+                    console.log(a);
+
+                    response(a);
+                    $("#suggesstion-box2").show();
+
+                },
+                error: function (xhr, status, error) {
+                    alert("Error");
+                }
+            });
+        }
+                  });
+
+                      $("#stperson2").autocomplete({
+        source: function (request, response) {
+            $.ajax({
+                url: '@Url.Action("GetSearchPerson","AdminShowOrder")',
+                dataType: "json",
+                data: { search: $("#stperson2").val() },
+                success: function (data) {
+                    console.log('Hiiii');
+                    console.log(data);
+                    var a = [];
+                    for (var i = 0; i < data.length; i++) {
+
+                        a.push(data[i].bupFullName);
+                    }
+                    console.log(a);
+
+                    response(a);
+                    $("#suggesstion-box3").show();
+
+                },
+                error: function (xhr, status, error) {
+                    alert("Error");
+                }
+            });
+        }
+                      });
+
+                          $("#person2").autocomplete({
+        source: function (request, response) {
+            $.ajax({
+                url: '@Url.Action("GetSearchPerson","AdminShowOrder")',
+                dataType: "json",
+                data: { search: $("#person2").val() },
+                success: function (data) {
+                    console.log('Hiiii');
+                    console.log(data);
+                    var a = [];
+                    for (var i = 0; i < data.length; i++) {
+
+                        a.push(data[i].bupFullName);
+                    }
+                    console.log(a);
+
+                    response(a);
+                    $("#suggesstion-box4").show();
+
+                },
+                error: function (xhr, status, error) {
+                    alert("Error");
+                }
+            });
+        }
+              });
+
+
+                              $("#person3").autocomplete({
+        source: function (request, response) {
+            $.ajax({
+                url: '@Url.Action("GetSearchPerson","AdminShowOrder")',
+                dataType: "json",
+                data: { search: $("#person3").val() },
+                success: function (data) {
+                    console.log('Hiiii');
+                    console.log(data);
+                    var a = [];
+                    for (var i = 0; i < data.length; i++) {
+
+                        a.push(data[i].bupFullName);
+                    }
+                    console.log(a);
+
+                    response(a);
+                    $("#suggesstion-box5").show();
+
+                },
+                error: function (xhr, status, error) {
+                    alert("Error");
+                }
+            });
+        }
+              });
+
+
+
+
+
+
+        //<<<<<<<<<<<<<<<<<< CleanPriceFieldOfExtraItem >>>>>>>>>>>>>>>>>>>>>>>
+
+    </script>
+}
+
+
+
+
+

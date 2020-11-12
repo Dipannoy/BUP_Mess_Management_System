@@ -1,0 +1,318 @@
+﻿
+@inject IDDLHelper _ddlHelper
+@{
+    ViewData["Title"] = "Create";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+
+
+
+<style>
+    .list-group {
+        max-height: 300px;
+        margin-bottom: 10px;
+        overflow: scroll;
+        -webkit-overflow-scrolling: touch;
+    }
+</style>
+
+
+
+<h2>Create</h2>
+
+<h4>Set-Menu</h4>
+<hr />
+
+<p style="text-align: right;">
+    <a asp-action="Index" class="btn btn-default btn-sm">Back to List</a>
+</p>
+
+
+<div class="row">
+    <div class="col-lg-2">
+        <div class="form-group">
+            <label for="sel1">Date:</label>
+            <input type="date" id="currentDate" class="form-control" required>
+        </div>
+    </div>
+
+</div>
+
+<div class="row">
+    <div class="col-lg-3">
+        <div class="form-group">
+            <label for="sel1">Meal Type:</label>
+            <select id="DDLCategory" class="form-control border-radius-none" asp-items="@(new SelectList(_ddlHelper.GetMealType().Prepend(new KeyValuePair<string, string>("-1","-- Select Meal Type --")),"Key","Value",""))"></select>
+        </div>
+    </div>
+
+</div>
+
+
+
+<div class="row">
+    <div class="col-lg-3">
+        <div class="form-group">
+            <label for="sel1">Set Menu Price: (Tk.)</label>
+            <input type="text" id="setMenuPrice" class="form-control" required>
+        </div>
+    </div>
+</div>
+
+
+
+<div class="row">
+
+
+
+
+    <div class="col-md-5">
+
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                Items
+            </div>
+            <div class="card-body">
+                <ul class="list-group" id="BreakfastItemList">
+                    @if (ViewBag.MealItemList != null)
+                    {
+                        @foreach (var mealItemList in ViewBag.MealItemList)
+                        {
+                            <li class="list-group-item  custom-control custom-checkbox">
+                                <input type="checkbox" class="custom-control-input" style="position: inherit;" id="check_@mealItemList.Id" name="checkboxBreakfast" value="@mealItemList.Id" />
+                                <label class="custom-control-label" for="check_@mealItemList.Id">@mealItemList.Name</label>
+                            </li>
+                        }
+                    }
+
+                </ul>
+            </div>
+        </div>
+
+    </div>
+
+
+
+    <div class="col-md-7">
+
+        <div class="card">
+            <div class="card-header bg-warning text-white">
+                Extra Items
+            </div>
+            <div class="card-body">
+                <ul class="list-group" id="BreakfastItemListAdded">
+                    @if (ViewBag.ExtraItemList != null)
+                    {
+                        @foreach (var skill in ViewBag.ExtraItemList)
+                        {
+                            <li class="list-group-item" style="padding:0px">
+                                <div class="row">
+                                    <div class="col-sm-6">
+                                        <div class="custom-control custom-checkbox" style="margin-top: 2.5%;">
+                                            <input type="checkbox" class="custom-control-input" style="position: inherit;" id="checkadded_@skill.Id" name="checkboxAdded" value="@skill.Id" />
+                                            <label class="custom-control-label" for="checkadded_@skill.Id">@skill.Name</label>
+                                        </div>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <input type="text" id="priceadded_@skill.Id" name="itemPriceAdded" placeholder="Item Price"  class="form-control w-100"  />
+                                    </div>
+                                </div>
+                            </li>
+                        }
+                    }
+                </ul>
+            </div>
+        </div>
+
+    </div>
+
+
+</div>
+
+
+
+
+<div class="row">
+    <div class="col-sm-12">
+        @*<div class="form-group">
+            <a class="btn btn-success btn-block" onclick="SaveSetMenuList()"> Submit </a> |
+            <a asp-controller="SetMenu" asp-action="Index" class="btn btn-default">Back to List</a>
+        </div>*@
+
+        <div class="form-group">
+            <br />
+            <div class="col-sm-10">
+                <a class="btn btn-primary" onclick="SaveSetMenuList()"> Create </a> |
+                <a asp-action="Index" class="btn btn-default">Back to List</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script src="https://ajax.aspnetcdn.com/ajax/jquery/jquery-3.3.1.min.js"
+        asp-fallback-src="~/lib/jquery/dist/jquery.min.js"
+        asp-fallback-test="window.jQuery"
+        crossorigin="anonymous"
+        integrity="sha384-tsQFqpEReu7ZLhBV2VZlAu7zcOV+rXbYlF2cqB8txI/8aZajjp4Bqd+V6D5IgvKT">
+</script>
+
+
+<script>
+    var date = new Date();
+
+    var day = date.getDate();
+    var month = date.getMonth() + 1;
+    var year = date.getFullYear();
+
+    if (month < 10) month = "0" + month;
+    if (day < 10) day = "0" + day;
+
+    var today = year + "-" + month + "-" + day;
+
+
+    document.getElementById('currentDate').value = today;
+</script>
+
+
+
+<script>
+
+    function SaveSetMenuList() {
+        var tempPassingObjectAdded = "";
+        var tempPassingObjectSetMenu = "";
+        var setMenuPrice = "";
+
+        var breakfastCount = 0;
+
+        var dateTime = document.getElementById("currentDate").value.toString();
+
+        setMenuPrice = document.getElementById("setMenuPrice").value.toString();
+
+        if (dateTime == "") {
+            alert("Please Select Date..!!");
+            document.getElementById('currentDate').style.borderColor = "red";
+            return false;
+        }
+
+
+
+        var ddlCategory = document.getElementById("DDLCategory");
+        var categoryId = ddlCategory.options[ddlCategory.selectedIndex].value.toString();
+
+
+        if (categoryId == "-1") {
+            alert("Please Select Category..!!");
+            document.getElementById('DDLCategory').style.borderColor = "red";
+            return false;
+        }
+
+
+        ////====================================== Start Added Item Price Insert ======================================================
+
+        var addedItem = [];
+
+
+
+        var checkBoxAdded = document.getElementsByName("checkboxAdded");
+        var checkBoxLengthAdded = checkBoxAdded.length;
+        var textsAdded = document.getElementsByName("itemPriceAdded");
+        var tempItemValueAdded = "";
+        var tempPriceValueAdded = "";
+
+
+
+
+
+        for (var i = 0; i < checkBoxLengthAdded; i++) {
+
+            if (checkBoxAdded[i].checked == true) {
+
+                tempPriceValueAdded = textsAdded[i].value.toString();
+                tempItemValueAdded = checkBoxAdded[i].value.toString();
+
+
+                var obj = { AddedItemId: tempItemValueAdded, AddedItemPrice: tempPriceValueAdded };
+                addedItem.push(obj);
+            }
+
+        }
+
+
+
+
+        ////====================================== End Added Item Price Insert ======================================================
+
+
+
+
+        //====================================== Start Set Menu Breakfast Insert ======================================================
+
+        var setMenuArray = [];
+
+        var checkBoxSetMenu = document.getElementsByName("checkboxBreakfast");
+        var checkBoxLengthSetMenu = checkBoxSetMenu.length;
+        var tempItemValueSetMenu = "";
+        //var countSetMenuItemChecked = 0;
+
+
+        for (var i = 0; i < checkBoxLengthSetMenu; i++) {
+
+            if (checkBoxSetMenu[i].checked == true) {
+
+                //countSetMenuItemChecked = countSetMenuItemChecked + 1;
+
+
+                tempItemValueSetMenu = checkBoxSetMenu[i].value.toString();
+
+
+                var obj = { SetMenuItemId: tempItemValueSetMenu };
+                setMenuArray.push(obj);
+
+
+            }
+
+        }
+
+
+        //====================================== End Set Menu Breakfast Insert ======================================================
+
+
+
+        //if (countSetMenuItemChecked == 0) {
+        //    alert("Please check at least one Breakfast Item !!");
+        //    return false;
+        //}
+
+
+
+
+        //AddedItemList: tempPassingObjectAdded,
+
+        tempPassingObjectAdded = JSON.stringify(addedItem);
+        tempPassingObjectSetMenu = JSON.stringify(setMenuArray);
+
+
+    $.ajax({
+
+        url: '@Url.Action("SaveSetMenuAndAddedItemList", "SetMenu")',
+        type: "POST",
+        data: { SetMenuList: tempPassingObjectSetMenu, ExtraItemList: tempPassingObjectAdded,  dateTimeT: dateTime, categoryIdValue: categoryId, SetMenuPrice: setMenuPrice },
+        success: function (response) {
+            if (response.success) {
+
+                alert(response.responseText);
+                window.location.reload(true);
+
+
+            } else {
+                // DoSomethingElse()
+                alert(response.responseText);
+            }
+        }
+
+
+    })
+}
+</script>

@@ -1,0 +1,312 @@
+﻿@model IEnumerable<Mess_Management_System_Alpha_V2.Models.MessModels.StoreOutItemRecipe>
+
+@inject ApplicationDbContext _context
+@inject IDDLHelper _ddlHelper
+
+
+
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+    int EId = 0;
+
+    var model = _context.StoreOutItemRecipe.Include(x => x.StoreOutItem).Include(x => x.StoreInItem).ToList();
+
+    if (ViewBag.EditableId != null)
+    {
+        EId = ViewBag.EditableId;
+    }
+}
+<style>
+
+    .btn {
+        padding: 0px 0px;
+        font-size: 15px;
+        cursor: pointer;
+        margin: 0;
+        /*color:red;*/
+    }
+    .btncolor{
+        color:purple
+    }
+        hr.divider { 
+  margin: .5em;
+  border-width: 2px;
+} 
+</style>
+
+<div class="container-fluid">
+
+    <h3 style="color:green;font-weight:bold;">StoreOut Item Recipe</h3>
+
+
+    <hr />
+
+    <div class="row">
+        <div class="col-md-4">
+            <a asp-controller="StorageManagement" asp-action="WarehouseStorageIn" class="btn btn-success  btn-lg btn-block btn-huge">Store In</a>
+        </div>
+        <div class="col-md-4">
+            <a asp-controller="StorageManagement" asp-action="WarehouseStorageOut" class="btn btn-success btn-lg btn-block btn-huge">Store Out</a>
+        </div>
+        <div class="col-md-4">
+            <a asp-controller="StoreOutItemRecipe" asp-action="Index" class="btn btn-success  btn-lg btn-block btn-huge">Recipe SetUp</a>
+        </div>
+
+
+
+    </div>
+
+    <hr />
+    @*<div class="row">
+            <div class="col-sm-4">
+
+            </div>
+            <div class="col-sm-4">
+
+            </div>
+            <div class="col-sm-4">
+                <a asp-action="Create" class="btn btn-success btn-sm">Create New</a>
+
+            </div>
+        </div>*@
+
+<div class="row">
+
+    <div class="col-sm-1">
+
+
+    </div>
+    <div class="col-sm-6">
+
+
+        <table class="table">
+            <thead>
+                <tr>
+                    <th style="font-size:18px;font-weight:bold;color:chocolate">
+                        #
+                    </th>
+                    <th style="font-size:18px;font-weight:bold;color:chocolate">
+                        Name
+                    </th>
+                    <th style="font-size:18px;font-weight:bold;color:chocolate">
+                        Min. Production Unit
+                    </th>
+                    @*<th>
+            Prodtion Unit Multiplier
+        </th>*@
+                    <th style="font-size:18px;font-weight:bold;color:chocolate">
+                        Recipe (map with raw item)
+                    </th>
+                    @*<th>
+            Action
+        </th>*@
+                </tr>
+            </thead>
+            <tbody>
+                @if (model != null)
+                {
+                    int i1 = 0;
+                    int i2 = 0;
+                    var qnt = "pcs";
+
+                    @foreach (var gr in model.GroupBy(a => a.StoreOutItem))
+                    {
+                        {
+                            i1 += 1;
+                            i2 = 0;
+                        }
+                <tr>
+                    <td style="font-size:14px;font-weight:bold;color:green">
+                        @i1
+                    </td>
+                    <td style="font-size:14px;font-weight:bold;color:green">
+                        @gr.Key.Name
+                    </td>
+                    <td style="font-size:14px;font-weight:bold;color:green">
+                        @gr.Key.MinimumProductionUnit @qnt
+                    </td>
+                    @*<td>
+            @gr.Key.MinimumProductionUnitMultiplier
+        </td>*@
+                    <td style="font-size:14px;font-weight:bold;color:green">
+                        @foreach (var item in gr.Key.StoreOutItemRecipeList)
+                        {
+                            var sti = _context.StoreInItem.Where(x => x.Id == item.StoreInItemId).FirstOrDefault();
+                            var unit = _context.UnitType.Where(x => x.Id == sti.UnitTypeId).FirstOrDefault();
+
+                            @if (EId == item.Id)
+                            {
+
+                                <form asp-action="EditSave" asp-route-id="@item.Id" method="post">
+                                    <div class="row">
+
+                                        <div class="col-sm-5">
+                                            <select id="Sin" name="Sin" class="form-control border-radius-none" asp-items="@(new SelectList(_ddlHelper.GetStoreInItem().Prepend(new KeyValuePair<string, string>( item.StoreInItemId.ToString(),item.StoreInItem.Name)),"Key","Value",""))"></select>
+
+                                            @*<select id="Sin" name="Sin" class="form-control border-radius-none" asp-items="@(new SelectList(_ddlHelper.GetStoreInItem().Prepend(item.StoreInItem.Name)))"></select>*@
+                                        </div>
+                                        <div class="col-sm-3" style="display:inline-flex">
+                                            <input type="text" id="qnt" name="qnt" class="form-control" value="@item.RequiredStoreInUnit" />
+
+                                            &nbsp;<p style="padding-top:5px;"> @unit.ShortName </p>
+                                        </div>
+                                        <div class="col-sm-2" style="margin-bottom:5px;">
+                                            <button type="submit" class="btn"><i class="fas fa-check"></i></button>
+                                        </div>
+                                    </div>
+                                    <hr class="divider">
+
+                                </form>
+                                @*<div class="col-sm-2">
+                            <a asp-action="Delete" asp-route-id="@item.Id"><i class="fas fa-trash"></i></a>
+
+
+
+                    </div>*@
+
+                            }
+                            else
+                            {
+                                <div class="row">
+                                    <div class="col-sm-5">
+                                        @item.StoreInItem.Name
+                                    </div>
+                                    <div class="col-sm-3">
+                                        @item.RequiredStoreInUnit @unit.ShortName
+                                    </div>
+                                    <div class="col-sm-2" style="margin-bottom:5px;">
+                                        <a asp-action="Edit" asp-route-id="@item.Id"><i class="far fa-edit"></i></a>
+                                    </div>
+                                    <div class="col-sm-2">
+                                        <a asp-action="Delete" asp-route-id="@item.Id"><i class="fas fa-trash"></i></a>
+
+                                    </div>
+
+
+                                </div>
+                                <hr class="divider">
+                            }
+
+                        }
+                    </td>
+                </tr>
+                    }
+
+                }
+            </tbody>
+        </table>
+    </div>
+    <div class="col-sm-1">
+
+    </div>
+    <div class="col-sm-4" style="padding-top:120px;">
+        <div class="card card-chart">
+            <div class="card-header card-header-success">
+                <h5 style="font-weight:bold">Create Recipe</h5>
+                @*<div class="ct-chart" id="dailySalesChart"></div>*@
+            </div>   
+            <div class="card-body">
+                <form asp-action="CreateStoreOutRecipe" method="post">
+
+                    <div class="row">
+
+                        <div class="col-sm-3">
+
+                        </div>
+                        <div class="col-sm-6">
+                            <select id="so" name="so" class="form-control border-radius-none" asp-items="@(new SelectList(_ddlHelper.GetStoreOutItem().Prepend(new KeyValuePair<string, string>("0","Item")),"Key","Value",""))"></select>
+
+                        </div>
+                        <div class="col-sm-3">
+
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <select id="si" name="si" class="form-control border-radius-none" asp-items="@(new SelectList(_ddlHelper.GetStoreInItem().Prepend(new KeyValuePair<string, string>("0","Raw Item")),"Key","Value",""))"></select>
+
+                        </div>
+                        <div class="col-sm-6">
+                            <input type="number" id="q" name="q" class="form-control" placeholder="Min Raw Item Unit" />
+
+                        </div>
+                    </div>
+                    <br />
+                    <div class="row">
+                        <div class="col-sm-4">
+
+                        </div>
+                        <div class="col-sm-4">
+
+                            <button class="btn btn-sm btn-success" id="In" type="submit" style="margin-left: 0px;"> Add </button>
+                        </div>
+
+                        <div class="col-sm-4">
+                            </div>
+
+                        </div>
+
+</form>
+
+
+            </div>
+            <br />
+            <br />
+       </div>
+            
+            
+            @*<form asp-action="CreateStoreOutRecipe" method="post">
+                <select class="form-control border-radius-none" asp-items="@(new SelectList(_ddlHelper.GetStoreOutItem().Prepend(new KeyValuePair<string, string>("0","Item")),"Key","Value",""))"></select>
+                <select class="form-control border-radius-none" asp-items="@(new SelectList(_ddlHelper.GetStoreInItem().Prepend(new KeyValuePair<string, string>("0","Raw Item")),"Key","Value",""))"></select>
+                <input type="number" class="form-control" placeholder="Min Raw Item Unit" />
+
+
+            </form>*@
+            @*<form asp-action="Create" class="form-horizontal">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+
+            <div class="form-group">
+                <label  class="control-label col-sm-2"></label>
+                <div class="col-sm-10">
+                    <select  class="form-control border-radius-none" asp-items="@(new SelectList(_ddlHelper.GetStoreOutItem().Prepend(new KeyValuePair<string, string>("0","-- Select Item Category --")),"Key","Value",""))"></select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label  class="control-label col-sm-2"></label>
+                <div class="col-sm-10">
+                    <select  class="form-control border-radius-none" asp-items="@(new SelectList(_ddlHelper.GetStoreInItem().Prepend(new KeyValuePair<string, string>("0","-- Select Item Category --")),"Key","Value",""))"></select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label  class="control-label col-sm-2"></label>
+                <div class="col-sm-10">
+                    <div style="display:inline-flex">
+
+                        <input  type="text" class="form-control" placeholder="Enter Required StoreIn Unit">
+
+                        <span  class="text-danger"></span>
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="form-group">
+                <br />
+                <div class="col-sm-offset-1 col-sm-10">
+
+                    <input type="submit" value="Create" class="btn btn-pr btn-sm" /> |
+                </div>
+            </div>
+
+
+        </form>*@
+
+        </div>
+
+</div>
+</div>
+

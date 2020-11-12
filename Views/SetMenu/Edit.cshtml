@@ -1,0 +1,314 @@
+﻿@model Mess_Management_System_Alpha_V2.Models.MessModels.SetMenu
+@inject ApplicationDbContext _db
+@inject IDDLHelper _ddlHelper
+@{
+    ViewData["Title"] = "Edit";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+
+<style>
+    .list-group {
+        max-height: 300px;
+        margin-bottom: 10px;
+        overflow: scroll;
+        -webkit-overflow-scrolling: touch;
+    }
+</style>
+
+
+<h2>Edit</h2>
+
+<h4>SetMenu</h4>
+<hr />
+
+<p style="text-align: right;">
+    <a asp-action="Index" class="btn btn-default btn-sm">Back to List</a>
+</p>
+
+
+<div class="row">
+    <div id="messageUp"></div>
+</div>
+
+
+<div class="row">
+    <div class="col-lg-2">
+        <div class="form-group">
+            <label for="sel1">Date:</label>
+            <input type="date" name="LoadOrderDate" value="@Model.SetMenuDate.ToString("yyyy-MM-dd")" disabled />
+
+            <input type="hidden" id="setMenuId" value="@Model.Id" />
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-3">
+        <div class="form-group">
+            <label for="sel1">Meal Type:</label>
+            <select id="DDLCategory" asp-for="MealTypeId" class="form-control border-radius-none" asp-items="@(new SelectList(_ddlHelper.GetMealType().Prepend(new KeyValuePair<string, string>("-1","-- Select Meal Type --")),"Key","Value",""))" disabled></select>
+        </div>
+    </div>
+
+</div>
+
+
+
+<div class="row">
+    <div class="col-lg-3">
+        <div class="form-group">
+            <label for="sel1">Set Menu Price: (Tk.)</label>
+            <input type="text" id="setMenuPrice" class="form-control" value="@Model.SetMenuPrice" >
+        </div>
+    </div>
+</div>
+
+
+
+<div class="row">
+
+
+
+
+    <div class="col-md-5">
+
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                Items
+            </div>
+            <div class="card-body">
+                <ul class="list-group" id="BreakfastItemList">
+                    @if (Model.SetMenuDetailsList.Count > 0)
+                    {
+                        var storeOutItemList = _db.StoreOutItem.ToList();
+                        @foreach (var storeOutItem in storeOutItemList)
+                        {
+                            var tempData = Model.SetMenuDetailsList.Where(x => x.StoreOutItemId == storeOutItem.Id).FirstOrDefault();
+                            if (tempData != null)
+                            {
+                                <li class="list-group-item custom-control custom-checkbox">
+                                    <input type="checkbox" class="custom-control-input" style="position: inherit;" id="check_@storeOutItem.Id" name="checkMainItem" value="@storeOutItem.Id" checked />
+                                    <label class="custom-control-label" for="check_@storeOutItem.Id">@storeOutItem.Name</label>
+                                </li>
+                            }
+                            else
+                            {
+                                <li class="list-group-item custom-control custom-checkbox">
+                                    <input type="checkbox" class="custom-control-input" style="position: inherit;" id="check_@storeOutItem.Id" name="checkMainItem" value="@storeOutItem.Id" />
+                                    <label class="custom-control-label" for="check_@storeOutItem.Id">@storeOutItem.Name</label>
+                                </li>
+                            }
+
+                        }
+                    }
+
+                </ul>
+            </div>
+        </div>
+
+    </div>
+
+
+
+    <div class="col-md-7">
+
+        <div class="card">
+            <div class="card-header bg-warning text-white">
+                Extra Items
+            </div>
+            <div class="card-body">
+                <ul class="list-group" id="BreakfastItemListAdded">
+                    @if (Model.ExtraItemList.Count > 0)
+                    {
+                        var storeOutItemList = _db.StoreOutItem.ToList();
+                        @foreach (var storeOutItem in storeOutItemList)
+                        {
+                            var tempData = Model.ExtraItemList.Where(x => x.StoreOutItemId == storeOutItem.Id).FirstOrDefault();
+                            if (tempData != null)
+                            {
+                                <li class="list-group-item" style="padding:0px">
+                                   
+                                    <div class="row">
+                                        <div class="col-sm-6">
+                                            <div class="custom-control custom-checkbox" style="margin-top: 2.5%;">
+                                                <input type="checkbox" class="custom-control-input" style="position: inherit;" id="checkadded_@storeOutItem.Id" name="checkExtraItem" value="@storeOutItem.Id" onclick="CleanPriceFieldOfExtraItem(@storeOutItem.Id)" checked />
+                                                <label class="custom-control-label" for="checkadded_@storeOutItem.Id">@storeOutItem.Name</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <input type="text" id="priceadded_@storeOutItem.Id" name="extraItemPrice" value="@tempData.Price" placeholder="Item Price"  class="form-control w-100" />
+                                        </div>
+                                    </div>
+                                
+                                
+                                </li>
+                            }
+                            else
+                            {
+                                <li class="list-group-item" style="padding:0px" >
+                                    <div class="row">
+                                        <div class="col-sm-6">
+                                            <div class="custom-control custom-checkbox" style="margin-top: 2.5%;">
+                                                <input type="checkbox" class="custom-control-input" style="position: inherit;" id="checkadded_@storeOutItem.Id" name="checkExtraItem" value="@storeOutItem.Id" onclick="CleanPriceFieldOfExtraItem(@storeOutItem.Id)" />
+                                                <label class="custom-control-label" for="checkadded_@storeOutItem.Id">@storeOutItem.Name</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <input type="text" id="priceadded_@storeOutItem.Id" name="extraItemPrice" placeholder="Item Price"  class="form-control w-100" />
+                                        </div>
+                                    </div>
+
+                                </li>
+                            }
+
+                        }
+                    }
+                </ul>
+            </div>
+        </div>
+
+    </div>
+
+
+</div>
+
+
+
+
+<div class="row">
+    <div class="col-sm-12">
+        <div class="form-group">
+            <br />
+            <div class="col-sm-10 pl-0">
+                <a class="btn btn-info btn-sm" onclick="UpdateSetMenuList()"> Update </a> |
+                <a asp-action="Index" class="btn btn-sm btn-default">Back to List</a>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div id="messageDown"></div>
+    </div>
+</div>
+
+
+
+
+
+
+@section Scripts {
+
+
+    <script>
+
+        function UpdateSetMenuList() {
+
+            //=============== Set Menu Id =================
+            var setMenuIdTemp = $('#setMenuId').val();
+            //alert(setMenuIdTemp);
+            //=============== Set Menu Id =================
+
+
+           //=============== Set Menu Item Id =================
+            var setMenuArray = [];
+                   var setMenuPrice = document.getElementById("setMenuPrice").value.toString();
+
+            var checkBoxSetMenu = document.getElementsByName("checkMainItem");
+            var checkBoxLengthSetMenu = checkBoxSetMenu.length;
+            var tempItemValueSetMenu = "";
+            for (var i = 0; i < checkBoxLengthSetMenu; i++) {
+                if (checkBoxSetMenu[i].checked == true) {
+
+                    tempItemValueSetMenu = checkBoxSetMenu[i].value.toString();
+                    var obj = { SetMenuItemId: tempItemValueSetMenu };
+                    setMenuArray.push(obj);
+                }
+            }
+            //=============== Set Menu Item Id =================
+
+
+            //=============== Extra Item Id =================
+            var addedItem = [];
+            var checkBoxAdded = document.getElementsByName("checkExtraItem");
+            var checkBoxLengthAdded = checkBoxAdded.length;
+            var textsAdded = document.getElementsByName("extraItemPrice");
+            var tempItemValueAdded = "";
+            var tempPriceValueAdded = "";
+            for (var i = 0; i < checkBoxLengthAdded; i++) {
+                if (checkBoxAdded[i].checked == true) {
+                    tempPriceValueAdded = textsAdded[i].value.toString();
+                    tempItemValueAdded = checkBoxAdded[i].value.toString();
+                    var obj = { AddedItemId: tempItemValueAdded, AddedItemPrice: tempPriceValueAdded };
+                    addedItem.push(obj);
+                }
+            }
+            //=============== Extra Item Id =================
+
+            var tempExtraItemList = "";
+            var tempSetMenuList = "";
+            tempExtraItemList = JSON.stringify(addedItem);
+            tempSetMenuList = JSON.stringify(setMenuArray);
+
+
+
+             $.ajax({
+
+                url: '@Url.Action("UpdateSetMenuAndAddedItemList", "SetMenu")',
+                 type: "POST",
+                 data: { SetMenuList: tempSetMenuList, ExtraItemList: tempExtraItemList, SetMenuId: setMenuIdTemp, SetMenuPrice: setMenuPrice },
+                success: function (response) {
+                    if (response.success) {
+
+                        //alert(response.responseText);
+                        //window.location.reload(true);
+
+
+
+
+                        jQuery("#messageUp").append('<div class="alert alert-success" role="alert"><b>"' + response.responseText + '"</b></div>');
+                        jQuery("#messageDown").append('<div class="alert alert-success" role="alert"><b>"' + response.responseText + '"</b></div>');
+
+
+                    } else {
+                        // DoSomethingElse()
+                        //alert(response.responseText);
+                        jQuery("#messageUp").append('<div class="alert alert-danger" role="alert"><b>"' + response.responseText + '"</b></div>');
+                        jQuery("#messageDown").append('<div class="alert alert-danger" role="alert"><b>"' + response.responseText +'"</b></div>');
+                    }
+                }
+
+
+            })
+
+
+
+
+        }
+
+
+
+
+
+
+
+        //<<<<<<<<<<<<<<<<<< CleanPriceFieldOfExtraItem >>>>>>>>>>>>>>>>>>>>>>>
+        function CleanPriceFieldOfExtraItem(storeOutItemId) {
+
+            var isChecked = $('#checkadded_' + storeOutItemId).is(":checked");
+            if (isChecked == true) {
+                //alert('is checked');
+            } else {
+                //alert('is not checked');
+                $('#priceadded_' + storeOutItemId).val('');
+
+            }
+
+        }
+        //<<<<<<<<<<<<<<<<<< CleanPriceFieldOfExtraItem >>>>>>>>>>>>>>>>>>>>>>>
+
+    </script>
+
+
+
+
+}

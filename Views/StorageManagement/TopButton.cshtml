@@ -1,0 +1,71 @@
+﻿
+@inject ApplicationDbContext _db
+
+@inject IDDLHelper _ddlHelper
+
+@inject IDDLHelper _ddlhelper
+@{
+    ViewData["Title"] = "TopButton";
+    //Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+<div class="row">
+    <div class="col-md-4">
+        @*<a asp-controller="StorageManagement" asp-action="WarehouseStorageIn" class="btn btn-success  btn-lg btn-block btn-huge">Store In</a>*@
+        <a onclick="CheckLoad()" class="btn btn-success  btn-lg btn-block btn-huge">Store In</a>
+
+    </div>
+    <div class="col-md-4">
+        <a onclick="CheckLoad2()" class="btn btn-success  btn-lg btn-block btn-huge">Store Out</a>
+
+    </div>
+    <div class="col-md-4">
+        <a onclick="CheckLoad3()" class="btn btn-success  btn-lg btn-block btn-huge">Recipe Setup</a>
+
+    </div>
+
+
+
+</div>
+
+@*<div id="storeIn">
+
+    <partial name="WarehouseStorageIn" />
+
+</div>
+<div id="storeOut">
+    <partial name="WarehouseStorageOut" />
+
+
+</div>
+
+<div id="storeRecipe">
+
+    <partial name="StoreOutRecipe" />
+
+</div>*@
+
+<script>
+    //$("#storeIn").hide();
+    //$("#storeOut").hide();
+    //$("#storeRecipe").hide();
+    //function CheckLoad() {
+    //    $("#storeIn").show();
+    //    $("#storeOut").hide();
+    //    $("#storeRecipe").hide();
+
+    //}
+
+    //function CheckLoad2() {
+    //    $("#storeIn").hide();
+    //    $("#storeOut").show();
+    //    $("#storeRecipe").hide();
+
+    //}
+    //function CheckLoa3() {
+    //    $("#storeIn").hide();
+    //    $("#storeOut").hide();
+    //    $("#storeRecipe").show();
+
+    //}
+</script>

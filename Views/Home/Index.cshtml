@@ -1,0 +1,24 @@
+﻿@inject IDDLHelper _ddlHelper
+@{
+    ViewData["Title"] = "Home Page";
+}
+
+<div class="container-fluid">
+
+    <div class="form-group">
+        <label class="col-sm-2 control-label">Stock</label>
+        <div class="col-sm-6">
+            <select class="form-control border-radius-none" asp-items="@{new SelectList(_ddlHelper.GetYears().Prepend(new KeyValuePair<string, string>("0","-- Select --")),"Key","Value","")}"></select>
+
+        </div>
+    </div>
+
+</div>
+
+
+
+
+
+<br />
+<br />
+
