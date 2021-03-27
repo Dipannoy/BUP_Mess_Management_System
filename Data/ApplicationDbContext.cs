@@ -9,7 +9,7 @@ using System.Linq;
 
 namespace Mess_Management_System_Alpha_V2.Data
 {
-    public class ApplicationDbContext : IdentityDbContext<ApplicationUser>
+    public class ApplicationDbContext : IdentityDbContext<ApplicationUser, UserIdentityRole, string>
     {
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)
@@ -82,8 +82,33 @@ namespace Mess_Management_System_Alpha_V2.Data
         public DbSet<Office> Office { get; set; }
 
         public DbSet<TestClassMod> TestClassMod { get; set; }
+        public DbSet<Constants> Constants { get; set; }
+        public DbSet<CustomerDailyMenuChoice> CustomerDailyMenuChoice { get; set; }
+        public DbSet<UserDateChoiceMaster> UserDateChoiceMaster { get; set; }
+
+        public DbSet<UserDateChoiceDetail> UserDateChoiceDetail { get; set; }
+        public DbSet<ExtraChitParent> ExtraChitParent { get; set; }
+        public DbSet<OnSpotParent> OnSpotParent { get; set; }
+        public DbSet<ConsumerMealWiseExtrachit> ConsumerMealWiseExtrachit { get; set; }
+
+        public DbSet<ConsumerMealWiseExtraChitParent> ConsumerMealWiseExtraChitParent { get; set; }
+
+        public DbSet<ConsumerPaymentInfo> ConsumerPaymentInfo { get; set; }
+
+        public DbSet<ConsumerBillHistory> ConsumerBillHistory { get; set; }
+
+        public DbSet<ConsumerBillParent> ConsumerBillParent { get; set; }
+
+        public DbSet<PaymentMethod> PaymentMethod { get; set; }
+
+        public DbSet<ConsumerPaymentAttachment> ConsumerPaymentAttachment { get; set; }
+
+       public DbSet<NavigationMenu> NavigationMenu { get; set; }
+        public DbSet<RoleMenu> RoleMenu { get; set; }
+        public DbSet<DailyOfferItem> DailyOfferItem { get; set; }
 
 
+        //public DbSet<ConsumerPaymentAttachment> ConsumerPaymentAttachment { get; set; }
 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -197,6 +222,10 @@ namespace Mess_Management_System_Alpha_V2.Data
              .HasOne(o => o.StoreInItem)
              .WithMany(m => m.WarehouseStorageList).OnDelete(DeleteBehavior.Restrict);
 
+            modelBuilder.Entity<WarehouseStorage>()
+        .HasOne(o => o.StoreOutItem)
+        .WithMany(m => m.WarehouseStorageList).OnDelete(DeleteBehavior.Restrict);
+
             modelBuilder.Entity<RemainingBalanceAndWeightedPriceCalculation>()
             .HasOne(o => o.StoreInItem)
             .WithMany(m => m.RemainingBalanceAndWeightedPriceCalculationList).OnDelete(DeleteBehavior.Restrict);
@@ -249,6 +278,13 @@ namespace Mess_Management_System_Alpha_V2.Data
           .HasOne(o => o.MealType)
           .WithMany(m => m.CustomerChoiceV2List).OnDelete(DeleteBehavior.Restrict);
 
+            modelBuilder.Entity<CustomerChoiceV2>()
+       .HasOne(o => o.OnSpotParent)
+       .WithMany(m => m.CustomerChoiceV2List).OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<CustomerChoiceV2>()
+        .HasOne(o => o.ExtraChitParent)
+        .WithMany(m => m.CustomerChoiceV2List).OnDelete(DeleteBehavior.Restrict);
 
 
 
@@ -275,6 +311,10 @@ namespace Mess_Management_System_Alpha_V2.Data
             modelBuilder.Entity<MenuItem>()
          .HasOne(o => o.MealType)
          .WithMany(m => m.MenuItemList).OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<MenuItem>()
+        .HasOne(o => o.StoreOutItem)
+        .WithMany(m => m.MenuItemList).OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<DailySetMenu>()
         .HasOne(o => o.MealType)
@@ -310,6 +350,112 @@ namespace Mess_Management_System_Alpha_V2.Data
 .WithMany(m => m.SpecialMenuParentList).OnDelete(DeleteBehavior.Restrict);
 
 
+            modelBuilder.Entity<CustomerDailyMenuChoice>()
+.HasOne(o => o.MealType)
+.WithMany(m => m.CustomerDailyMenuChoiceList).OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<CustomerDailyMenuChoice>()
+.HasOne(o => o.OrderType)
+.WithMany(m => m.CustomerDailyMenuChoiceList).OnDelete(DeleteBehavior.Restrict);
+
+            
+
+            modelBuilder.Entity<CustomerDailyMenuChoice>()
+.HasOne(o => o.ApplicationUser)
+.WithMany(m => m.CustomerDailyMenuChoiceList).OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<UserDateChoiceMaster>()
+.HasOne(o => o.ApplicationUser)
+.WithMany(m => m.UserDateChoiceMasterList).OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<UserDateChoiceMaster>()
+.HasOne(o => o.MealType)
+.WithMany(m => m.UserDateChoiceMasterList).OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<UserDateChoiceDetail>()
+.HasOne(o => o.UserDateChoiceMaster)
+.WithMany(m => m.UserDateChoiceDetailList).OnDelete(DeleteBehavior.Restrict);
+
+//            modelBuilder.Entity<ExtraChitParent>()
+//.HasOne(o => o.ApplicationUser)
+//.WithMany(m => m.ExtraChitParentList).OnDelete(DeleteBehavior.Restrict);
+
+//            modelBuilder.Entity<ExtraChitParent>()
+//.HasOne(o => o.Office)
+//.WithMany(m => m.ExtraChitParentList).OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<OnSpotParent>()
+.HasOne(o => o.ApplicationUser)
+.WithMany(m => m.OnSpotParentList).OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<OnSpotParent>()
+.HasOne(o => o.Office)
+.WithMany(m => m.OnSpotParentList).OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<ConsumerMealWiseExtraChitParent>()
+.HasOne(o => o.ApplicationUser)
+.WithMany(m => m.ConsumerMealWiseExtraChitParentList).OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<ConsumerMealWiseExtraChitParent>()
+.HasOne(o => o.MealType)
+.WithMany(m => m.ConsumerMealWiseExtraChitParentList).OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<ConsumerMealWiseExtraChitParent>()
+.HasOne(o => o.OrderType)
+.WithMany(m => m.ConsumerMealWiseExtraChitParentList).OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<ConsumerMealWiseExtrachit>()
+.HasOne(o => o.StoreOutItem)
+.WithMany(m => m.ConsumerMealWiseExtrachitList).OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<ConsumerMealWiseExtrachit>()
+.HasOne(o => o.ConsumerMealWiseExtraChitParent)
+.WithMany(m => m.ConsumerMealWiseExtrachitList).OnDelete(DeleteBehavior.Restrict);
+
+
+            modelBuilder.Entity<ConsumerBillHistory>()
+.HasOne(o => o.ConsumerBillParent)
+.WithMany(m => m.ConsumerBillHistoryList).OnDelete(DeleteBehavior.Restrict);
+
+
+            modelBuilder.Entity<ConsumerBillHistory>()
+.HasOne(o => o.ConsumerPaymentInfo)
+.WithMany(m => m.ConsumerBillHistoryList).OnDelete(DeleteBehavior.Restrict);
+
+
+
+            modelBuilder.Entity<ConsumerBillParent>()
+.HasOne(o => o.ApplicationUser)
+.WithMany(m => m.ConsumerBillParentList).OnDelete(DeleteBehavior.Restrict);
+
+
+            modelBuilder.Entity<ConsumerPaymentInfo>()
+.HasOne(o => o.ConsumerBillParent)
+.WithMany(m => m.ConsumerPaymentInfoList).OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<ConsumerPaymentInfo>()
+.HasOne(o => o.PaymentMethod)
+.WithMany(m => m.ConsumerPaymentInfoList).OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<ConsumerPaymentAttachment>()
+.HasOne(o => o.ConsumerBillParent)
+.WithMany(m => m.ConsumerPaymentAttachmentList).OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<ConsumerPaymentAttachment>()
+.HasOne(o => o.ConsumerPaymentInfo)
+.WithMany(m => m.ConsumerPaymentAttachmentList).OnDelete(DeleteBehavior.Restrict);
+
+
+            modelBuilder.Entity<RoleMenu>()
+.HasOne(o => o.UserIdentityRole)
+.WithMany(m => m.RoleMenuList).OnDelete(DeleteBehavior.Restrict);
+
+
+            modelBuilder.Entity<RoleMenu>()
+.HasOne(o => o.NavigationMenu)
+.WithMany(m => m.RoleMenuList).OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<DailyOfferItem>()
+.HasOne(o => o.StoreOutItem)
+.WithMany(m => m.DailyOfferItemList).OnDelete(DeleteBehavior.Restrict);
             base.OnModelCreating(modelBuilder);
         }
 

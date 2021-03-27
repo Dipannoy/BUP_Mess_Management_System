@@ -1,0 +1,162 @@
+﻿@inject ApplicationDbContext _context
+@inject Microsoft.AspNetCore.Identity.UserManager<ApplicationUser> _userManager
+@inject ApplicationDbContext _db
+@inject IDDLHelper _ddlHelper
+
+@{
+    ViewData["Title"] = "ConsumerPaymentSlip";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+
+    //var ConsumerSlipList = _db.ConsumerPaymentAttachment.Where(x => x.EntryDone == false).ToList();
+    var ConsumerSlipList = _db.ConsumerPaymentAttachment.Where(x => x.Id > 0).ToList();
+
+    var paymentDictionay = new Dictionary<string, string>();
+
+    var paymentMethodList = _db.PaymentMethod.Where(x => x.Id > 0).ToList();
+    foreach (var i in paymentMethodList)
+    {
+        paymentDictionay.Add(i.Id.ToString(), i.MethodName);
+    }
+}
+
+    <div class="content">
+        <div class="container-fluid">
+            @{
+                var c = 0;
+            }
+            @for (int i = 0; i < ConsumerSlipList.Count; i = i + 3)
+            {
+            <div class="row" style="padding-top:100px;">
+                <div class="col-sm-2">
+
+                </div>
+                <div class="col-sm-3">
+                    <div class="row">
+                        @{
+                            var iPhotoUrl = "/Upload/" + ConsumerSlipList[i].Attachment;
+                        }
+                        <a href="@iPhotoUrl" download>
+                            <img class="float-left p-2" src="@iPhotoUrl" height="150" />
+                        </a>
+                    </div>
+                    <div class="row">
+
+                        <div class="col-sm-8">
+                            @{
+                                var userId = _context.ConsumerBillParent.Where(x => x.Id == ConsumerSlipList[i].ConsumerBillParentId).FirstOrDefault().UserId;
+                            }
+                            @_userManager.Users.Where(x => x.Id == userId).FirstOrDefault().BUPFullName
+                        </div>
+                        <div class="col-sm-4">
+
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-8">
+                            <span class="badge badge-danger" style="font-size:11px;">
+                                @ConsumerSlipList[i].Remarks
+                            </span>
+                        </div>
+                        <div class="col-sm-4">
+          
+                        </div>
+                    </div>
+
+                </div>
+                <div class="col-sm-3">
+                    <div class="row">
+                    @{
+                        var iPhotoUrl2 = "";
+                        if ((i + 1) < ConsumerSlipList.Count)
+                        {
+                            iPhotoUrl2 = "/Upload/" + ConsumerSlipList[i + 1].Attachment;
+                            <a href="@iPhotoUrl2" download>
+                                <img class="float-left p-2" src="@iPhotoUrl2" height="150" />
+                            </a>
+
+                        }
+                    }
+                        </div>
+                    @if ((i + 1) < ConsumerSlipList.Count)
+                    {
+                <div class="row">
+
+                    <div class="col-sm-8">
+                        @{
+                            var userId2 = _context.ConsumerBillParent.Where(x => x.Id == ConsumerSlipList[i + 1].ConsumerBillParentId).FirstOrDefault().UserId;
+                        }
+                        @_userManager.Users.Where(x => x.Id == userId2).FirstOrDefault().BUPFullName
+                    </div>
+                    <div class="col-sm-4">
+
+                    </div>
+                </div>
+                        <div class="row">
+                            <div class="col-sm-8">
+                                <span class="badge badge-danger" style="font-size:11px;">
+                                    @ConsumerSlipList[i + 1].Remarks
+                                </span>
+                            </div>
+                            <div class="col-sm-4">
+
+                            </div>
+                        </div>
+                    }
+                </div>
+                <div class="col-sm-3">
+                    <div class="row">
+                        @{
+                            var iPhotoUrl3 = "";
+                            if ((i + 2) < ConsumerSlipList.Count)
+                            {
+                                iPhotoUrl3 = "/Upload/" + ConsumerSlipList[i + 2].Attachment;
+                                <a href="@iPhotoUrl3" download>
+                                    <img class="float-left p-2" src="@iPhotoUrl3" height="150" />
+                                </a>
+
+                            }
+                        }
+                    </div>
+                    @if ((i + 2) < ConsumerSlipList.Count)
+                    {
+                <div class="row">
+
+                    <div class="col-sm-8">
+                        @{
+                            var userId3 = _context.ConsumerBillParent.Where(x => x.Id == ConsumerSlipList[i + 2].ConsumerBillParentId).FirstOrDefault().UserId;
+                        }
+                        @_userManager.Users.Where(x => x.Id == userId3).FirstOrDefault().BUPFullName
+                    </div>
+                    <div class="col-sm-4">
+
+                    </div>
+                </div>
+                        <div class="row">
+                            <div class="col-sm-8">
+                                <span class="badge badge-danger" style="font-size:11px;">
+                                    @ConsumerSlipList[i + 2].Remarks
+                                </span>
+                            </div>
+                            <div class="col-sm-4">
+
+                            </div>
+                        </div>
+                    }
+
+                </div>
+                <div class="col-sm-1">
+
+                </div>
+            </div>
+             
+           
+                 
+
+
+         }
+
+                     
+
+
+                </div>
+    </div>

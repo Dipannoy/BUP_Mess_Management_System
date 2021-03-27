@@ -1,0 +1,699 @@
+﻿@inject ApplicationDbContext _context
+@inject Microsoft.AspNetCore.Identity.UserManager<ApplicationUser> _userManager
+@inject IDDLHelper _ddlHelper
+
+@{
+    ViewData["Title"] = "MenuManagement";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+
+    var MenuList = new Dictionary<string, string>();
+    var roleDict = new Dictionary<string, string>();
+
+
+    var fullMenuList = _context.NavigationMenu.Where(x => x.Id > 0).ToList();
+    var menuLayer1 = _context.NavigationMenu.Where(x => x.ParentId == 0).ToList();
+
+    var roleList = _context.Roles.Where(x => x.Id.Count() > 0).ToList();
+
+    foreach (var i in fullMenuList)
+    {
+
+        MenuList.Add(i.Id.ToString(), i.Name);
+    }
+
+    foreach(var r in roleList)
+    {
+        roleDict.Add(r.Id.ToString(), r.Name);
+    }
+}
+<head>
+    <link href="~/assets/css/material-dashboard.css?v=2.1.1" rel="stylesheet" />
+    <link href="~/assets/demo/demo.css" rel="stylesheet" />
+</head>
+<style>
+
+    #ui-datepicker-div {
+        display: none;
+        background-color: #fff;
+        box-shadow: 0 0.125rem 0.5rem rgba(0,0,0,0.1);
+        margin-top: 0.25rem;
+        border-radius: 0.5rem;
+        padding: 0.5rem;
+    }
+
+    table {
+        border-collapse: collapse;
+        border-spacing: 0;
+    }
+
+    .ui-datepicker-calendar thead th {
+        padding: 0.25rem 0;
+        text-align: center;
+        font-size: 0.75rem;
+        font-weight: 400;
+        color: #78909C;
+    }
+
+    .ui-datepicker-calendar tbody td {
+        width: 2.5rem;
+        text-align: center;
+        padding: 0;
+    }
+
+        .ui-datepicker-calendar tbody td a {
+            display: block;
+            border-radius: 0.25rem;
+            line-height: 2rem;
+            transition: 0.3s all;
+            color: #546E7A;
+            font-size: 0.875rem;
+            text-decoration: none;
+        }
+
+            .ui-datepicker-calendar tbody td a:hover {
+                background-color: #E0F2F1;
+            }
+
+            .ui-datepicker-calendar tbody td a.ui-state-active {
+                background-color: #009688;
+                color: white;
+            }
+
+    .ui-datepicker-header a.ui-corner-all {
+        cursor: pointer;
+        position: absolute;
+        top: 0;
+        width: 2rem;
+        height: 2rem;
+        margin: 0.5rem;
+        border-radius: 0.25rem;
+        transition: 0.3s all;
+    }
+
+        .ui-datepicker-header a.ui-corner-all:hover {
+            background-color: #ECEFF1;
+        }
+
+    .ui-datepicker-header a.ui-datepicker-prev {
+        left: 0;
+        background: url("~/assets/img/prev.png");
+        background-repeat: no-repeat;
+        background-size: 0.5rem;
+        background-position: 50%;
+        transform: rotate(180deg);
+    }
+
+    .ui-datepicker-header a.ui-datepicker-next {
+        right: 0;
+        background: url("~/assets/img/prev.png");
+        background-repeat: no-repeat;
+        background-size: 10px;
+        background-position: 50%;
+    }
+
+    .ui-datepicker-header a > span {
+        display: none;
+    }
+
+    .ui-datepicker-title {
+        text-align: center;
+        line-height: 2rem;
+        margin-bottom: 0.25rem;
+        font-size: 0.875rem;
+        font-weight: 500;
+        padding-bottom: 0.25rem;
+    }
+
+    .ui-datepicker-week-col {
+        color: #78909C;
+        font-weight: 400;
+        font-size: 0.75rem;
+    }
+
+    .modal {
+        display: none; /* Hidden by default */
+        position: fixed; /* Stay in place */
+        /*z-index: 1;*/ /* Sit on top */
+        padding-top: 100px; /* Location of the box */
+        left: 0;
+        top: 0;
+        width: 100%; /* Full width */
+        height: 100%; /* Full height */
+        overflow: auto; /* Enable scroll if needed */
+        background-color: rgb(0,0,0); /* Fallback color */
+        background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+        padding-left: 100px;
+    }
+
+    /* Modal Content */
+    .modal-content {
+        background-color: #fefefe;
+        margin: auto;
+        padding: 20px;
+        border: 1px solid #888;
+        width: 40%;
+    }
+
+    /* The Close Button */
+    .close {
+        color: #aaaaaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+    }
+
+        .close:hover,
+        .close:focus {
+            color: #000;
+            text-decoration: none;
+            cursor: pointer;
+        }
+</style>
+
+<div class="content">
+    <div class="container-fluid">
+        @*<div id="addMenu" class="modal">
+            <div class="modal-content">
+                <div class="row">
+                    <div class="col-sm-4">
+                        <label class="bmd-label-floating">Name</label>
+
+                    </div>
+                    <div class="col-sm-4">
+                        <input type="text" id="menuName" class="form-control" placeholder="menu" />
+
+                    </div>
+
+                    <div class="col-sm-4">
+
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-4">
+                        <label class="bmd-label-floating">Controller</label>
+
+                    </div>
+                    <div class="col-sm-4">
+                        <input type="text" id="controllerName" class="form-control" placeholder="controller" />
+
+                    </div>
+
+                    <div class="col-sm-4">
+
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-4">
+                        <label class="bmd-label-floating">Action</label>
+
+                    </div>
+                    <div class="col-sm-4">
+                        <input type="text" id="actionName" class="form-control" placeholder="action" />
+
+                    </div>
+
+                    <div class="col-sm-4">
+
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-4">
+                        <label class="bmd-label-floating">Parent Menu</label>
+
+                    </div>
+                    <div class="col-sm-4">
+                        <select id="parentMenu" name="parentMenu" class="form-control border-radius-none" asp-items="@(new SelectList(MenuList.Prepend(new KeyValuePair<string, string>("0", "Parent Menu")), "Key", "Value", ""))"></select>
+
+                    </div>
+
+                    <div class="col-sm-4">
+
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-4">
+                        <label class="bmd-label-floating">Route Variable</label>
+
+                    </div>
+                    <div class="col-sm-4">
+                        <input type="text" id="routeVariableName" class="form-control" placeholder="Route" />
+
+                    </div>
+
+                    <div class="col-sm-4">
+
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-4">
+                        <label class="bmd-label-floating">Route Value</label>
+
+                    </div>
+                    <div class="col-sm-4">
+                        <input type="text" id="routeValue" class="form-control" placeholder="Route Value" />
+
+                    </div>
+
+                    <div class="col-sm-4">
+
+                    </div>
+                </div>
+                <div class="row" style="padding-top:20px;">
+                    <div class="col-sm-6">
+
+                    </div>
+
+                    <div class="col-sm-3">
+                        <button class="btn" onclick="SaveMenu()" style="padding:3px;"> Save</button>
+                    </div>
+                    <div class="col-sm-3">
+                        <button class="btn" onclick="CloseModal()" style="padding:3px;"> Close</button>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>*@
+        <div class="row" style="padding-top:100px;">
+            <div class="col-sm-6">
+                <div class="card">
+                    <div class="card-header card-header-success">
+                        Add Menu 
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-sm-4">
+                                <label class="bmd-label-floating">Name</label>
+
+                            </div>
+                            <div class="col-sm-4">
+                                <input type="text" id="menuName" class="form-control" placeholder="menu" />
+
+                            </div>
+
+                            <div class="col-sm-4">
+
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-4">
+                                <label class="bmd-label-floating">Controller</label>
+
+                            </div>
+                            <div class="col-sm-4">
+                                <input type="text" id="controllerName" class="form-control" placeholder="controller" />
+
+                            </div>
+
+                            <div class="col-sm-4">
+
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-4">
+                                <label class="bmd-label-floating">Action</label>
+
+                            </div>
+                            <div class="col-sm-4">
+                                <input type="text" id="actionName" class="form-control" placeholder="action" />
+
+                            </div>
+
+                            <div class="col-sm-4">
+
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-4">
+                                <label class="bmd-label-floating">Parent Menu</label>
+
+                            </div>
+                            <div class="col-sm-4">
+                                <select id="parentMenu" name="parentMenu" class="form-control border-radius-none" asp-items="@(new SelectList(MenuList.Prepend(new KeyValuePair<string, string>("0", "Parent Menu")), "Key", "Value", ""))"></select>
+
+                            </div>
+
+                            <div class="col-sm-4">
+
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-4">
+                                <label class="bmd-label-floating">Route Variable</label>
+
+                            </div>
+                            <div class="col-sm-4">
+                                <input type="text" id="routeVariableName" class="form-control" placeholder="Route" />
+
+                            </div>
+
+                            <div class="col-sm-4">
+
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-4">
+                                <label class="bmd-label-floating">Route Value</label>
+
+                            </div>
+                            <div class="col-sm-4">
+                                <input type="text" id="routeValue" class="form-control" placeholder="Route Value" />
+
+                            </div>
+
+                            <div class="col-sm-4">
+
+                            </div>
+                        </div>
+                        <div class="row" style="padding-top:20px;">
+                            <div class="col-sm-6">
+
+                            </div>
+
+                            <div class="col-sm-3">
+                                <button class="btn btn-success" onclick="SaveMenu()" style="padding:3px;"> Save</button>
+                            </div>
+                            <div class="col-sm-3">
+                                @*<button class="btn" onclick="CloseModal()" style="padding:3px;"> Close</button>*@
+
+                            </div>
+                        </div>
+                        @*@{
+            var roleList = _context.Roles.Where(x => x.Id.Count() > 0).ToList();
+            var a = 0;
+            var sl = 0;
+        }
+        <div class="row">
+            <div class="col-sm-2"></div>
+            <div class="col-sm-8">
+                <table class="table table-striped table-bordered table-hover">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Role Name</th>
+
+
+
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var i in roleList)
+                        {
+                            sl++;
+                            <tr>
+                                <td>
+                                    @sl
+                                </td>
+                                <td>
+                                    @i.Name
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+            <div class="col-sm-2"></div>
+
+        </div>*@
+                        @*<div class="row">
+                            <div class="col-sm-4">
+
+                            </div>
+                            <div class="col-sm-4">
+                                <button onclick="AddMenu()" class="btn btn-danger" style="padding:3px;">
+                                    Add Menu
+                                </button>
+                            </div>
+                            <div class="col-sm-4">
+
+                            </div>
+                        </div>*@
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="col-sm-6">
+                <div class="card">
+                    <div class="card-header card-header-success">
+                        Role Menu Mapping
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-sm-4">
+                                @*<label class="bmd-label-floating">Role</label>*@
+
+                            </div>
+                            <div class="col-sm-4">
+                                <select id="role" name="role" onchange="updateMenu()" class="form-control border-radius-none" asp-items="@(new SelectList(roleDict.Prepend(new KeyValuePair<string, string>("0", "Select Role")), "Key", "Value", ""))"></select>
+
+                                @*<input type="text" id="rolePerson" class="form-control" placeholder="person" />
+                                <div id="suggesstion-box"></div>*@
+
+                            </div>
+
+                            <div class="col-sm-4">
+
+                            </div>
+                        </div>
+                        <ul id="myUL">
+
+                            @foreach (var r in menuLayer1)
+                            {
+                                var menuLayer2 = _context.NavigationMenu.Where(x => x.ParentId == r.Id).ToList();
+                                <div class="row">
+                                    <div class="col-sm-4">
+
+                                    </div>
+                                    <div class="col-sm-2">
+                                        <input class="form-check-input" name="roleCheck" type="checkbox" value="@r.Id" unchecked>
+
+                                    </div>
+                                    <div class="col-sm-4">
+                                        <li>
+                                            @r.Name
+                                            @*<ul>
+                                <li>Water</li>
+                                <li>Coffee</li>
+
+                            </ul>*@
+                                        </li>
+                                    </div>
+                                </div>
+                                <ul>
+
+                                    @foreach (var rr in menuLayer2)
+                                    {
+
+                                        <div class="row">
+                                            <div class="col-sm-4">
+
+                                            </div>
+                                            <div class="col-sm-2">
+                                                <input class="form-check-input" name="roleCheck" type="checkbox" value="@rr.Id" unchecked>
+
+                                            </div>
+                                            <div class="col-sm-4">
+
+                                                <li>@rr.Name</li>
+
+
+                                            </div>
+                                        </div>
+                                    }
+                                </ul>
+
+
+                            }
+                        </ul>
+
+                        <div class="row">
+                            <div class="col-sm-8">
+
+                            </div>
+                            <div class="col-sm-4">
+                                <button class="btn btn-success" style="padding:3px;" onclick="SetRole()"> Submit </button>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.12.0/themes/smoothness/jquery-ui.css" />
+<script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+<script src="https://code.jquery.com/ui/1.12.0/jquery-ui.min.js"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.js"></script>
+
+<script>
+
+    function AddMenu() {
+        var model = document.getElementById("addMenu");
+        model.style.display = "block";
+    }
+    function CloseModal() {
+        var model = document.getElementById("addMenu");
+        model.style.display = "none";
+    }
+    function SaveMenu() {
+        var menu = document.getElementById("menuName").value;
+        var controller = document.getElementById("controllerName").value;
+        var action = document.getElementById("actionName").value;
+        var parent = document.getElementById("parentMenu").value;
+        var route = document.getElementById("routeVariableName").value;
+        var routeVal = document.getElementById("routeValue").value;
+
+        $.ajax({
+            url: '/AdminRoleMenu/SaveMenu',
+            type: "POST",
+
+            dataType: "json",
+            data: {
+                Menu: menu,
+                Controller: controller,
+                Action: action,
+                Parent: parent,
+                Route: route,
+                RouteValue: routeVal
+
+            },
+            success: function (response) {
+                if (response.success) {
+
+                    alert(response.responseText);
+                    window.location.reload(true);
+
+
+                } else {
+                    // DoSomethingElse()
+                    if (response.responseText == "Expire") {
+                        window.location.href = "https://ucam.bup.edu.bd/Security/LogOut.aspx";
+                    }
+                    else {
+                        alert(response.responseText);
+                        window.location.reload(true);
+
+                    }
+
+                }
+            },
+            error: function (xhr, status, error) {
+                alert(error);
+            }
+        });
+
+    }
+    $("#rolePerson").autocomplete({
+        source: function (request, response) {
+            $.ajax({
+                url: '/AdminRoleMenu/GetSearchPerson',
+                dataType: "json",
+                data: { search: $("#rolePerson").val() },
+                success: function (data) {
+                    console.log(data);
+                    var a = [];
+                    for (var i = 0; i < data.length; i++) {
+
+                        a.push(data[i].bupFullName);
+                    }
+                    console.log(a);
+
+                    response(a);
+                    $("#suggesstion-box").show();
+
+                },
+                error: function (xhr, status, error) {
+                    alert("Error");
+                }
+            });
+        }
+    });
+
+
+    function updateMenu() {
+        var roleSelect = document.getElementById("role");
+        var role = roleSelect.options[roleSelect.selectedIndex].text;
+        $.ajax({
+            url: '/AdminRoleMenu/GetRoleMenu',
+            dataType: "json",
+            data: { search: role },
+            success: function (data) {
+                console.log(data);
+                var checkArray = document.getElementsByName("roleCheck");
+                for (var i = 0; i < checkArray.length; i++) {
+                
+                    checkArray[i].checked = false;
+
+                }
+                for (var i = 0; i < checkArray.length; i++) {
+                    var obj = data.find(x => x.NavigationMenuId.toString() == checkArray[i].value.toString());
+                    if (obj != null) {
+                        checkArray[i].checked = true;
+                    }
+
+                }
+               
+
+            },
+            error: function (xhr, status, error) {
+                alert(error);
+            }
+        });
+
+    }
+
+    function SetRole() {
+        var checkBoxAdded;
+        var checkBoxLengthAdded;
+        var role = document.getElementById("role").value;
+        var itemList = [];
+        checkBoxAdded = document.getElementsByName("roleCheck");
+        checkBoxLengthAdded = checkBoxAdded.length;
+        for (var i = 0; i < checkBoxLengthAdded; i++) {
+            if (checkBoxAdded[i].checked == true) {
+                var obj = { Role: role, Menu: checkBoxAdded[i].value };
+                itemList.push(obj);
+            }
+        }
+        console.log(itemList);
+
+        $.ajax({
+            url: '/AdminRoleMenu/SetRoleMenu',
+            type: "POST",
+
+            dataType: "json",
+            data: {
+                ItemList: JSON.stringify(itemList)
+            },
+            success: function (response) {
+                if (response.success) {
+
+                    alert(response.responseText);
+                    window.location.reload(true);
+
+
+                } else {
+                    // DoSomethingElse()
+                    if (response.responseText == "Expire") {
+                        window.location.href = "https://ucam.bup.edu.bd/Security/LogOut.aspx";
+                    }
+                    else {
+                        alert(response.responseText);
+                        window.location.reload(true);
+
+                    }
+
+                }
+            },
+            error: function (xhr, status, error) {
+                alert(error);
+            }
+        });
+
+    }
+</script>

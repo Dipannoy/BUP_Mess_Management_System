@@ -20,5 +20,9 @@ namespace Mess_Management_System_Alpha_V2.Models.MessModels
         [ForeignKey("StoreInItem")]
         public long StoreInItemId { get; set; }
         public virtual StoreInItem StoreInItem { get; set; }
+
+        [ForeignKey("StoreOutItem")]
+        public long? StoreOutItemId { get; set; }
+        public virtual StoreOutItem StoreOutItem { get; set; }
     }
 }

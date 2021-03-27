@@ -33,6 +33,8 @@ namespace Mess_Management_System_Alpha_V2.Models.MessModels
         public virtual ICollection<SetMenuDetails> SetMenuDetailList { get; set; }
 
         public virtual ICollection<MenuItem> MenuItemList { get; set; }
+        public virtual ICollection<CustomerDailyMenuChoice> CustomerDailyMenuChoiceList { get; set; }
+
 
 
 

@@ -126,17 +126,35 @@
             <div class="menu">
                 <ul class="list">
                     <li class="header">MAIN NAVIGATION</li>
-                    <li class="active">
+                    <li class="@(ViewBag.MenuId == 1 ? "active" : "")">
                         <a asp-action="Index" asp-controller="Consumer">
                             <i class="material-icons">home</i>
-                            <span>Home</span>
+                            <span>Meal Settings</span>
+                        </a>
+                    </li>
+                    <li class="@(ViewBag.MenuId == 2 ? "active" : "")">
+                        <a asp-action="OnSpotOrder" asp-controller="Consumer">
+                            <i class="material-icons">credit_card</i>
+                            <span>On Spot Order</span>
                         </a>
                     </li>
                     <li>
-                        @*<a asp-action="PaymentHistory" asp-controller="Consumer">
+                        <a asp-action="PaymentHistory" asp-controller="Consumer">
                             <i class="material-icons">credit_card</i>
-                            <span>Payment history</span>
-                        </a>*@
+                            <span>Bill history</span>
+                        </a>
+                    </li>
+                    <li class="@(ViewBag.MenuId == 3 ? "active" : "")">
+                        <a asp-action="PaymentSlipUpload" asp-controller="Consumer">
+                            <i class="material-icons">credit_card</i>
+                            <span>Payment Slip Upload</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a asp-action="HomePage" asp-controller="AdminShowOrder">
+                            <i class="material-icons">home</i>
+                            <span>Home</span>
+                        </a>
                     </li>
 
 

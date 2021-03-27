@@ -1,0 +1,479 @@
+﻿@inject ApplicationDbContext _db
+@inject IDDLHelper _ddlHelper
+@inject ApplicationDbContext _context
+@{ ViewData["Title"] = "OnSpotOrder";
+    Layout = "~/Views/Shared/_ConsumerDashboardLayout.cshtml";
+    var OnSpotList = new Dictionary<string, string>();
+
+    int day = (int)DateTime.Today.DayOfWeek + 1;
+
+    // var OnSpotItemList = _db.MenuItem.Where(x => x.Day == day).ToList();
+
+    var OnSpotItemList = _db.DailyOfferItem.Where(x => x.Date.Date == DateTime.Now.Date || x.IsActive == true).ToList();
+    foreach (var i in OnSpotItemList)
+    {
+        var itemCount = _context.CustomerChoiceV2.Where(x => x.Date.Date == DateTime.Now.Date && x.OrderTypeId == 10002
+        && x.MealTypeId == 10005 && x.StoreOutItemId == i.StoreOutItemId).Sum(x => x.quantity);
+
+        var availableAmount = i.OrderLimit - itemCount;
+        //if (itemCount < i.OrderLimit)
+
+        //{
+        var storeOutItem = _db.StoreOutItem.Where(x => x.Id == i.StoreOutItemId).FirstOrDefault();
+        OnSpotList.Add(i.StoreOutItemId.ToString(), storeOutItem.Name + "[" + availableAmount.ToString() + "pcs available]");
+        //}
+    }
+
+    string userId = ViewBag.UserId;
+    string userName = ViewBag.FullUser;
+    var onSpotOrderList = _context.OnSpotParent.Where(x => (x.UserId == userId || x.BearerId == userId || x.CreatedBy == userId) && x.Date.Date == DateTime.Now.Date).ToList(); }
+
+    <head>
+        @*<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">*@
+
+        <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Roboto+Slab:400,700|Material+Icons" />
+        <link href="~/assets/demo/demo.css" rel="stylesheet" />
+        <link href="~/assets/demo/cdn.css" rel="stylesheet" />
+
+        <link href="~/assets/css/material-dashboardCut.css" rel="stylesheet" />
+
+    </head>
+<style>
+
+    .selectStl {
+        margin-top: 35px;
+    }
+
+    .tableHead
+    {
+        font-size:12px;
+        font-weight:bold;
+    }
+    .labelStl {
+        margin-top: 30px;
+    }
+
+    .modal {
+        display: none; /* Hidden by default */
+        position: fixed; /* Stay in place */
+        /*z-index: 1;*/ /* Sit on top */
+        padding-top: 100px; /* Location of the box */
+        left: 0;
+        top: 0;
+        width: 100%; /* Full width */
+        height: 100%; /* Full height */
+        overflow: auto; /* Enable scroll if needed */
+        background-color: rgb(0,0,0); /* Fallback color */
+        background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+        padding-left: 100px;
+    }
+
+    /* Modal Content */
+    .modal-content {
+        background-color: #fefefe;
+        margin: auto;
+        padding: 20px;
+        border: 1px solid #888;
+        width: 40%;
+    }
+
+    /* The Close Button */
+    .close {
+        color: #aaaaaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+    }
+
+    .close:hover,
+    .close:focus {
+            color: #000;
+            text-decoration: none;
+            cursor: pointer;
+     }
+</style>
+
+<section class="content">
+    <div class="container-fluid">
+
+        <div id="onSpotEdit" class="modal">
+            <div class="modal-content">
+                <div class="row">
+
+                    <div class="col-sm-3" id="removeLabel">
+
+                    </div>
+                    <div class="col-sm-1" id="removeCheck">
+
+                    </div>
+                    <div class="col-sm-3" id="itemFld">
+
+                    </div>
+                    <div class="col-sm-3" id="itemQntFld">
+
+                    </div>
+                    <div class="col-sm-2" id="itemQntFld">
+
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-sm-2">
+
+                    </div>
+                    <div class="col-sm-4" id="moreItemDropEdit">
+
+                    </div>
+                    <div class="col-sm-4" id="moreItemQuantityEdit">
+                    </div>
+                    <div class="col-sm-2">
+
+                    </div>
+
+                </div>
+
+                
+                <div class="row" style="padding-top:20px;">
+                    <div class="col-sm-3">
+
+                    </div>
+                    <div class="col-sm-3">
+                        <button class="btn btn-success" style="padding:2px;" onclick="addMoreOnSpotEdit()">Add More</button>
+
+                    </div>
+
+                    <div class="col-sm-3">
+                        <button class="btn btn-success" onclick="ConfirmEdit()" style="padding:3px;"> Save</button>
+                    </div>
+                    <div class="col-sm-3">
+                        <button class="btn btn-success" onclick="CloseModal()" style="padding:3px;"> Close</button>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Exportable Table -->
+        <div class="row clearfix">
+            @*<div class="col-sm-1">
+            </div>*@
+            <div class="col-sm-5">
+
+                <div class="card">
+                    <div class="card-header-success">
+                        <h2>
+                            On Spot Order
+                        </h2>
+                    </div>
+                    <div class="body">
+                        <div class="row">
+                            <div class="col-sm-2">
+
+                            </div>
+                            <div class="col-sm-4">
+                                <input type="radio" name="orderType" onchange="loadOnSpotSpace()" id="personal" checked>Personal
+                            </div>
+                            <div class="col-sm-4">
+                                <input type="radio" name="orderType" onchange="loadOnSpotSpace()" id="official">Official
+
+                            </div>
+                            <div class="col-sm-2">
+
+                                @*<button class="btn"><i class="fa fa-remove"></i></button>*@
+
+                            </div>
+                        </div>
+                        <div id="personOrder">
+                            <div class="row">
+                                @*<div class="col-sm-2">
+
+                                </div>*@
+                                <div class="col-sm-6">
+                                    <div class="form-group">
+                                        <label class="bmd-label-floating">Person</label>
+                                        <div>
+                                            @*<i class="material-icons" style="padding-top:5px;">person</i>*@
+                                            <input type="text" name="onspotPerson" id="onspotPerson" class="form-control" value="@userName" required disabled />
+                                        </div>
+                                        <div id="suggesstion-box"></div>
+                                    </div>
+                                </div>
+                                <div class="col-sm-2" style="padding-top:25px;">
+                                    <button class="btn btn-success" style="padding:2px;" onclick="Change()">Change</button>
+
+                                </div>
+                                <div class="col-sm-4">
+                                    <label class="bmd-label-floating">Bearer</label>
+                                    <div style="display:inline-flex">
+                                        @*<i class="material-icons" style="padding-top:5px;">person</i>*@
+                                        <input type="text" name="onspotBearer" id="onspotBearer" class="form-control" value="" />
+                                    </div>
+                                    <div id="suggesstion-box3"></div>
+
+                                </div>
+
+
+                            </div>
+                            <div class="row">
+                                @*<div class="col-sm-2">
+
+                                </div>*@
+                                <div class="col-sm-6">
+                                    @*<div class="form-group">
+                                        <label class="bmd-label-floating">Item</label>
+                                        <br />
+                                        <div style="display:inline-flex">*@
+
+                                            @*<i class="material-icons" style="padding-top:6px;">local_dining</i>*@
+                                            <select id="onspotItem1" name="onspotItem1" onchange="checkRepeatValue(1)" class="form-control border-radius-none" asp-items="@(new SelectList(OnSpotList.Prepend(new KeyValuePair<string, string>("0", "Select Item")), "Key", "Value", "Select Item"))"></select>
+
+                                        @*</div>
+
+
+                                    </div>*@
+                                </div>
+                                <div class="col-sm-4" style="margin-top:-10px;">
+                                    @*<div class="form-group">
+                                        <label class="bmd-label-floating">Quantity</label>
+                                        <div style="display:inline-flex">*@
+                                            @*<i class="material-icons" style="padding-top:6px;">double_arrow</i>*@
+                                            <input type="number" id="itmQ1" name="itmQ1" class="form-control" min="1" placeholder="quantity" required />
+                                        @*</div>
+                                    </div>*@
+                                </div>
+                                <div class="col-sm-2">
+
+                                </div>
+
+                            </div>
+                            <div class="row">
+                                @*<div class="col-sm-2">
+
+                                </div>*@
+                                <div class="col-sm-6" id="moreItemDrop">
+
+                                </div>
+                                <div class="col-sm-4" id="moreItemQuantity">
+                                </div>
+                                <div class="col-sm-2" id="removeMore">
+
+                                </div>
+
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-4">
+
+                                </div>
+                                <div class="col-sm-4">
+                                    <button class="btn btn-success" style="padding:2px;" onclick="addMoreOnSpot(1)">Add More</button>
+                                </div>
+                                <div class="col-sm-4">
+                                    <button class="btn btn-success" style="padding:2px;" onclick="addOnSpotItem(1)">Confirm</button>
+
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row" id="officeOrder" style="display:none;">
+                            <div class="row">
+                                <div class="col-sm-2">
+
+                                </div>
+                                <div class="col-sm-4">
+                                    <div class="form-group">
+                                        <label class="bmd-label-floating">Office</label>
+                                        <div style="display:inline-flex">
+                                            <input type="text" name="onspotOffice" id="onspotOffice" class="form-control" value="" required />
+                                        </div>
+                                        <div id="suggesstion-box2"></div>
+                                    </div>
+                                </div>
+                                <div class="col-sm-4">
+                                    <label class="bmd-label-floating">Bearer</label>
+                                    <div style="display:inline-flex">
+                                        <input type="text" name="onspotOfficeBearer" id="onspotOfficeBearer" class="form-control" value="" />
+                                    </div>
+                                    <div id="suggesstion-box4"></div>
+
+                                </div>
+                                <div class="col-sm-2">
+
+                                </div>
+
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-2">
+
+                                </div>
+                                <div class="col-sm-4">
+                                    @*<div class="form-group">
+            <label class="bmd-label-floating">Item</label>
+            <br />
+            <div style="display:inline-flex">*@
+
+                                    @*<i class="material-icons" style="padding-top:6px;">local_dining</i>*@
+                                    <select id="onspotOfficeItem1" name="onspotOfficeItem1" onchange="checkRepeatValue(2)" class="form-control border-radius-none" asp-items="@(new SelectList(OnSpotList.Prepend(new KeyValuePair<string, string>("0", "")), "Key", "Value", ""))"></select>
+
+                                    @*</div>
+
+
+            </div>*@
+                                </div>
+                                <div class="col-sm-4" style="margin-top:-10px;">
+                                    @*<div class="form-group">
+            <label class="bmd-label-floating">Quantity</label>
+            <div style="display:inline-flex">*@
+                                    @*<i class="material-icons" style="padding-top:6px;">double_arrow</i>*@
+                                    <input type="number" id="itmOfficeQ1" name="itmOfficeQ1" class="form-control" min="1" placeholder="quantity" required />
+                                    @*</div>
+            </div>*@
+                                </div>
+                                <div class="col-sm-2">
+
+                                </div>
+
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-2">
+
+                                </div>
+                                <div class="col-sm-4" id="moreOfficeItemDrop">
+
+                                </div>
+                                <div class="col-sm-4" id="moreOfficeItemQuantity">
+                                </div>
+                                <div class="col-sm-2" id="removeOfficeMore">
+
+                                </div>
+
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-4">
+
+                                </div>
+                                <div class="col-sm-4">
+                                    <button class="btn btn-success" style="padding:2px;" onclick="addMoreOnSpot(2)">Add More</button>
+                                </div>
+                                <div class="col-sm-4">
+                                    <button class="btn btn-success" style="padding:2px;" onclick="addOnSpotItem(2)">Confirm</button>
+
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-sm-7">
+                <table class="table table-bordered table-striped  table-hover dataTable js-exportable">
+                    <thead>
+                        <tr style="background: chocolate;">
+                            <th style="font-size:12px;font-weight:bold;">Order Type</th>
+                            <th style="font-size:12px;font-weight:bold;">Order For </th>
+                            <th style="font-size:12px;font-weight:bold;">Order By</th>
+                            <th style="font-size:12px;font-weight:bold;">Bear By</th>
+                            <th style="font-size:12px;font-weight:bold;">Time</th>
+                            <th style="font-size:12px;font-weight:bold;">Item </th>
+                            <th style="font-size:12px;font-weight:bold;">Quantity</th>
+
+                            <th></th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in onSpotOrderList)
+                        {
+                            var orderType = item.IsOfficeOrder == true ? "Official" : "Personal";
+                            var orderFor = item.IsOfficeOrder == true ? _context.Office.Where(x => x.Id == item.OfficeId).FirstOrDefault().Name :
+                                _context.Users.Where(x => x.Id == item.UserId).FirstOrDefault().BUPFullName;
+                            var orderBy = item.CreatedBy == null ? "-" : _context.Users.Where(x => x.Id == item.CreatedBy).FirstOrDefault().BUPFullName;
+                            var bearBy =  String.IsNullOrEmpty(item.BearerId)? "-" : _context.Users.Where(x => x.Id == item.BearerId).FirstOrDefault().BUPFullName;
+                            var ind = 0;
+                            var onSpotDetailList = _context.CustomerChoiceV2.Where(x => x.OnSpotParentId == item.Id).ToList();
+                            if (onSpotDetailList.Count > 0)
+                            {
+                        <tr>
+                            <td rowspan="@onSpotDetailList.Count">
+                                @orderType
+                            </td>
+                            <td rowspan="@onSpotDetailList.Count">
+                                @orderFor
+                            </td>
+                            <td rowspan="@onSpotDetailList.Count">
+                                @orderBy
+                            </td>
+                            <td rowspan="@onSpotDetailList.Count">
+                                @bearBy
+                            </td>
+                            <td rowspan="@onSpotDetailList.Count">
+                                @item.Date.ToString("h:mm tt")
+                            </td>
+                            <td>
+                                @{ //var ex = _context.ExtraItem.Where(x => x.Id == onSpotDetailList.ElementAt(0).ExtraItemId).FirstOrDefault();
+                                                        var itm = _context.StoreOutItem.Where(x => x.Id == onSpotDetailList.ElementAt(0).StoreOutItemId).FirstOrDefault(); }
+                                @itm.Name
+                            </td>
+                            <td>
+                                @onSpotDetailList.ElementAt(0).quantity
+                            </td>
+                            <td rowspan="@onSpotDetailList.Count">
+                                @if (item.IsApproved == true)
+                                {
+                                    <span style="font-size:10px;" class="badge badge-success"> Approved</span>
+                                }
+                                else
+                                {
+                                @*<a asp-action="EditOnSpotItem" asp-route-id="@onSpotDetailList.ElementAt(0).Id"><i class="far fa-edit"></i></a>*@
+                                <button class="btn btn-success" style="padding:3px;" onclick="editOrder(@item.Id)"> Edit </button>
+                                }
+                            </td>
+                            @*<td>
+            <a asp-action="OnSpotItem" asp-route-id="@onSpotDetailList.ElementAt(0).Id"><i class="far fa-edit"></i></a>
+
+        </td>*@
+                        </tr>
+
+                                @foreach (var o in onSpotDetailList)
+                                {
+                                    if (ind > 0)
+                                    {
+                                        <tr>
+                                            <td>
+                                                @{ 
+                                                    //var ex2 = _context.ExtraItem.Where(x => x.Id == o.ExtraItemId).FirstOrDefault();
+                                                    var itm2 = _context.StoreOutItem.Where(x => x.Id == o.StoreOutItemId).FirstOrDefault(); }
+                                                @itm2.Name
+                                            </td>
+                                            <td>
+                                                @o.quantity
+                                            </td>
+
+
+                                        </tr>
+                                     }
+
+                                    ind++;
+                                  }
+                            }
+                        }
+
+                    </tbody>
+                </table>
+            </div>
+            @*<div class="col-sm-1">
+            </div>*@
+
+        </div>
+    </div>
+</section>
+
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.12.0/themes/smoothness/jquery-ui.css" />
+<script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+<script src="https://code.jquery.com/ui/1.12.0/jquery-ui.min.js"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.js"></script>
+
+
+@*<script src="~/lib/jquery/dist/jquery.js"></script>*@
+<script src="~/js/ConsumerOnSpotController.js"></script>

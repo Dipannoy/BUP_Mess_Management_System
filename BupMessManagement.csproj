@@ -11,6 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="MailKit" Version="2.10.1" />
     <PackageReference Include="Microsoft.AspNet.WebApi.Client" Version="5.2.7" />
     <PackageReference Include="Microsoft.AspNetCore.App" />
     <PackageReference Include="Microsoft.AspNetCore.Http" Version="2.2.2" />
@@ -72,10 +73,13 @@
     <None Include="Areas\Identity\Pages\_ValidationScriptsPartial.cshtml" />
     <None Include="Areas\Identity\Pages\_ViewImports.cshtml" />
     <None Include="Areas\Identity\Pages\_ViewStart.cshtml" />
+    <None Include="wwwroot\js\ConsumerDashboardController.js" />
   </ItemGroup>
 
   <ItemGroup>
     <Folder Include="Areas\Identity\Services\" />
+    <Folder Include="Uploads\" />
+    <Folder Include="wwwroot\Upload\" />
   </ItemGroup>
 
 </Project>

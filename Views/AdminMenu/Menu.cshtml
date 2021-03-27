@@ -11,6 +11,7 @@
     {
         editableId = ViewBag.EditableItemId;
     }
+    
 }
 
 
@@ -47,6 +48,47 @@
     .hidden {
         display: none;
     }
+    /*  --------------------------------------  Modal CSS --------------------------------------
+    */
+
+    .modal {
+        display: none; /* Hidden by default */
+        position: fixed; /* Stay in place */
+        /*z-index: 1;*/ /* Sit on top */
+        padding-top: 100px; /* Location of the box */
+        left: 0;
+        top: 0;
+        width: 100%; /* Full width */
+        height: 100%; /* Full height */
+        overflow: auto; /* Enable scroll if needed */
+        background-color: rgb(0,0,0); /* Fallback color */
+        background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+        padding-left: 100px;
+    }
+
+    /* Modal Content */
+    .modal-content {
+        background-color: #fefefe;
+        margin: auto;
+        padding: 20px;
+        border: 1px solid #888;
+        width: 40%;
+    }
+
+    /* The Close Button */
+    .close {
+        color: #aaaaaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+    }
+
+        .close:hover,
+        .close:focus {
+            color: #000;
+            text-decoration: none;
+            cursor: pointer;
+        }
 </style>
 
 
@@ -91,7 +133,7 @@
         </div>
     </div>*@
 
-<div class="modal" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+@*<div class="modal" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
@@ -108,7 +150,7 @@
             </div>
         </div>
     </div>
-</div>
+</div>*@
 
 @*<div class="modal" id="my_modal">
         <div class="modal-dialog">
@@ -146,6 +188,14 @@
     </div>*@
 @*<hr />*@
 <div class="row">
+    <div id="menuModal" class="modal">
+        <div class="modal-content">
+            <p> Are you sure to remove this ? </p>
+            <div id="modalMenu">
+
+            </div>
+        </div>
+    </div>
     <div class="col-md-12">
         <div class="card">
             <div class="card-header bg-success text-white">
@@ -205,19 +255,19 @@
                                         </button>*@
                                     <form asp-action="DeleteDayMenu" asp-route-StrItmId="@sbf.Id" asp-controller="AdminMenu" method="post">
                                         <div class="row">
-                                            <div class="col-sm-6" style="padding-right:0px;">
+                                            <div class="col-sm-8" style="padding-right:0px;">
                                                 @*<a href="" class="btn btn-default btn-rounded" data-toggle="modal" data-target="#centralModalSuccess">
                                                         Launch
                                                         Modal Success
                                                         <i class="far fa-eye ml-1"></i>
                                                     </a>*@
 
-                                                <button type="button" data-toggle="modal" data-target="#myModal" data-itemid='<%= @sbf.Id %>' data-itemprice="@sbf.Price" style="padding: 0px;margin: 0px;">
-                                                    <span class="badge badge-success">
-                                                        <i class="fas fa-edit"></i>
-                                                    </span>
+                                                @*<button type="button" data-toggle="modal" data-target="#myModal" data-itemid='<%= @sbf.Id %>' data-itemprice="@sbf.Price" style="padding: 0px;margin: 0px;">
+                                                        <span class="badge badge-success">
+                                                            <i class="fas fa-edit"></i>
+                                                        </span>
 
-                                                </button>
+                                                    </button>*@
 
                                                 @*<a href="" data-toggle="modal" data-target="#myModal" data-id="5" data-StrItm-id="@sbf.Id" data-StrItmPrice-id="@sbf.Price">
                                                         <span class="badge badge-success">
@@ -236,9 +286,10 @@
                                                 }
                                                 @_db.StoreOutItem.Where(x => x.Id == storeoutId).FirstOrDefault().Name
                                             </div>
-                                            <div class="col-sm-6">
+                                            <div class="col-sm-4">
 
-                                                <button type="submit" name="submit" value="Delete" style="padding: 0px;margin: 0px;">
+                                                <button type="submit" name="submit" value="Delete" 
+                                                        style="padding: 0px;margin: 0px;" onclick="return confirm('Are you sure to remove?')" >
                                                     <span class="badge badge-success">
                                                         <i class="fas fa-times"></i>
                                                     </span>
@@ -292,7 +343,7 @@
                                 <div class="row">
                                     <div id="Add">
                                         <button class="btn-sm" onclick="AddItem()"><i class="fa fa-plus"></i> Item</button>
-                                        <button class="btn-sm" onclick="AddSetMenu()"><i class="fa fa-plus"></i> SetMenu</button>
+                                        <button class="btn-sm" style="display:none;" onclick="AddSetMenu()"><i class="fa fa-plus"></i> SetMenu</button>
 
 
                                     </div>
@@ -377,11 +428,11 @@
                                         <div class="row">
                                             <div class="col-sm-8">
 
-                                                <a href="#my_modal" data-toggle="modal" data-book-id="my_id_value">
-                                                    <span class="badge badge-success">
-                                                        <i class="fas fa-edit"></i>
-                                                    </span>
-                                                </a>
+                                                @*<a href="#my_modal" data-toggle="modal" data-book-id="my_id_value">
+                                                        <span class="badge badge-success">
+                                                            <i class="fas fa-edit"></i>
+                                                        </span>
+                                                    </a>*@
 
                                                 @{
                                                     var storeoutId = _db.ExtraItem.Where(x => x.Id == sbf.ExtraItemId).FirstOrDefault().StoreOutItemId;
@@ -393,7 +444,7 @@
                                             </div>
                                             <div class="col-sm-4">
 
-                                                <button type="submit" style="padding: 0px;margin: 0px;">
+                                                <button type="submit" onclick="return confirm('Are you sure to remove?')" style="padding: 0px;margin: 0px;">
                                                     <span class="badge badge-success">
                                                         <i class="fas fa-times"></i>
                                                     </span>
@@ -449,7 +500,7 @@
                                 <div class="row">
                                     <div id="Add2">
                                         <button class="btn-sm" onclick="AddItem2()"><i class="fa fa-plus"></i> Item</button>
-                                        <button class="btn-sm" onclick="AddSetMenu2()"><i class="fa fa-plus"></i> SetMenu</button>
+                                        <button class="btn-sm" style="display:none;" onclick="AddSetMenu2()"><i class="fa fa-plus"></i> SetMenu</button>
 
 
                                     </div>
@@ -527,11 +578,11 @@
                                         <div class="row">
                                             <div class="col-sm-8">
 
-                                                <a href="#my_modal" data-toggle="modal" data-book-id="my_id_value">
-                                                    <span class="badge badge-success">
-                                                        <i class="fas fa-edit"></i>
-                                                    </span>
-                                                </a>
+                                                @*<a href="#my_modal" data-toggle="modal" data-book-id="my_id_value">
+                                                        <span class="badge badge-success">
+                                                            <i class="fas fa-edit"></i>
+                                                        </span>
+                                                    </a>*@
                                                 @{
                                                     var storeoutId = _db.ExtraItem.Where(x => x.Id == sbf.ExtraItemId).FirstOrDefault().StoreOutItemId;
 
@@ -540,7 +591,7 @@
                                             </div>
                                             <div class="col-sm-4">
 
-                                                <button type="submit" style="padding: 0px;margin: 0px;">
+                                                <button type="submit" onclick="return confirm('Are you sure to remove?')" style="padding: 0px;margin: 0px;">
                                                     <span class="badge badge-success">
                                                         <i class="fas fa-times"></i>
                                                     </span>
@@ -598,7 +649,7 @@
                                 <div class="row">
                                     <div id="Add3">
                                         <button class="btn-sm" onclick="AddItem3()"><i class="fa fa-plus"></i> Item</button>
-                                        <button class="btn-sm" onclick="AddSetMenu3()"><i class="fa fa-plus"></i> SetMenu</button>
+                                        <button class="btn-sm" style="display:none;" onclick="AddSetMenu3()"><i class="fa fa-plus"></i> SetMenu</button>
 
 
                                     </div>
@@ -694,17 +745,17 @@
                                         <div class="row">
                                             <div class="col-sm-8">
 
-                                                <a href="#my_modal" data-toggle="modal" data-book-id="my_id_value">
-                                                    <span class="badge badge-success">
-                                                        <i class="fas fa-edit"></i>
-                                                    </span>
-                                                </a>
+                                                @*<a href="#my_modal" data-toggle="modal" data-book-id="my_id_value">
+                                                        <span class="badge badge-success">
+                                                            <i class="fas fa-edit"></i>
+                                                        </span>
+                                                    </a>*@
 
                                                 @_db.StoreOutItem.Where(x => x.Id == storeoutId).FirstOrDefault().Name
                                             </div>
                                             <div class="col-sm-4">
 
-                                                <button type="submit" style="padding: 0px;margin: 0px;">
+                                                <button type="submit" onclick="return confirm('Are you sure to remove?')" style="padding: 0px;margin: 0px;">
                                                     <span class="badge badge-success">
                                                         <i class="fas fa-times"></i>
                                                     </span>
@@ -759,7 +810,7 @@
                                 <div class="row">
                                     <div id="Add4">
                                         <button class="btn-sm" onclick="AddItem4()"><i class="fa fa-plus"></i> Item</button>
-                                        <button class="btn-sm" onclick="AddSetMenu4()"><i class="fa fa-plus"></i> SetMenu</button>
+                                        <button class="btn-sm" style="display:none;" onclick="AddSetMenu4()"><i class="fa fa-plus"></i> SetMenu</button>
 
 
                                     </div>
@@ -848,17 +899,17 @@
                                         <div class="row">
                                             <div class="col-sm-8">
 
-                                                <a href="#my_modal" data-toggle="modal" data-book-id="my_id_value">
-                                                    <span class="badge badge-success">
-                                                        <i class="fas fa-edit"></i>
-                                                    </span>
-                                                </a>
+                                                @*<a href="#my_modal" data-toggle="modal" data-book-id="my_id_value">
+                                                        <span class="badge badge-success">
+                                                            <i class="fas fa-edit"></i>
+                                                        </span>
+                                                    </a>*@
 
                                                 @_db.StoreOutItem.Where(x => x.Id == storeoutId).FirstOrDefault().Name
                                             </div>
                                             <div class="col-sm-4">
 
-                                                <button type="submit" style="padding: 0px;margin: 0px;">
+                                                <button type="submit" onclick="return confirm('Are you sure to remove?')" style="padding: 0px;margin: 0px;">
                                                     <span class="badge badge-success">
                                                         <i class="fas fa-times"></i>
                                                     </span>
@@ -916,7 +967,7 @@
                                 <div class="row">
                                     <div id="Add5">
                                         <button class="btn-sm" onclick="AddItem5()"><i class="fa fa-plus"></i> Item</button>
-                                        <button class="btn-sm" onclick="AddSetMenu5()"><i class="fa fa-plus"></i> SetMenu</button>
+                                        <button class="btn-sm" style="display:none;" onclick="AddSetMenu5()"><i class="fa fa-plus"></i> SetMenu</button>
 
 
                                     </div>
@@ -996,17 +1047,17 @@
                                         <div class="row">
                                             <div class="col-sm-8">
 
-                                                <a href="#my_modal" data-toggle="modal" data-book-id="my_id_value">
-                                                    <span class="badge badge-success">
-                                                        <i class="fas fa-edit"></i>
-                                                    </span>
-                                                </a>
+                                                @*<a href="#my_modal" data-toggle="modal" data-book-id="my_id_value">
+                                                        <span class="badge badge-success">
+                                                            <i class="fas fa-edit"></i>
+                                                        </span>
+                                                    </a>*@
 
                                                 @_db.StoreOutItem.Where(x => x.Id == storeoutId).FirstOrDefault().Name
                                             </div>
                                             <div class="col-sm-4">
 
-                                                <button type="submit" style="padding: 0px;margin: 0px;">
+                                                <button type="submit" onclick="return confirm('Are you sure to remove?')"  style="padding: 0px;margin: 0px;">
                                                     <span class="badge badge-success">
                                                         <i class="fas fa-times"></i>
                                                     </span>
@@ -1062,7 +1113,7 @@
                                 <div class="row">
                                     <div id="Add6">
                                         <button class="btn-sm" onclick="AddItem6()"><i class="fa fa-plus"></i> Item</button>
-                                        <button class="btn-sm" onclick="AddSetMenu6()"><i class="fa fa-plus"></i> SetMenu</button>
+                                        <button class="btn-sm" style="display:none;" onclick="AddSetMenu6()"><i class="fa fa-plus"></i> SetMenu</button>
 
 
                                     </div>
@@ -1160,16 +1211,16 @@
                                         <div class="row">
                                             <div class="col-sm-8">
 
-                                                <a href="#my_modal" data-toggle="modal" data-book-id="my_id_value">
-                                                    <span class="badge badge-success">
-                                                        <i class="fas fa-edit"></i>
-                                                    </span>
-                                                </a>
+                                                @*<a href="#my_modal" data-toggle="modal" data-book-id="my_id_value">
+                                                        <span class="badge badge-success">
+                                                            <i class="fas fa-edit"></i>
+                                                        </span>
+                                                    </a>*@
                                                 @_db.StoreOutItem.Where(x => x.Id == storeoutId).FirstOrDefault().Name
                                             </div>
                                             <div class="col-sm-4">
 
-                                                <button type="submit" style="padding: 0px;margin: 0px;">
+                                                <button type="submit" onclick="return confirm('Are you sure to remove?')" style="padding: 0px;margin: 0px;">
                                                     <span class="badge badge-success">
                                                         <i class="fas fa-times"></i>
                                                     </span>
@@ -1224,7 +1275,7 @@
                                 <div class="row">
                                     <div id="Add7">
                                         <button class="btn-sm" onclick="AddItem7()"><i class="fa fa-plus"></i> Item</button>
-                                        <button class="btn-sm" onclick="AddSetMenu7()"><i class="fa fa-plus"></i> SetMenu</button>
+                                        <button class="btn-sm" style="display:none;" onclick="AddSetMenu7()"><i class="fa fa-plus"></i> SetMenu</button>
 
 
                                     </div>
@@ -1309,16 +1360,16 @@
                                         <div class="row">
                                             <div class="col-sm-8">
 
-                                                <a href="#my_modal" data-toggle="modal" data-book-id="my_id_value">
-                                                    <span class="badge badge-success">
-                                                        <i class="fas fa-edit"></i>
-                                                    </span>
-                                                </a>
+                                                @*<a href="#my_modal" data-toggle="modal" data-book-id="my_id_value">
+                                                        <span class="badge badge-success">
+                                                            <i class="fas fa-edit"></i>
+                                                        </span>
+                                                    </a>*@
                                                 @_db.StoreOutItem.Where(x => x.Id == storeoutId).FirstOrDefault().Name
                                             </div>
                                             <div class="col-sm-4">
 
-                                                <button type="submit" style="padding: 0px;margin: 0px;">
+                                                <button type="submit" onclick="return confirm('Are you sure to remove?')" style="padding: 0px;margin: 0px;">
                                                     <span class="badge badge-success">
                                                         <i class="fas fa-times"></i>
                                                     </span>
@@ -1374,7 +1425,7 @@
                                 <div class="row">
                                     <div id="Add8">
                                         <button class="btn-sm" onclick="AddItem8()"><i class="fa fa-plus"></i> Item</button>
-                                        <button class="btn-sm" onclick="AddSetMenu8()"><i class="fa fa-plus"></i> SetMenu</button>
+                                        <button class="btn-sm" style="display:none;" onclick="AddSetMenu8()"><i class="fa fa-plus"></i> SetMenu</button>
 
 
                                     </div>
@@ -1450,17 +1501,17 @@
                                         <div class="row">
                                             <div class="col-sm-8">
 
-                                                <a href="#my_modal" data-toggle="modal" data-book-id="my_id_value">
-                                                    <span class="badge badge-success">
-                                                        <i class="fas fa-edit"></i>
-                                                    </span>
-                                                </a>
+                                                @*<a href="#my_modal" data-toggle="modal" data-book-id="my_id_value">
+                                                        <span class="badge badge-success">
+                                                            <i class="fas fa-edit"></i>
+                                                        </span>
+                                                    </a>*@
 
                                                 @_db.StoreOutItem.Where(x => x.Id == storeoutId).FirstOrDefault().Name
                                             </div>
                                             <div class="col-sm-4">
 
-                                                <button type="submit" style="padding: 0px;margin: 0px;">
+                                                <button type="submit" onclick="return confirm('Are you sure to remove?')" style="padding: 0px;margin: 0px;">
                                                     <span class="badge badge-success">
                                                         <i class="fas fa-times"></i>
                                                     </span>
@@ -1518,7 +1569,7 @@
                                 <div class="row">
                                     <div id="Add9">
                                         <button class="btn-sm" onclick="AddItem9()"><i class="fa fa-plus"></i> Item</button>
-                                        <button class="btn-sm" onclick="AddSetMenu9()"><i class="fa fa-plus"></i> SetMenu</button>
+                                        <button class="btn-sm" style="display:none;" onclick="AddSetMenu9()"><i class="fa fa-plus"></i> SetMenu</button>
 
 
                                     </div>
@@ -1610,18 +1661,18 @@
                                         <div class="row">
                                             <div class="col-sm-8">
 
-                                                <a href="#my_modal" data-toggle="modal" data-book-id="my_id_value">
-                                                    <span class="badge badge-success">
-                                                        <i class="fas fa-edit"></i>
-                                                    </span>
-                                                </a>
+                                                @*<a href="#my_modal" data-toggle="modal" data-book-id="my_id_value">
+                                                        <span class="badge badge-success">
+                                                            <i class="fas fa-edit"></i>
+                                                        </span>
+                                                    </a>*@
 
                                                 @_db.StoreOutItem.Where(x => x.Id == storeoutId).FirstOrDefault().Name
 
                                             </div>
                                             <div class="col-sm-4">
 
-                                                <button type="submit" style="padding: 0px;margin: 0px;">
+                                                <button type="submit" onclick="return confirm('Are you sure to remove?')" style="padding: 0px;margin: 0px;">
                                                     <span class="badge badge-success">
                                                         <i class="fas fa-times"></i>
                                                     </span>
@@ -1677,7 +1728,7 @@
                                 <div class="row">
                                     <div id="Add10">
                                         <button class="btn-sm" onclick="AddItem10()"><i class="fa fa-plus"></i> Item</button>
-                                        <button class="btn-sm" onclick="AddSetMenu10()"><i class="fa fa-plus"></i> SetMenu</button>
+                                        <button class="btn-sm" style="display:none;" onclick="AddSetMenu10()"><i class="fa fa-plus"></i> SetMenu</button>
 
 
                                     </div>
@@ -1762,17 +1813,17 @@
                                         <div class="row">
                                             <div class="col-sm-8">
 
-                                                <a href="#my_modal" data-toggle="modal" data-book-id="my_id_value">
-                                                    <span class="badge badge-success">
-                                                        <i class="fas fa-edit"></i>
-                                                    </span>
-                                                </a>
+                                                @*<a href="#my_modal" data-toggle="modal" data-book-id="my_id_value">
+                                                        <span class="badge badge-success">
+                                                            <i class="fas fa-edit"></i>
+                                                        </span>
+                                                    </a>*@
 
                                                 @_db.StoreOutItem.Where(x => x.Id == storeoutId).FirstOrDefault().Name
                                             </div>
                                             <div class="col-sm-4">
 
-                                                <button type="submit" style="padding: 0px;margin: 0px;">
+                                                <button type="submit" onclick="return confirm('Are you sure to remove?')" style="padding: 0px;margin: 0px;">
                                                     <span class="badge badge-success">
                                                         <i class="fas fa-times"></i>
                                                     </span>
@@ -1830,7 +1881,7 @@
                                 <div class="row">
                                     <div id="Add11">
                                         <button class="btn-sm" onclick="AddItem11()"><i class="fa fa-plus"></i> Item</button>
-                                        <button class="btn-sm" onclick="AddSetMenu11()"><i class="fa fa-plus"></i> SetMenu</button>
+                                        <button class="btn-sm" style="display:none;" onclick="AddSetMenu11()"><i class="fa fa-plus"></i> SetMenu</button>
 
 
                                     </div>
@@ -1907,17 +1958,17 @@
                                         <div class="row">
                                             <div class="col-sm-8">
 
-                                                <a href="#my_modal" data-toggle="modal" data-book-id="my_id_value">
-                                                    <span class="badge badge-success">
-                                                        <i class="fas fa-edit"></i>
-                                                    </span>
-                                                </a>
+                                                @*<a href="#my_modal" data-toggle="modal" data-book-id="my_id_value">
+                                                        <span class="badge badge-success">
+                                                            <i class="fas fa-edit"></i>
+                                                        </span>
+                                                    </a>*@
 
                                                 @_db.StoreOutItem.Where(x => x.Id == storeoutId).FirstOrDefault().Name
                                             </div>
                                             <div class="col-sm-4">
 
-                                                <button type="submit" style="padding: 0px;margin: 0px;">
+                                                <button type="submit" onclick="return confirm('Are you sure to remove?')" style="padding: 0px;margin: 0px;">
                                                     <span class="badge badge-success">
                                                         <i class="fas fa-times"></i>
                                                     </span>
@@ -1975,7 +2026,7 @@
                                 <div class="row">
                                     <div id="Add12">
                                         <button class="btn-sm" onclick="AddItem12()"><i class="fa fa-plus"></i> Item</button>
-                                        <button class="btn-sm" onclick="AddSetMenu12()"><i class="fa fa-plus"></i> SetMenu</button>
+                                        <button class="btn-sm" style="display:none;" onclick="AddSetMenu12()"><i class="fa fa-plus"></i> SetMenu</button>
 
 
                                     </div>
@@ -2071,17 +2122,17 @@
                                         <div class="row">
                                             <div class="col-sm-8">
 
-                                                <a href="#my_modal" data-toggle="modal" data-book-id="my_id_value">
-                                                    <span class="badge badge-success">
-                                                        <i class="fas fa-edit"></i>
-                                                    </span>
-                                                </a>
+                                                @*<a href="#my_modal" data-toggle="modal" data-book-id="my_id_value">
+                                                        <span class="badge badge-success">
+                                                            <i class="fas fa-edit"></i>
+                                                        </span>
+                                                    </a>*@
 
                                                 @_db.StoreOutItem.Where(x => x.Id == storeoutId).FirstOrDefault().Name
                                             </div>
                                             <div class="col-sm-4">
 
-                                                <button type="submit" style="padding: 0px;margin: 0px;">
+                                                <button type="submit" onclick="return confirm('Are you sure to remove?')" style="padding: 0px;margin: 0px;">
                                                     <span class="badge badge-success">
                                                         <i class="fas fa-times"></i>
                                                     </span>
@@ -2137,7 +2188,7 @@
                                 <div class="row">
                                     <div id="Add13">
                                         <button class="btn-sm" onclick="AddItem13()"><i class="fa fa-plus"></i> Item</button>
-                                        <button class="btn-sm" onclick="AddSetMenu13()"><i class="fa fa-plus"></i> SetMenu</button>
+                                        <button class="btn-sm" style="display:none;" onclick="AddSetMenu13()"><i class="fa fa-plus"></i> SetMenu</button>
 
 
                                     </div>
@@ -2221,17 +2272,17 @@
                                         <div class="row">
                                             <div class="col-sm-8">
 
-                                                <a href="#my_modal" data-toggle="modal" data-book-id="my_id_value">
-                                                    <span class="badge badge-success">
-                                                        <i class="fas fa-edit"></i>
-                                                    </span>
-                                                </a>
+                                                @*<a href="#my_modal" data-toggle="modal" data-book-id="my_id_value">
+                                                        <span class="badge badge-success">
+                                                            <i class="fas fa-edit"></i>
+                                                        </span>
+                                                    </a>*@
 
                                                 @_db.StoreOutItem.Where(x => x.Id == storeoutId).FirstOrDefault().Name
                                             </div>
                                             <div class="col-sm-4">
 
-                                                <button type="submit" style="padding: 0px;margin: 0px;">
+                                                <button type="submit" onclick="return confirm('Are you sure to remove?')" style="padding: 0px;margin: 0px;">
                                                     <span class="badge badge-success">
                                                         <i class="fas fa-times"></i>
                                                     </span>
@@ -2289,7 +2340,7 @@
                                 <div class="row">
                                     <div id="Add14">
                                         <button class="btn-sm" onclick="AddItem14()"><i class="fa fa-plus"></i> Item</button>
-                                        <button class="btn-sm" onclick="AddSetMenu14()"><i class="fa fa-plus"></i> SetMenu</button>
+                                        <button class="btn-sm" style="display:none;" onclick="AddSetMenu14()"><i class="fa fa-plus"></i> SetMenu</button>
 
 
                                     </div>
@@ -2365,17 +2416,17 @@
                                         <div class="row">
                                             <div class="col-sm-8">
 
-                                                <a href="#my_modal" data-toggle="modal" data-book-id="my_id_value">
-                                                    <span class="badge badge-success">
-                                                        <i class="fas fa-edit"></i>
-                                                    </span>
-                                                </a>
+                                                @*<a href="#my_modal" data-toggle="modal" data-book-id="my_id_value">
+                                                        <span class="badge badge-success">
+                                                            <i class="fas fa-edit"></i>
+                                                        </span>
+                                                    </a>*@
 
                                                 @_db.StoreOutItem.Where(x => x.Id == storeoutId).FirstOrDefault().Name
                                             </div>
                                             <div class="col-sm-4">
 
-                                                <button type="submit" style="padding: 0px;margin: 0px;">
+                                                <button type="submit" onclick="return confirm('Are you sure to remove?')" style="padding: 0px;margin: 0px;">
                                                     <span class="badge badge-success">
                                                         <i class="fas fa-times"></i>
                                                     </span>
@@ -2433,7 +2484,7 @@
                                 <div class="row">
                                     <div id="Add15">
                                         <button class="btn-sm" onclick="AddItem15()"><i class="fa fa-plus"></i> Item</button>
-                                        <button class="btn-sm" onclick="AddSetMenu15()"><i class="fa fa-plus"></i> SetMenu</button>
+                                        <button class="btn-sm" style="display:none;" onclick="AddSetMenu15()"><i class="fa fa-plus"></i> SetMenu</button>
 
 
                                     </div>
@@ -3104,11 +3155,41 @@ $('[data-toggle="modal"]').on('click', function (e) {
         console.log(dateTime);
         console.log(addedItem);
 
-
-
-
-
     }
+
+    function createStoreOutModal(formID) {
+
+        var chk = "Hello";
+        var store = "Store";
+        var storeOutModal = 10101010;
+
+        var id = "removeStoreIn" + formID;
+        var htmlString = '<div class="row">';
+        htmlString += '<div class="col-sm-6"></div>';
+        htmlString += '<div class="col-sm-3">';
+        htmlString += '<button class="btn" style="padding:5px;" onclick="ExecuteStoreOutDeletion(' + formID + ')"> Yes</button>';
+        htmlString += '</div>';
+        htmlString += '<div class="col-sm-3">';
+        htmlString += '<button class="btn" style="padding:5px;" onclick="CloseModal2()"> No</button>'
+        htmlString += '</div></div>'
+        var modal = document.getElementById("Store");
+        document.getElementById("modalStrOutDel").innerHTML = htmlString;
+
+
+        //var span = document.getElementsByClassName("close")[0];
+        modal.style.display = "block";
+
+
+        //span.onclick = function () {
+        //    modal.style.display = "none";
+        //}
+        window.onclick = function (event) {
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        }
+    }
+
 
     function SaveDayItem() {
         console.log('dop');

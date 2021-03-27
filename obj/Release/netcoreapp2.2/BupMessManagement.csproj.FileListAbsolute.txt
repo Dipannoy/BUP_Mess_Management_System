@@ -315,3 +315,15 @@ D:\AllSolution\BUP_Mess\Mess_All_Versions\BUP_Mess_20.2.20\obj\Release\netcoreap
 D:\AllSolution\BUP_Mess\Mess_All_Versions\BUP_Mess_20.2.20\obj\Release\netcoreapp2.2\BupMessManagement.genruntimeconfig.cache
 D:\AllSolution\BUP_Mess\Mess_All_Versions\BUP_Mess_20.2.20\obj\Release\netcoreapp2.2\BupMessManagement.csprojAssemblyReference.cache
 D:\AllSolution\BUP_Mess\Mess_All_Versions\BUP_Mess_20.2.20\obj\Release\netcoreapp2.2\Razor\Views\ConsumerOrder\Index.cshtml.g.cs
+D:\AllSolution\BUP_Mess\Mess_All_Versions\BUP_Mess_20.2.20\obj\Release\netcoreapp2.2\Razor\Views\ConsumerBill\Index.cshtml.g.cs
+D:\AllSolution\BUP_Mess\Mess_All_Versions\BUP_Mess_20.2.20\obj\Release\netcoreapp2.2\Razor\Views\Consumer\OnSpotOrder.cshtml.g.cs
+D:\AllSolution\BUP_Mess\Mess_All_Versions\BUP_Mess_20.2.20\obj\Release\netcoreapp2.2\Razor\Views\AdminBillGenerate\BillPayment.cshtml.g.cs
+D:\AllSolution\BUP_Mess\Mess_All_Versions\BUP_Mess_20.2.20\obj\Release\netcoreapp2.2\Razor\Views\AdminBillGenerate\ConsumerPaymentSlip.cshtml.g.cs
+D:\AllSolution\BUP_Mess\Mess_All_Versions\BUP_Mess_20.2.20\obj\Release\netcoreapp2.2\Razor\Views\Consumer\PaymentSlipUpload.cshtml.g.cs
+D:\AllSolution\BUP_Mess\Mess_All_Versions\BUP_Mess_20.2.20\obj\Release\netcoreapp2.2\Razor\Views\AdminBillGenerate\ConsumerPaymentHistory.cshtml.g.cs
+D:\AllSolution\BUP_Mess\Mess_All_Versions\BUP_Mess_20.2.20\obj\Release\netcoreapp2.2\Razor\Views\AdminReport\StoreOutReport.cshtml.g.cs
+D:\AllSolution\BUP_Mess\Mess_All_Versions\BUP_Mess_20.2.20\obj\Release\netcoreapp2.2\Razor\Views\AdminRoleMenu\Index.cshtml.g.cs
+D:\AllSolution\BUP_Mess\Mess_All_Versions\BUP_Mess_20.2.20\obj\Release\netcoreapp2.2\Razor\Views\AdminRoleMenu\MenuManagement.cshtml.g.cs
+D:\AllSolution\BUP_Mess\Mess_All_Versions\BUP_Mess_20.2.20\obj\Release\netcoreapp2.2\Razor\Views\AdminRoleMenu\RoleManagement.cshtml.g.cs
+D:\AllSolution\BUP_Mess\Mess_All_Versions\BUP_Mess_20.2.20\obj\Release\netcoreapp2.2\Razor\Views\AdminShowOrder\HomePage.cshtml.g.cs
+D:\AllSolution\BUP_Mess\Mess_All_Versions\BUP_Mess_20.2.20\obj\Release\netcoreapp2.2\Razor\Views\DailyOffer\Index.cshtml.g.cs

@@ -105,7 +105,7 @@ namespace Mess_Management_System_Alpha_V2.Controllers.Admin
                 try
                 {
                     MenuItem mit = _context.MenuItem.Where(x => x.Id == StrItmId).FirstOrDefault();
-
+                 
                     _context.MenuItem.Remove(mit);
                     _context.SaveChanges();
 
@@ -320,6 +320,12 @@ namespace Mess_Management_System_Alpha_V2.Controllers.Admin
 
             //var user = await _userManager.GetUserAsync(User);
             //var userID = user.Id;
+            var obj = _context.ExtraItem.Where(x => x.Day == Int32.Parse(Day) && x.MealTypeId == Int32.Parse(MealTypeId) && x.StoreOutItemId == Int32.Parse(Item)).FirstOrDefault();
+            if(obj != null)
+            {
+                return Json(new { success = false, responseText = "Item already exists" });
+
+            }
 
             ExtraItem et = new ExtraItem();
 

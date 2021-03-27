@@ -9,6 +9,27 @@
     int day = -1;
     String SMDate = DateTime.Now.ToShortDateString();
     DateTime OrderDate = DateTime.Now;
+    string errorMessage = "";
+    List<UserDateChoiceDetail> udcdBrk = new List<UserDateChoiceDetail>();
+    List<UserDateChoiceDetail> udcdTBrk = new List<UserDateChoiceDetail>();
+    List<UserDateChoiceDetail> udcdLn = new List<UserDateChoiceDetail>();
+    List<int> Days = new List<int>(new int[] { 1, 2, 3, 4, 5 });
+    List<string> WeekDays = new List<string>(new string[] { "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday" });
+    List<string> Months = new List<string>(new string[] { "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December" });
+
+    var OnSpotList = new Dictionary<string, string>();
+
+    var brkItemList = "";
+    var tbrkItemList = "";
+    var lunchItemList = "";
+
+    var OnSpotItemList = _db.StoreOutItem.Where(x => x.Id > 0).ToList();
+
+    foreach (var i in OnSpotItemList)
+    {
+
+        OnSpotList.Add(i.Id.ToString(), i.Name);
+    }
 
     int daay = 0;
     int month = 0;
@@ -18,6 +39,11 @@
     {
         SMDate = ViewBag.MenuDate.ToShortDateString();
         OrderDate = ViewBag.MenuDate;
+
+    }
+    if (ViewBag.ErrorMessage != null)
+    {
+        errorMessage = ViewBag.ErrorMessage;
 
     }
     string[] Datearray = SMDate.Split("/");
@@ -41,7 +67,6 @@
     var STMLnch = _db.DailySetMenu.Where(x => x.Day == day && x.MealTypeId == 2).ToList();
     var STMTBreak = _db.DailySetMenu.Where(x => x.Day == day && x.MealTypeId == 3).ToList();
 
-    var ExItemBrkFromCustomerChoiceV2 = _db.CustomerChoiceV2.Where(x => x.MealTypeId == 1 && x.OrderTypeId == 4 && x.Date.ToShortDateString() == SMDate && x.UserId == UserId).ToList();
 
     var preSchedulePersonBrk = _db.PreOrderSchedule.Where(x => x.MealTypeId == 1 && x.UserId == UserId).LastOrDefault();
     var preSchedulePersonLnch = _db.PreOrderSchedule.Where(x => x.MealTypeId == 2 && x.UserId == UserId).LastOrDefault();
@@ -55,6 +80,22 @@
     Boolean showmenu = false;
     Boolean showmenu2 = false;
     Boolean showmenu3 = false;
+
+    var dateMasterBRK = _db.UserDateChoiceMaster.Where(x => x.UserId == UserId && x.MealTypeId == 1).FirstOrDefault();
+    var dateMasterTBRK = _db.UserDateChoiceMaster.Where(x => x.UserId == UserId && x.MealTypeId == 3).FirstOrDefault();
+    var dateMasterLn = _db.UserDateChoiceMaster.Where(x => x.UserId == UserId && x.MealTypeId == 2).FirstOrDefault();
+    if (dateMasterBRK != null)
+    {
+        udcdBrk = _db.UserDateChoiceDetail.Where(x => x.UserDateChoiceMasterId == dateMasterBRK.Id).OrderBy(x => x.Date).ToList();
+    }
+    if (dateMasterTBRK != null)
+    {
+        udcdTBrk = _db.UserDateChoiceDetail.Where(x => x.UserDateChoiceMasterId == dateMasterTBRK.Id).OrderBy(x => x.Date).ToList();
+    }
+    if (dateMasterLn != null)
+    {
+        udcdLn = _db.UserDateChoiceDetail.Where(x => x.UserDateChoiceMasterId == dateMasterLn.Id).OrderBy(x => x.Date).ToList();
+    }
 
 
     if (periodPersonBrk != null && periodPersonBrk.From <= OrderDate && OrderDate <= periodPersonBrk.To)
@@ -183,6 +224,17 @@
         SetMenuListTea.Add(i.SetMenuId.ToString(), "SetMenu" + it);
 
     }
+    var extraChitListBFPrnt = _context.ConsumerMealWiseExtraChitParent.Where(x => x.UserId == UserId && x.MealTypeId == 1).FirstOrDefault();
+
+
+    var extraChitListTBRKPrnt = _context.ConsumerMealWiseExtraChitParent.Where(x => x.UserId == UserId && x.MealTypeId == 3).FirstOrDefault();
+
+    //var extraChitListTBRK = _context.ConsumerMealWiseExtrachit.Where(x => x.ConsumerMealWiseExtraChitParentId == extraChitListTBRKPrnt.Id).ToList();
+
+    var extraChitListLnPrnt = _context.ConsumerMealWiseExtraChitParent.Where(x => x.UserId == UserId && x.MealTypeId == 2).FirstOrDefault();
+
+    //var extraChitListLn = _context.ConsumerMealWiseExtrachit.Where(x => x.ConsumerMealWiseExtraChitParentId == extraChitListLnPrnt.Id).ToList();
+
 }
 
 
@@ -205,7 +257,6 @@
         <link href="~/assets/demo/demo.css" rel="stylesheet" />*@
     <link href="~/assets/css/material-dashboardCut.css" rel="stylesheet" />
     @*<link href="~/assets/demo/demo.css" rel="stylesheet" />*@
-
 
 </head>
 
@@ -391,8 +442,68 @@
             text-decoration: none;
             cursor: pointer;
         }
+
+    .checkBoxClass {
+        position: inherit;
+        opacity: 1;
+        left: 0px;
+    }
+
+    .textBox {
+        width: 300px;
+        border: 1px solid;
+        /* padding: 2px;
+        margin: 2px;*/
+        height: 150px;
+        font-size: 14px;
+    }
+
+    .modal {
+        display: none; /* Hidden by default */
+        position: fixed; /* Stay in place */
+        /*z-index: 1;*/ /* Sit on top */
+        padding-top: 100px; /* Location of the box */
+        left: 0;
+        top: 0;
+        width: 100%; /* Full width */
+        height: 100%; /* Full height */
+        overflow: auto; /* Enable scroll if needed */
+        background-color: rgb(0,0,0); /* Fallback color */
+        background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+        padding-left: 100px;
+    }
+
+    /* Modal Content */
+    .modal-content {
+        background-color: #fefefe;
+        margin: auto;
+        padding: 20px;
+        border: 1px solid #888;
+        width: 40%;
+    }
+
+    /* The Close Button */
+    .close {
+        color: #aaaaaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+    }
+
+        .close:hover,
+        .close:focus {
+            color: #000;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+
+    /* Safari */
+
 </style>
 <div id="myModal" class="modalModify">
+
+
 
     <div class="modalModify-content">
         <span class="closeModify">&times;</span>
@@ -415,13 +526,27 @@
 
 <section class="content" style="margin-top:0px;">
 
-
-
-
-
-
-
     <div class="container-fluid">
+
+        <div class="modal" id="loadModal">
+            <div class="modal-content">
+                <div style="text-align:center;">
+                    <div class="loader">
+                        <div class="preloader">
+                            <div class="spinner-layer pl-red">
+                                <div class="circle-clipper left">
+                                    <div class="circle"></div>
+                                </div>
+                                <div class="circle-clipper right">
+                                    <div class="circle"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <p style="font-size:14px;">Please Wait for save...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
 
         <div class="modal fade" id="fileUploadModal" role="dialog">
             <div class="modal-dialog">
@@ -441,13 +566,84 @@
             </div>
         </div>
 
+        <div id="onSpotEdit" class="modal">
+            <div class="modal-content">
+                <div class="row">
 
+                    <div class="col-sm-3" id="removeLabel">
+
+                    </div>
+                    <div class="col-sm-1" id="removeCheck">
+
+                    </div>
+                    <div class="col-sm-3" id="itemFld">
+
+                    </div>
+                    <div class="col-sm-3" id="itemQntFld">
+
+                    </div>
+                    <div class="col-sm-2">
+
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-6">
+
+                    </div>
+                    <div class="col-sm-5">
+                        <textarea id="editRemarks" name="editRemarks" style="font-size:14px;" placeholder=""></textarea>
+
+
+                    </div>
+                    <div class="col-sm-1">
+
+                    </div>
+
+                </div>
+                <div class="row" style="padding-top:20px;">
+                    <div class="col-sm-6">
+
+                    </div>
+
+                    <div class="col-sm-3">
+                        <button class="btn" onclick="ConfirmEdit()" style="padding:3px;"> Save</button>
+                    </div>
+                    <div class="col-sm-3">
+                        <button class="btn" onclick="CloseModal()" style="padding:3px;"> Close</button>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <div id="deleteModal" class="modal">
+            <div class="modal-content">
+                <div class="row">
+                    Are you sure to remove the date?
+                </div>
+                <div class="row">
+                    <div class="col-sm-6">
+
+                    </div>
+                    <div class="col-sm-3" id="ConfirmDelete">
+
+                    </div>
+                    <div class="col-sm-3">
+                        <button onclick="closeDeleteModal()" class="btn btn-primary" style="padding:3px;">
+                            Close
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
 
 
         <div class="row">
             <div class="col-sm-3">
                 <div class="card card-stats">
-                    <div class=" card-header-warning ">
+                    <div class="card-header-warning ">
                         <div class="card-icon">
                             <i class="material-icons">store</i>
                         </div>
@@ -548,7 +744,362 @@
             </div>
 
         </div>
+
         <div class="row">
+            <div class="col-sm-4">
+                @if (preSchedulePersonBrk != null)
+                {
+                @if (preSchedulePersonBrk.IsPreOrderSet == true)
+                {
+                    <div class="card">
+                        <div class="card-header-success" style="font-size:14px;">
+                            Add Additional Breakfast Items.
+                        </div>
+                        <div class="card-body">
+                            <div class="row" style="padding-left:10px;">
+                                <p style="font-size:14px;font-weight: bold;color: red;">
+                                    Add extra breakfast items according to your choice.
+                                </p>
+                            </div>
+                            @if (extraChitListBFPrnt != null)
+                            {
+                                var extraChitListBF = _context.ConsumerMealWiseExtrachit.Where(x => x.ConsumerMealWiseExtraChitParentId == extraChitListBFPrnt.Id).ToList();
+
+                                @if (extraChitListBF.Count > 0)
+                                {
+                                    <div class="row" style="padding-left:10px; padding-top:10px;">
+                                        <div class="jumbotron" style="width:325px;">
+                                            @foreach (var i in extraChitListBF)
+                                            {
+                                                brkItemList += _context.StoreOutItem.Where(x => x.Id == i.StoreOutItemId).FirstOrDefault().Name + " ";
+                                                <div class="row">
+                                                    <div class="col-sm-6" style="font-size:15px;padding-top:10px;">
+                                                        @_db.StoreOutItem.Where(x => x.Id == i.StoreOutItemId).FirstOrDefault().Name
+                                                    </div>
+                                                    <div class="col-sm-6" style="font-size:15px;padding-top:10px;">
+                                                        @i.quantity
+                                                    </div>
+                                                </div>
+                                            }
+                                            <div class="row" style="padding-left:14px;padding-top:20px;">
+
+                                                <p style="font-size:14px;font-weight: bold;color: red;">
+                                                    @extraChitListBFPrnt.Remarks
+                                                </p>
+                                            </div>
+                                            <div class="row" style="padding-top:15px;">
+                                                <div class="col-sm-8">
+
+                                                </div>
+                                                <div class="col-sm-4">
+                                                    <button class="btn btn-success" style="padding:3px;" onclick="editOrder(@extraChitListBFPrnt.Id)"> Edit </button>
+
+                                                </div>
+                                            </div>
+                                        </div>
+
+
+                                    </div>
+                                }
+                            }
+                            <div class="row" style="padding-top: 10px;">
+                                <div class="col-sm-6" id="BFConsumerExtraChit">
+
+                                    <div style="padding-top:10px;" id="BFExtraChitDrop1">
+                                        @*<div style="display:inline-flex">*@
+
+                                        <select id="BFextraItem1" name="BFextraItem1" class="form-control border-radius-none" asp-items="@(new SelectList(OnSpotList.Prepend(new KeyValuePair<string, string>("0", "Select Extra Chit")), "Key", "Value", ""))"></select>
+
+                                        @*</div>*@
+
+
+                                    </div>
+                                </div>
+                                <div class="col-sm-3" id="BFConsumerExtraCHitInp">
+                                    @*<div class="form-group">
+                                        <label class="bmd-label-floating">Quantity</label>*@
+                                    @*<div style="display:inline-flex">*@
+                                    <input type="number" id="BFitmQ1" name="BFitmQ1" class="form-control" min="1" required />
+                                    @*</div>*@
+                                    @*</div>*@
+
+                                </div>
+                                <div class="col-sm-3" id="BFButtonParent">
+
+                                    <div id="BFConsumerExtraCHitButton1" style="padding-bottom:35px;">
+                                        <button class="btn btn-success" style="padding:3px;" id="BFMorebtn1" onclick="AddMoreExtra(1,'BFConsumerExtraChit','BFextraItem','BFConsumerExtraCHitInp','BFitmQ','BFConsumerExtraCHitButton','BFMorebtn','BFButtonParent','BFExtraChitDrop')">Add More</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-sm-7">
+                                    <div class="form-group">
+                                        <div style="display:inline-flex">
+                                            @*<input  id="BFremarks" name="remarks" class="form-control" />*@
+
+                                            <textarea id="BFremarks" name="BFremarks" style="font-size:14px;" placeholder="Write down if you have any remarks"></textarea>
+
+                                            @*<input type="text" id="BFremarks" name="remarks" class="form-control" />*@
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-sm-2">
+                                </div>
+
+                                <div class="col-sm-3" style="padding-top:20px;">
+                                    <button class="btn btn-success" style="padding:3px;" onclick="SubmitExtra(1,'BFextraItem','BFitmQ','BFremarks')">Submit</button>
+
+                                </div>
+
+                            </div>
+
+
+
+
+                        </div>
+                    </div>
+                }
+                }
+
+            </div>
+            <div class="col-sm-4">
+                @if (preSchedulePersonTBrk != null)
+                {
+                @if (preSchedulePersonTBrk.IsPreOrderSet == true)
+                {
+                    <div class="card">
+                        <div class="card-header-success" style="font-size:14px;">
+                            Add Additonal Teabreak items.
+                        </div>
+                        <div class="card-body">
+                            <div class="row" style="padding-left:10px;">
+                                <p style="font-size:14px;font-weight: bold;color: red;">
+                                    Add extra teabreak items according to your choice.
+                                </p>
+                            </div>
+
+                            @if (extraChitListTBRKPrnt != null)
+                            {
+                                var extraChitListTBRK = _context.ConsumerMealWiseExtrachit.Where(x => x.ConsumerMealWiseExtraChitParentId == extraChitListTBRKPrnt.Id).ToList();
+
+                                @if (extraChitListTBRK.Count > 0)
+                                {
+                                    <div class="row" style="padding-left:10px;padding-top:10px;">
+                                        <div class="jumbotron" style="width:325px;">
+                                            @foreach (var i in extraChitListTBRK)
+                                            {
+                                                tbrkItemList += _context.StoreOutItem.Where(x => x.Id == i.StoreOutItemId).FirstOrDefault().Name + " ";
+
+                                                <div class="row">
+                                                    <div class="col-sm-6" style="font-size:15px;padding-top:10px;">
+                                                        @_db.StoreOutItem.Where(x => x.Id == i.StoreOutItemId).FirstOrDefault().Name
+                                                    </div>
+                                                    <div class="col-sm-6" style="font-size:15px;padding-top:10px;">
+                                                        @i.quantity
+                                                    </div>
+                                                </div>
+                                            }
+                                            <div class="row" style="padding-left:14px;padding-top:20px;">
+
+                                                <p style="font-size:15px;font-weight:bold;color:red;"> @extraChitListTBRKPrnt.Remarks</p>
+                                            </div>
+                                            <div class="row" style="padding-top:15px;">
+                                                <div class="col-sm-8">
+
+                                                </div>
+                                                <div class="col-sm-4">
+                                                    <button class="btn btn-success" style="padding:3px;" onclick="editOrder(@extraChitListTBRKPrnt.Id)"> Edit </button>
+
+                                                </div>
+                                            </div>
+                                        </div>
+
+
+                                    </div>
+                                }
+                            }
+                            <div class="row" style="padding-top: 10px;">
+                                <div class="col-sm-6" id="TBRKConsumerExtraChit">
+
+                                    <div style="padding-top:10px;" id="TBRKExtraChitDrop1">
+                                        @*<div style="display:inline-flex">*@
+
+                                        <select id="TBRKextraItem1" name="TBRKextraItem1" class="form-control border-radius-none" asp-items="@(new SelectList(OnSpotList.Prepend(new KeyValuePair<string, string>("0", "Select Extra Chit")), "Key", "Value", ""))"></select>
+
+                                        @*</div>*@
+
+
+                                    </div>
+                                </div>
+                                <div class="col-sm-3" id="TBRKConsumerExtraCHitInp">
+                                    @*<div class="form-group">
+                                        <label class="bmd-label-floating">Quantity</label>*@
+                                    @*<div style="display:inline-flex">*@
+                                    <input type="number" id="TBRKitmQ1" name="TBRKitmQ1" class="form-control" min="1" required />
+                                    @*</div>*@
+                                    @*</div>*@
+
+                                </div>
+                                <div class="col-sm-3" id="TBRKButtonParent">
+
+                                    <div id="TBRKConsumerExtraCHitButton1" style="padding-bottom:35px;">
+                                        <button class="btn btn-success" style="padding:3px;" id="TBRKMorebtn1" onclick="AddMoreExtra(3,'TBRKConsumerExtraChit','TBRKextraItem','TBRKConsumerExtraCHitInp','TBRKitmQ','TBRKConsumerExtraCHitButton','TBRKMorebtn','TBRKButtonParent','TBRKExtraChitDrop')">Add More</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-sm-7">
+                                    <div class="form-group">
+                                        <div style="display:inline-flex">
+                                            @*<input  id="BFremarks" name="remarks" class="form-control" />*@
+
+                                            <textarea id="TBRKremarks" name="TBRKremarks" style="font-size:14px;" placeholder="Write down if you have any remarks"></textarea>
+
+                                            @*<input type="text" id="BFremarks" name="remarks" class="form-control" />*@
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-sm-2">
+                                </div>
+
+                                <div class="col-sm-3" style="padding-top:20px;">
+                                    <button class="btn btn-success" style="padding:3px;" onclick="SubmitExtra(3,'TBRKextraItem','TBRKitmQ','TBRKremarks')">Submit</button>
+
+                                </div>
+
+                            </div>
+
+
+
+
+                        </div>
+                    </div>
+                }
+                }
+            </div>
+            <div class="col-sm-4">
+                @if (preSchedulePersonLnch != null)
+                {
+                @if (preSchedulePersonLnch.IsPreOrderSet == true)
+                {
+                    <div class="card">
+                        <div class="card-header-success" style="font-size:14px;">
+                            Add Additional Lunch Items.
+                        </div>
+                        <div class="card-body">
+                            <div class="row" style="padding-left:10px;">
+                                <p style="font-size:14px;font-weight: bold;color: red;">
+                                    Add extra lunch items according to your choice.
+                                </p>
+                            </div>
+                            @if (extraChitListLnPrnt != null)
+                            {
+                                var extraChitListLn = _context.ConsumerMealWiseExtrachit.Where(x => x.ConsumerMealWiseExtraChitParentId == extraChitListLnPrnt.Id).ToList();
+
+                                @if (extraChitListLn.Count > 0)
+                                {
+                                    <div class="row" style="padding-left:10px;padding-top:10px;">
+                                        <div class="jumbotron" style="width:325px;">
+                                            @foreach (var i in extraChitListLn)
+                                            {
+                                                lunchItemList += _context.StoreOutItem.Where(x => x.Id == i.StoreOutItemId).FirstOrDefault().Name + " ";
+
+                                                <div class="row">
+                                                    <div class="col-sm-6" style="font-size:15px;padding-top:10px;">
+                                                        @_db.StoreOutItem.Where(x => x.Id == i.StoreOutItemId).FirstOrDefault().Name
+                                                    </div>
+                                                    <div class="col-sm-6" style="font-size:15px;padding-top:10px;">
+                                                        @i.quantity
+                                                    </div>
+                                                </div>
+                                            }
+                                            <div class="row" style="padding-left:20px;padding-top:20px;">
+
+                                                <p style="font-size:14px;font-weight: bold;color: red;">
+                                                    @extraChitListLnPrnt.Remarks
+                                                </p>
+
+                                            </div>
+                                            <div class="row" style="padding-top:15px;">
+                                                <div class="col-sm-8">
+
+                                                </div>
+                                                <div class="col-sm-4">
+                                                    <button class="btn btn-success" style="padding:3px;" onclick="editOrder(@extraChitListLnPrnt.Id)"> Edit </button>
+
+                                                </div>
+                                            </div>
+                                        </div>
+
+
+                                    </div>
+                                }
+                            }
+
+                            <div class="row" style="padding-top: 10px;">
+                                <div class="col-sm-6" id="LnConsumerExtraChit">
+
+                                    <div style="padding-top:10px;" id="LnExtraChitDrop1">
+                                        @*<div style="display:inline-flex">*@
+
+                                        <select id="LnextraItem1" name="LnextraItem1" class="form-control border-radius-none" asp-items="@(new SelectList(OnSpotList.Prepend(new KeyValuePair<string, string>("0", "Select Extra Chit")), "Key", "Value", ""))"></select>
+
+                                        @*</div>*@
+
+
+                                    </div>
+                                </div>
+                                <div class="col-sm-3" id="LnConsumerExtraCHitInp">
+                                    @*<div class="form-group">
+                                        <label class="bmd-label-floating">Quantity</label>*@
+                                    @*<div style="display:inline-flex">*@
+                                    <input type="number" id="LnitmQ1" name="LnitmQ1" class="form-control" min="1" required />
+                                    @*</div>*@
+                                    @*</div>*@
+
+                                </div>
+                                <div class="col-sm-3" id="LnButtonParent">
+
+                                    <div id="LnConsumerExtraCHitButton1" style="padding-bottom:35px;">
+                                        <button class="btn btn-success" style="padding:3px;" id="LnMorebtn1" onclick="AddMoreExtra(2,'LnConsumerExtraChit','LnextraItem','LnConsumerExtraCHitInp','LnitmQ','LnConsumerExtraCHitButton','LnMorebtn','LnButtonParent','LnExtraChitDrop')">Add More</button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-sm-7">
+                                    <div class="form-group">
+                                        <div style="display:inline-flex">
+                                            @*<input  id="BFremarks" name="remarks" class="form-control" />*@
+
+                                            <textarea id="Lnremarks" name="Lnremarks" style="font-size:14px;" placeholder="Write down if you have any remarks"></textarea>
+
+                                            @*<input type="text" id="BFremarks" name="remarks" class="form-control" />*@
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-sm-2">
+                                </div>
+
+                                <div class="col-sm-3" style="padding-top:20px;">
+                                    <button class="btn btn-success" style="padding:3px;" onclick="SubmitExtra(2,'LnextraItem','LnitmQ','Lnremarks')">Submit</button>
+
+                                </div>
+
+                            </div>
+
+
+
+
+                        </div>
+                    </div>
+                    }
+                }
+            </div>
+        </div>
+        <div class="row" style="display:none;">
             <div class="col-sm-4">
                 <div class="card card-stats">
                     <div class="card-header card-header-warning card-header-icon">
@@ -777,10 +1328,431 @@
 
         </div>
 
-        <div class="card">
+        @*New Date Concept from BUP-----------------------------------------*@
+        <div class="row">
+            @*@if (preSchedulePersonBrk.IsPreOrderSet == true)
+                {*@
+            <div class="col-sm-4">
+                <div class="card">
+                    <div class="card-header-success" style="font-size:15px;">
+                        On or Off your Breakfast for any specific date.
+                    </div>
+                    <div class="card-body">
+                        <div class="body">
+                            <ul class="nav nav-tabs tab-nav-right" role="tablist">
+                                @*<li role="presentation" class="active"><a href="#a" data-toggle="tab" aria-expanded="true">SetMenu</a></li>
+                                    <li role="presentation" class=""><a href="#b" data-toggle="tab" aria-expanded="false">SetMenu Detail</a></li>*@
+                                <li role="presentation" class=""><a href="#viewDate" data-toggle="tab" aria-expanded="false">View</a></li>
+                                @*<li role="presentation" class="active"><a href="#addDate" data-toggle="tab" aria-expanded="false">Add</a></li>*@
+
+                            </ul>
+                            <div class="tab-content">
+                                <div role="tabpanel" class="tab-pane active" id="viewDate">
+                                    @foreach (var i in udcdBrk)
+                                    {
+                                        <div class="row">
+                                            <div class="col-sm-8">
+                                                @{
+                                                    int d = (int)i.Date.DayOfWeek;
+
+                                                    int m = i.Date.Month;
+                                                    var date = WeekDays.ElementAt(d) + "," + Months.ElementAt(m - 1) + " " + i.Date.Day + "," + i.Date.Year;
+
+                                                }
+                                                @date
+
+                                            </div>
+                                            <div class="col-sm-2">
+                                                @{
+                                                    var mealSt = @i.IsOrderSet == true ? "On" : "Off";
+
+                                                }
+                                                @mealSt
+                                            </div>
+                                            <div class="col-sm-2">
+                                                <button onclick="deleteDate(@i.Id)" class="btn btn-success" style="padding:3px;">Delete</button>
+                                            </div>
+                                            @*<div class="col-sm-2">
+
+                                                </div>*@
+                                        </div>
+                                    }
+                                    @*<div class="row">
+                                            <div class="col-sm-4">
+
+                                            </div>
+                                            <div class="col-sm-4">
+
+                                            </div>
+                                            <div class="col-sm-4">
+                                                <button onclick="createMealDateInput(1, 'BRKDateSpace', 'BRKCheckBox','BRKCheckSpace','BRKButton','BRKButtonSpace','BRKMoreButton','BRKMoreButtonSpace')" rel="tooltip" class="btn">Add Date</button>
+
+                                            </div>
+                                        </div>*@
+                                    <div class="row">
+                                        <div class="col-sm-4" id="BRKDateSpace">
+                                            @*<input type="text" id="datepicker5" name="datepicker" value="@from3" class="form-control col-sm-10" placeholder="From..">*@
+
+                                        </div>
+                                        <div class="col-sm-4" id="BRKMoreButtonSpace">
+                                            @*<button onclick="createBRKDateInput()" rel="tooltip" class="btn"><i class="material-icons">edit</i>Add Date</button>*@
+
+                                        </div>
+                                        <div class="col-sm-4">
+
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-sm-4" id="BRKCheckSpace">
+
+                                        </div>
+                                        <div class="col-sm-4" id="BRKButtonSpace">
+
+                                        </div>
+                                        <div class="col-sm-4">
+
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-sm-4">
+
+                                        </div>
+                                        <div class="col-sm-4">
+
+                                        </div>
+                                        <div class="col-sm-4" id="initButtonBRK">
+                                            <button onclick="createMealDateInput(1, 'BRKDateSpace', 'BRKCheckBox','BRKCheckSpace','BRKButton','BRKButtonSpace','BRKMoreButton','BRKMoreButtonSpace','initButtonBRK')" rel="tooltip" class="btn btn-success">Add More</button>
+
+                                        </div>
+                                    </div>
+                                </div>
+                                <div role="tabpanel" class="tab-pane" id="addDate">
+
+
+                                    <div class="row">
+                                        <div class="col-sm-4" id="BRKDateSpace">
+                                            @*<input type="text" id="datepicker5" name="datepicker" value="@from3" class="form-control col-sm-10" placeholder="From..">*@
+
+                                        </div>
+                                        <div class="col-sm-4" id="BRKMoreButtonSpace">
+                                            @*<button onclick="createBRKDateInput()" rel="tooltip" class="btn"><i class="material-icons">edit</i>Add Date</button>*@
+
+                                        </div>
+                                        <div class="col-sm-4">
+
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-sm-4" id="BRKCheckSpace">
+
+                                        </div>
+                                        <div class="col-sm-4" id="BRKButtonSpace">
+
+                                        </div>
+                                        <div class="col-sm-4">
+
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-sm-4">
+
+                                        </div>
+                                        <div class="col-sm-4">
+
+                                        </div>
+                                        <div class="col-sm-4">
+                                            <button onclick="createMealDateInput(1, 'BRKDateSpace', 'BRKCheckBox','BRKCheckSpace','BRKButton','BRKButtonSpace','BRKMoreButton','BRKMoreButtonSpace')" rel="tooltip" class="btn btn-success">Add More</button>
+
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            @*}*@
+            @*@if (preSchedulePersonTBrk.IsPreOrderSet == true)
+                {*@
+            <div class="col-sm-4 ">
+                <div class="card">
+                    <div class="card-header-success" style="font-size:15px;">
+                        On or Off your Teabreak for any specific date.
+
+                    </div>
+                    <div class="card-body">
+                        <div class="body">
+                            <ul class="nav nav-tabs tab-nav-right" role="tablist">
+                                @*<li role="presentation" class="active"><a href="#a" data-toggle="tab" aria-expanded="true">SetMenu</a></li>
+                                    <li role="presentation" class=""><a href="#b" data-toggle="tab" aria-expanded="false">SetMenu Detail</a></li>*@
+                                <li role="presentation" class=""><a href="#viewDate2" data-toggle="tab" aria-expanded="false">View</a></li>
+                                @*<li role="presentation" class="active"><a href="#addDate2" data-toggle="tab" aria-expanded="false">Add</a></li>*@
+
+                            </ul>
+                            <div class="tab-content">
+                                <div role="tabpanel" class="tab-pane active" id="viewDate2">
+                                    @foreach (var i in udcdTBrk)
+                                    {
+                                        <div class="row">
+                                            <div class="col-sm-8">
+                                                @{
+                                                    int d = (int)i.Date.DayOfWeek;
+
+                                                    int m = i.Date.Month;
+                                                    var date = WeekDays.ElementAt(d) + "," + Months.ElementAt(m - 1) + " " + i.Date.Day + "," + i.Date.Year;
+
+                                                }
+                                                @date
+
+                                            </div>
+                                            <div class="col-sm-2">
+                                                @{
+                                                    var mealSt = @i.IsOrderSet == true ? "On" : "Off";
+
+                                                }
+                                                @mealSt
+                                            </div>
+                                            <div class="col-sm-2">
+                                                <button onclick="deleteDate(@i.Id)" class="btn btn-success" style="padding:3px;">Delete</button>
+                                            </div>
+                                            @*<div class="col-sm-2">
+
+                                                </div>*@
+                                        </div>
+                                    }
+
+
+                                    <div class="row">
+                                        <div class="col-sm-4" id="TBRKDateSpace">
+                                            @*<input type="text" id="datepicker5" name="datepicker" value="@from3" class="form-control col-sm-10" placeholder="From..">*@
+
+                                        </div>
+                                        <div class="col-sm-4" id="TBRKMoreButtonSpace">
+                                            @*<button onclick="createBRKDateInput()" rel="tooltip" class="btn"><i class="material-icons">edit</i>Add Date</button>*@
+
+                                        </div>
+                                        <div class="col-sm-4">
+
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-sm-4" id="TBRKCheckSpace">
+
+                                        </div>
+                                        <div class="col-sm-4" id="TBRKButtonSpace">
+
+                                        </div>
+                                        <div class="col-sm-4">
+
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-sm-4">
+
+                                        </div>
+                                        <div class="col-sm-4">
+
+                                        </div>
+                                        <div class="col-sm-4" id="initButtonTBRK">
+                                            <button onclick="createMealDateInput(3, 'TBRKDateSpace', 'TBRKCheckBox','TBRKCheckSpace','TBRKButton','TBRKButtonSpace','TBRKMoreButton','TBRKMoreButtonSpace','initButtonTBRK')" rel="tooltip" class="btn btn-success">Add More</button>
+
+                                        </div>
+                                    </div>
+
+                                </div>
+                                <div role="tabpanel" class="tab-pane" id="addDate2">
+
+                                    <div class="row">
+                                        <div class="col-sm-4">
+
+                                        </div>
+                                        <div class="col-sm-4">
+
+                                        </div>
+                                        <div class="col-sm-4">
+                                            <button onclick="createMealDateInput(3, 'TBRKDateSpace', 'TBRKCheckBox','TBRKCheckSpace','TBRKButton','TBRKButtonSpace','TBRKMoreButton','TBRKMoreButtonSpace')" rel="tooltip" class="btn">Add More</button>
+
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-sm-4" id="TBRKDateSpace">
+                                            @*<input type="text" id="datepicker5" name="datepicker" value="@from3" class="form-control col-sm-10" placeholder="From..">*@
+
+                                        </div>
+                                        <div class="col-sm-4" id="TBRKMoreButtonSpace">
+                                            @*<button onclick="createBRKDateInput()" rel="tooltip" class="btn"><i class="material-icons">edit</i>Add Date</button>*@
+
+                                        </div>
+                                        <div class="col-sm-4">
+
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-sm-4" id="TBRKCheckSpace">
+
+                                        </div>
+                                        <div class="col-sm-4" id="TBRKButtonSpace">
+
+                                        </div>
+                                        <div class="col-sm-4">
+
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            @*}*@
+            @*@if (preSchedulePersonLnch.IsPreOrderSet == true)
+                {*@
+            <div class="col-sm-4">
+                <div class="card">
+                    <div class="card-header-success" style="font-size:15px;">
+                        On or Off your Lunch for any specific date.
+
+                    </div>
+                    <div class="card-body">
+                        <div class="body">
+                            <ul class="nav nav-tabs tab-nav-right" role="tablist">
+                                @*<li role="presentation" class="active"><a href="#a" data-toggle="tab" aria-expanded="true">SetMenu</a></li>
+                                    <li role="presentation" class=""><a href="#b" data-toggle="tab" aria-expanded="false">SetMenu Detail</a></li>*@
+                                <li role="presentation" class=""><a href="#viewDate3" data-toggle="tab" aria-expanded="false">View</a></li>
+                                @*<li role="presentation" class="active"><a href="#addDate3" data-toggle="tab" aria-expanded="false">Add</a></li>*@
+
+                            </ul>
+                            <div class="tab-content">
+                                <div role="tabpanel" class="tab-pane active" id="viewDate3">
+                                    @foreach (var i in udcdLn)
+                                    {
+                                        <div class="row">
+                                            <div class="col-sm-8">
+                                                @{
+                                                    int d = (int)i.Date.DayOfWeek;
+
+                                                    int m = i.Date.Month;
+                                                    var date = WeekDays.ElementAt(d) + "," + Months.ElementAt(m - 1) + " " + i.Date.Day + "," + i.Date.Year;
+
+                                                }
+                                                @date
+
+                                            </div>
+                                            <div class="col-sm-2">
+                                                @{
+                                                    var mealSt = @i.IsOrderSet == true ? "On" : "Off";
+
+                                                }
+                                                @mealSt
+                                            </div>
+                                            <div class="col-sm-2">
+                                                <button onclick="deleteDate(@i.Id)" class="btn btn-success" style="padding:3px;">Delete</button>
+                                            </div>
+                                            @*<div class="col-sm-2">
+
+                                                </div>*@
+                                        </div>
+                                    }
+
+
+                                    <div class="row">
+                                        <div class="col-sm-4" id="LnDateSpace">
+                                            @*<input type="text" id="datepicker5" name="datepicker" value="@from3" class="form-control col-sm-10" placeholder="From..">*@
+
+                                        </div>
+                                        <div class="col-sm-4" id="LnMoreButtonSpace">
+                                            @*<button onclick="createBRKDateInput()" rel="tooltip" class="btn"><i class="material-icons">edit</i>Add Date</button>*@
+
+                                        </div>
+                                        <div class="col-sm-4">
+
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-sm-4" id="LnCheckSpace">
+
+                                        </div>
+                                        <div class="col-sm-4" id="LnButtonSpace">
+
+                                        </div>
+                                        <div class="col-sm-4">
+
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-sm-4">
+
+                                        </div>
+                                        <div class="col-sm-4">
+
+                                        </div>
+                                        <div class="col-sm-4" id="initButtonLn">
+                                            <button onclick="createMealDateInput(2, 'LnDateSpace', 'LnCheckBox','LnCheckSpace','LnButton','LnButtonSpace','LnMoreButton','LnMoreButtonSpace','initButtonLn')" rel="tooltip" class="btn btn-success">Add More</button>
+
+                                        </div>
+                                    </div>
+
+                                </div>
+                                <div role="tabpanel" class="tab-pane " id="addDate3">
+
+                                    <div class="row">
+                                        <div class="col-sm-4">
+
+                                        </div>
+                                        <div class="col-sm-4">
+
+                                        </div>
+                                        <div class="col-sm-4">
+                                            <button onclick="createMealDateInput(2, 'LnDateSpace', 'LnCheckBox','LnCheckSpace','LnButton','LnButtonSpace','LnMoreButton','LnMoreButtonSpace')" rel="tooltip" class="btn btn-success">Add More</button>
+
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-sm-4" id="LnDateSpace">
+                                            @*<input type="text" id="datepicker5" name="datepicker" value="@from3" class="form-control col-sm-10" placeholder="From..">*@
+
+                                        </div>
+                                        <div class="col-sm-4" id="LnMoreButtonSpace">
+                                            @*<button onclick="createBRKDateInput()" rel="tooltip" class="btn"><i class="material-icons">edit</i>Add Date</button>*@
+
+                                        </div>
+                                        <div class="col-sm-4">
+
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-sm-4" id="LnCheckSpace">
+
+                                        </div>
+                                        <div class="col-sm-4" id="LnButtonSpace">
+
+                                        </div>
+                                        <div class="col-sm-4">
+
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            @*}*@
+
+        </div>
+        @*New Date Concept from BUP-----------------------------------------*@
+
+        <div class="card" style="display:none;">
             <div class=" card-header-tabs card-header-success" style="padding-top:5px;height:60px;">
                 <div class="col-sm-4">
+                    @if (!string.IsNullOrEmpty(errorMessage))
+                    {
+                        <span class="badge badge-danger" style="font-size:12px;margin-right:30px;line-height:2;vertical-align:middle;">
 
+                            @errorMessage
+
+                        </span>
+                    }
                 </div>
                 <div class="col-sm-4">
 
@@ -789,7 +1761,7 @@
                 <div class="col-sm-4">
                     <form id="FetchMenu" asp-action="FetchMenu" asp-controller="Consumer" method="post">
                         @*<div class="input-group no-border">*@
-                        <input type="text" id="menudate" name="menudate" value="@showdate" class="form-control col-sm-10" placeholder="Search....">
+                        <input type="text" id="menudate" name="menudate" value="@showdate" class="form-control col-sm-10" placeholder="Search...." required>
                         <button type="submit" class="btn btn-white btn-round btn-just-icon">
                             <i class="material-icons">search</i>
                             <div class="ripple-container"></div>
@@ -815,14 +1787,14 @@
                             <div class="body">
                                 <!-- Nav tabs -->
                                 <ul class="nav nav-tabs tab-nav-right" role="tablist">
-                                    <li role="presentation" class="active"><a href="#a" data-toggle="tab" aria-expanded="true">SetMenu</a></li>
-                                    <li role="presentation" class=""><a href="#b" data-toggle="tab" aria-expanded="false">SetMenu Detail</a></li>
-                                    <li role="presentation" class=""><a href="#c" data-toggle="tab" aria-expanded="false">Extra item</a></li>
+                                    @*<li role="presentation" class="active"><a href="#a" data-toggle="tab" aria-expanded="true">SetMenu</a></li>
+                                        <li role="presentation" class=""><a href="#b" data-toggle="tab" aria-expanded="false">SetMenu Detail</a></li>*@
+                                    <li role="presentation" class=""><a href="#c" data-toggle="tab" aria-expanded="false">Item</a></li>
                                 </ul>
 
                                 <!-- Tab panes -->
                                 <div class="tab-content">
-                                    <div role="tabpanel" class="tab-pane active in" id="a">
+                                    <div role="tabpanel" class="tab-pane" id="a">
                                         @if (showmenu == true)
                                         {
 
@@ -892,7 +1864,7 @@
                                                             <div class="col-sm-3" style="padding-right:0px;padding-left:0px;">
 
 
-                                                                <input type="number" id="EsmBrkQ" name="EsmBrkQ" class="form-control col-sm-8" placeholder="Quantity">
+                                                                <input type="number" id="EsmBrkQ" name="EsmBrkQ" class="form-control col-sm-8" min="1" placeholder="Quantity" required>
                                                             </div>
                                                             <div class="col-sm-1" style="padding-top:6px;padding-right:0px;">
 
@@ -916,76 +1888,225 @@
                                                             var sl = i + 1;
                                                             var smid = long.Parse(SetMenuListBrk.Keys.ElementAt(i));
                                                             var smcount = cesmr.Where(x => x.SetMenuId == long.Parse(SetMenuListBrk.Keys.ElementAt(i))).FirstOrDefault();
-                                                        <span>SetMenu @sl  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; @smcount.quantity pcs </span>
+                                                            <span>SetMenu @sl  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; @smcount.quantity pcs </span>
 
                                                         }
-                                                        
+
 
 
                                                     </div>
-                                                        }
-
-
-
-                                                    }
-
-
-
-
                                                 }
 
 
 
+                                            }
 
 
-                                                else
-                                                {
-                                                                        <div class="jumbotron" style="padding-bottom:10px;padding-left:10px;padding-right:10px;padding-top:10px;">
-                                                                            Meal Off
 
-                                                                        </div>
-                                                                    }
+
+                                        }
+
+
+
+
+
+                                        else
+                                        {
+                                            <div class="jumbotron" style="padding-bottom:10px;padding-left:10px;padding-right:10px;padding-top:10px;">
+                                                Meal Off
+
+                                            </div>
+                                        }
 
 
                                     </div>
 
-                                            <div role="tabpanel" class="tab-pane " id="b">
-                                                @foreach (var itm in STMBrk)
-                                                        {
-                                                            var stmBrkDtl = _db.SetMenuDetails.Where(x => x.SetMenuId == itm.SetMenuId).ToList();
-                                                            int j = 1;
-                                                    <div class="col-sm-4">
-                                                        SetMenu @j
+                                    <div role="tabpanel" class="tab-pane " id="b">
+                                        @foreach (var itm in STMBrk)
+                                        {
+                                            var stmBrkDtl = _db.SetMenuDetails.Where(x => x.SetMenuId == itm.SetMenuId).ToList();
+                                            int j = 1;
+                                            <div class="col-sm-4">
+                                                SetMenu @j
+                                            </div>
+                                            <div class="col-sm-8">
+                                                @foreach (var i in stmBrkDtl)
+                                                {
+                                                    @_db.StoreOutItem.Where(x => x.Id == i.StoreOutItemId).FirstOrDefault().Name <span>&nbsp;</span>
+
+                                                }
+                                            </div>
+
+                                        }
+
+                                    </div>
+                                    <div role="tabpanel" class="tab-pane active in" id="c">
+                                        @{
+                                            var ExItemBrk = _db.MenuItem.Where(x => x.MealTypeId == 1 && x.Day == day).ToList();
+
+
+                                        }
+
+                                        @if (showmenu == true)
+                                        {
+
+                                            Boolean c = true;
+
+                                            var ExItemBrkFromCustomerChoiceV2 = _db.CustomerChoiceV2.Where(x => x.MealTypeId == 1 && x.OrderTypeId == 4 && x.Date.ToShortDateString() == SMDate && x.UserId == UserId).ToList();
+
+
+                                            if (SetMenuListBrk.Count > 0 && ExItemBrkFromCustomerChoiceV2.Count == 0)
+                                            {
+                                                @foreach (var item in ExItemBrk)
+                                                {
+                                                    @*<div class="row">*@
+
+                                                    <div class="col-sm-2">
+                                                        <div class="form-check">
+                                                            <label class="form-check-label">
+                                                                <input class="form-check-input" name="itemcheck" type="checkbox" value="@item.Id" unchecked>
+                                                                <span class="form-check-sign">
+                                                                    <span class="check"></span>
+                                                                </span>
+                                                            </label>
+                                                        </div>
                                                     </div>
-                                                    <div class="col-sm-8">
-                                                        @foreach (var i in stmBrkDtl)
-                                                        {
-                                                            @_db.StoreOutItem.Where(x => x.Id == i.StoreOutItemId).FirstOrDefault().Name <span>&nbsp;</span>
+
+                                                    <div class="col-sm-4" style="padding-top:20px;">
+                                                        @{
+                                                            var ex = _db.ExtraItem.Where(x => x.Id == item.ExtraItemId).FirstOrDefault();
 
                                                         }
+                                                        @_db.StoreOutItem.Where(x => x.Id == ex.StoreOutItemId).FirstOrDefault().Name
                                                     </div>
 
+                                                    <div class="col-sm-6" style="padding-top:6px;">
+                                                        <input type="number" id="EitmBrkQ" name="EitmBrkQ" class="form-control col-sm-5" value="" placeholder="Quantity">
+
+                                                    </div>
+
+                                                    @*</div>*@
                                                 }
+                                                @*<div class="row">*@
+                                                <div class="col-sm-4">
 
-                                            </div>
-                                            <div role="tabpanel" class="tab-pane" id="c">
-                                                @{
-                                                    var ExItemBrk = _db.MenuItem.Where(x => x.MealTypeId == 1 && x.Day == day).ToList();
+                                                </div>
+
+                                                <div class="col-sm-4">
+
+                                                </div>
+                                                <div class="col-sm-4">
+                                                    <button onclick="ExtraItemUpdate(1)" class="btn bg-pink waves-effect">Order</button>
+
+                                                </div>
 
 
-                                                }
+                                                @*</div>*@
+                                            }
+                                            else
+                                            {
 
-                                                @if (showmenu == true)
+                                                @if (ExItemBrkFromCustomerChoiceV2.Count == 0)
+                                                {
+
+                                                    @*@if(SetMenuListBrk.Count == 0)
+                                                        {*@
+                                                    @foreach (var item in ExItemBrk)
                                                     {
+                                                        @*<div class="row">*@
 
-                                                        Boolean c = true;
+                                                        <div class="col-sm-2">
+                                                            <div class="form-check">
+                                                                <label class="form-check-label">
+                                                                    <input class="form-check-input" name="itemcheck" type="checkbox" value="@item.Id" checked>
+                                                                    <span class="form-check-sign">
+                                                                        <span class="check"></span>
+                                                                    </span>
+                                                                </label>
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="col-sm-4" style="padding-top:20px;">
+                                                            @{
+                                                                var ex = _db.ExtraItem.Where(x => x.Id == item.ExtraItemId).FirstOrDefault();
+
+                                                            }
+                                                            @_db.StoreOutItem.Where(x => x.Id == ex.StoreOutItemId).FirstOrDefault().Name
+                                                        </div>
+
+                                                        <div class="col-sm-6" style="padding-top:6px;">
+                                                            <input type="number" id="EitmBrkQ" name="EitmBrkQ" class="form-control col-sm-5" value="1" placeholder="Quantity">
+
+                                                        </div>
+                                                        @*</div>*@
+                                                    }
+                                                    @*<div class="row">*@
+                                                    <div class="col-sm-4">
+
+                                                    </div>
+
+                                                    <div class="col-sm-4">
+
+                                                    </div>
+                                                    <div class="col-sm-4">
+                                                        <button onclick="ExtraItemUpdate(1)" class="btn bg-pink waves-effect">Order</button>
+
+                                                    </div>
 
 
+                                                    @*</div>*@
 
-                                                        if (SetMenuListBrk.Count > 0 && ExItemBrkFromCustomerChoiceV2.Count == 0)
+                                                }
+                                                else
+                                                {
+
+                                                    double q = 0;
+                                                    @foreach (var item in ExItemBrk)
+                                                    {
+                                                        int ct = 0;
+                                                        foreach (var i in ExItemBrkFromCustomerChoiceV2)
                                                         {
-                                                            @foreach (var item in ExItemBrk)
+
+                                                            if (item.ExtraItemId == i.ExtraItemId)
                                                             {
+                                                                ct = 1;
+                                                                q = i.quantity;
+                                                                break;
+                                                            }
+
+                                                        }
+                                                        if (ct == 1)
+                                                        {
+                                                            @*<div class="row">*@
+
+                                                            <div class="col-sm-2">
+                                                                <div class="form-check">
+                                                                    <label class="form-check-label">
+                                                                        <input class="form-check-input" name="itemcheck" type="checkbox" value="@item.Id" checked>
+                                                                        <span class="form-check-sign">
+                                                                            <span class="check"></span>
+                                                                        </span>
+                                                                    </label>
+                                                                </div>
+                                                            </div>
+
+                                                            <div class="col-sm-4" style="padding-top:20px;">
+                                                                @{
+                                                                    var ex = _db.ExtraItem.Where(x => x.Id == item.ExtraItemId).FirstOrDefault();
+
+                                                                }
+                                                                @_db.StoreOutItem.Where(x => x.Id == ex.StoreOutItemId).FirstOrDefault().Name
+                                                            </div>
+
+                                                            <div class="col-sm-6" style="padding-top:6px;">
+                                                                <input type="number" id="EitmBrkQ" name="EitmBrkQ" class="form-control col-sm-5" value="@q" placeholder="Quantity">
+
+                                                            </div>
+
+                                                            @*</div>*@
+                                                        }
+                                                        else
+                                                        {
                                                             @*<div class="row">*@
 
                                                             <div class="col-sm-2">
@@ -1013,204 +2134,56 @@
                                                             </div>
 
                                                             @*</div>*@
-                                                        }
-                                                        @*<div class="row">*@
-                                                        <div class="col-sm-4">
-
-                                                        </div>
-
-                                                        <div class="col-sm-4">
-
-                                                        </div>
-                                                        <div class="col-sm-4">
-                                                            <button onclick="ExtraItemUpdate(1)" class="btn bg-pink waves-effect">Order</button>
-
-                                                        </div>
-
-
-                                                        @*</div>*@
-                                                    }
-                                                    else
-                                                    {
-
-                                                        @if (ExItemBrkFromCustomerChoiceV2.Count == 0)
-                                                        {
-
-                                                            @*@if(SetMenuListBrk.Count == 0)
-                            {*@
-                                                            @foreach (var item in ExItemBrk)
-                                                            {
-                                                                @*<div class="row">*@
-
-                                                                <div class="col-sm-2">
-                                                                    <div class="form-check">
-                                                                        <label class="form-check-label">
-                                                                            <input class="form-check-input" name="itemcheck" type="checkbox" value="@item.Id" checked>
-                                                                            <span class="form-check-sign">
-                                                                                <span class="check"></span>
-                                                                            </span>
-                                                                        </label>
-                                                                    </div>
-                                                                </div>
-
-                                                                <div class="col-sm-4" style="padding-top:20px;">
-                                                                    @{
-                                                                        var ex = _db.ExtraItem.Where(x => x.Id == item.ExtraItemId).FirstOrDefault();
-
-                                                                    }
-                                                                    @_db.StoreOutItem.Where(x => x.Id == ex.StoreOutItemId).FirstOrDefault().Name
-                                                                </div>
-
-                                                                <div class="col-sm-6" style="padding-top:6px;">
-                                                                    <input type="number" id="EitmBrkQ" name="EitmBrkQ" class="form-control col-sm-5" value="1" placeholder="Quantity">
-
-                                                                </div>
-                                                                @*</div>*@
-                                                            }
-                                                            @*<div class="row">*@
-                                                            <div class="col-sm-4">
-
-                                                            </div>
-
-                                                            <div class="col-sm-4">
-
-                                                            </div>
-                                                            <div class="col-sm-4">
-                                                                <button onclick="ExtraItemUpdate(1)" class="btn bg-pink waves-effect">Order</button>
-
-                                                            </div>
-
-
-                                                            @*</div>*@
-
-                                                        }
-                                                        else
-                                                        {
-
-                                                            double q = 0;
-                                                            @foreach (var item in ExItemBrk)
-                                                            {
-                                                                int ct = 0;
-                                                                foreach (var i in ExItemBrkFromCustomerChoiceV2)
-                                                                {
-
-                                                                    if (item.ExtraItemId == i.ExtraItemId)
-                                                                    {
-                                                                        ct = 1;
-                                                                        q = i.quantity;
-                                                                        break;
-                                                                    }
-
-                                                                }
-                                                                if (ct == 1)
-                                                                {
-                                                                    @*<div class="row">*@
-
-                                                                    <div class="col-sm-2">
-                                                                        <div class="form-check">
-                                                                            <label class="form-check-label">
-                                                                                <input class="form-check-input" name="itemcheck" type="checkbox" value="@item.Id" checked>
-                                                                                <span class="form-check-sign">
-                                                                                    <span class="check"></span>
-                                                                                </span>
-                                                                            </label>
-                                                                        </div>
-                                                                    </div>
-
-                                                                    <div class="col-sm-4" style="padding-top:20px;">
-                                                                        @{
-                                                                            var ex = _db.ExtraItem.Where(x => x.Id == item.ExtraItemId).FirstOrDefault();
-
-                                                                        }
-                                                                        @_db.StoreOutItem.Where(x => x.Id == ex.StoreOutItemId).FirstOrDefault().Name
-                                                                    </div>
-
-                                                                    <div class="col-sm-6" style="padding-top:6px;">
-                                                                        <input type="number" id="EitmBrkQ" name="EitmBrkQ" class="form-control col-sm-5" value="@q" placeholder="Quantity">
-
-                                                                    </div>
-
-                                                                    @*</div>*@
-                                                                }
-                                                                else
-                                                                {
-                                                                    @*<div class="row">*@
-
-                                                                    <div class="col-sm-2">
-                                                                        <div class="form-check">
-                                                                            <label class="form-check-label">
-                                                                                <input class="form-check-input" name="itemcheck" type="checkbox" value="@item.Id" unchecked>
-                                                                                <span class="form-check-sign">
-                                                                                    <span class="check"></span>
-                                                                                </span>
-                                                                            </label>
-                                                                        </div>
-                                                                    </div>
-
-                                                                    <div class="col-sm-4" style="padding-top:20px;">
-                                                                        @{
-                                                                            var ex = _db.ExtraItem.Where(x => x.Id == item.ExtraItemId).FirstOrDefault();
-
-                                                                        }
-                                                                        @_db.StoreOutItem.Where(x => x.Id == ex.StoreOutItemId).FirstOrDefault().Name
-                                                                    </div>
-
-                                                                    <div class="col-sm-6" style="padding-top:6px;">
-                                                                        <input type="number" id="EitmBrkQ" name="EitmBrkQ" class="form-control col-sm-5" value="" placeholder="Quantity">
-
-                                                                    </div>
-
-                                                                    @*</div>*@
-
-                                                                }
-                                                            }
-                                                            @*<div class="row">*@
-                                                            <div class="col-sm-4">
-
-                                                            </div>
-
-                                                            <div class="col-sm-4">
-
-                                                            </div>
-                                                            <div class="col-sm-4">
-                                                                <button onclick="ExtraItemUpdate(1)" class="btn bg-pink waves-effect">Order</button>
-
-                                                            </div>
-
-
 
                                                         }
                                                     }
+                                                    @*<div class="row">*@
+                                                    <div class="col-sm-4">
 
-
-                                                }
-                                                else
-                                                {
-                                                    @foreach (var item in ExItemBrk)
-                                                    {
-                                                        <div class="row">
-                                                            <div class="col-sm-4">
-                                                            </div>
-                                                            <div class="col-sm-4">
-                                                                @{
-                                                                    var ex = _db.ExtraItem.Where(x => x.Id == item.ExtraItemId).FirstOrDefault();
-
-                                                                }
-                                                                @_db.StoreOutItem.Where(x => x.Id == ex.StoreOutItemId).FirstOrDefault().Name
-                                                            </div>
-                                                            <div class="col-sm-4">
-                                                            </div>
-                                                        </div>
-
-                                                    }
-                                                    <div class="row">
-                                                        You can just view,can't choose extra item.As Meal is Off.
                                                     </div>
+
+                                                    <div class="col-sm-4">
+
+                                                    </div>
+                                                    <div class="col-sm-4">
+                                                        <button onclick="ExtraItemUpdate(1)" class="btn bg-pink waves-effect">Order</button>
+
+                                                    </div>
+
+
+
                                                 }
+                                            }
 
 
+                                        }
+                                        else
+                                        {
+                                            @foreach (var item in ExItemBrk)
+                                            {
+                                                <div class="row">
+                                                    <div class="col-sm-4">
+                                                    </div>
+                                                    <div class="col-sm-4">
+                                                        @{
+                                                            var ex = _db.ExtraItem.Where(x => x.Id == item.ExtraItemId).FirstOrDefault();
+
+                                                        }
+                                                        @_db.StoreOutItem.Where(x => x.Id == ex.StoreOutItemId).FirstOrDefault().Name
+                                                    </div>
+                                                    <div class="col-sm-4">
+                                                    </div>
+                                                </div>
+
+                                            }
+                                            <div class="row">
+                                                You can just view,can't choose extra item.As Meal is Off.
                                             </div>
-                                        </div>
+                                        }
+
+
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
@@ -1230,14 +2203,14 @@
                             <div class="body">
                                 <!-- Nav tabs -->
                                 <ul class="nav nav-tabs tab-nav-right" role="tablist">
-                                    <li role="presentation" class="active"><a href="#x" data-toggle="tab" aria-expanded="true">SetMenu</a></li>
-                                    <li role="presentation" class=""><a href="#y" data-toggle="tab" aria-expanded="false">SetMenu Detail</a></li>
-                                    <li role="presentation" class=""><a href="#z" data-toggle="tab" aria-expanded="false">Extra item</a></li>
+                                    @*<li role="presentation" class="active"><a href="#x" data-toggle="tab" aria-expanded="true">SetMenu</a></li>
+                                        <li role="presentation" class=""><a href="#y" data-toggle="tab" aria-expanded="false">SetMenu Detail</a></li>*@
+                                    <li role="presentation" class=""><a href="#z" data-toggle="tab" aria-expanded="false">Item</a></li>
                                 </ul>
 
                                 <!-- Tab panes -->
                                 <div class="tab-content">
-                                    <div role="tabpanel" class="tab-pane active in" id="x">
+                                    <div role="tabpanel" class="tab-pane" id="x">
                                         @if (showmenu3 == true)
                                         {
                                             var smSetUpT = _db.CustomerChoiceV2.Where(x => x.MealTypeId == 3 && x.Date.ToShortDateString() == SMDate && x.UserId == UserId && x.OrderTypeId == 1).FirstOrDefault();
@@ -1306,7 +2279,7 @@
                                                             <div class="col-sm-3" style="padding-right:0px;padding-left:0px;">
 
 
-                                                                <input type="number" id="EsmTQ" name="EsmTQ" class="form-control col-sm-8" placeholder="Quantity">
+                                                                <input type="number" id="EsmTQ" name="EsmTQ" min="1" class="form-control col-sm-8" placeholder="Quantity" required>
                                                             </div>
                                                             <div class="col-sm-1" style="padding-top:6px;padding-right:0px;">
 
@@ -1377,7 +2350,7 @@
 
 
                                     </div>
-                                    <div role="tabpanel" class="tab-pane" id="z">
+                                    <div role="tabpanel" class="tab-pane active in" id="z">
                                         @{
                                             var ExItemT = _db.MenuItem.Where(x => x.MealTypeId == 3 && x.Day == day).ToList();
 
@@ -1619,14 +2592,14 @@
                             <div class="body">
                                 <!-- Nav tabs -->
                                 <ul class="nav nav-tabs tab-nav-right" role="tablist">
-                                    <li role="presentation" class="active"><a href="#d" data-toggle="tab" aria-expanded="true">SetMenu</a></li>
-                                    <li role="presentation" class=""><a href="#e" data-toggle="tab" aria-expanded="false">SetMenu Detail</a></li>
-                                    <li role="presentation" class=""><a href="#f" data-toggle="tab" aria-expanded="false">Extra item</a></li>
+                                    @*<li role="presentation" class="active"><a href="#d" data-toggle="tab" aria-expanded="true">SetMenu</a></li>
+                                        <li role="presentation" class=""><a href="#e" data-toggle="tab" aria-expanded="false">SetMenu Detail</a></li>*@
+                                    <li role="presentation" class=""><a href="#f" data-toggle="tab" aria-expanded="false">Item</a></li>
                                 </ul>
 
                                 <!-- Tab panes -->
                                 <div class="tab-content">
-                                    <div role="tabpanel" class="tab-pane active in" id="d">
+                                    <div role="tabpanel" class="tab-pane" id="d">
                                         @if (showmenu2 == true)
                                         {
                                             var smSetUplnc = _db.CustomerChoiceV2.Where(x => x.MealTypeId == 2 && x.Date.ToShortDateString() == SMDate && x.UserId == UserId && x.OrderTypeId == 1).FirstOrDefault();
@@ -1694,7 +2667,7 @@
                                                             <div class="col-sm-3" style="padding-right:0px;padding-left:0px;">
 
 
-                                                                <input type="number" id="EsmLnQ" name="EsmLnQ" class="form-control col-sm-8" placeholder="Quantity">
+                                                                <input type="number" id="EsmLnQ" name="EsmLnQ" class="form-control col-sm-8" min="1" placeholder="Quantity" required>
                                                             </div>
                                                             <div class="col-sm-1" style="padding-top:6px;padding-right:0px;">
 
@@ -1761,7 +2734,7 @@
                                         }
 
                                     </div>
-                                    <div role="tabpanel" class="tab-pane" id="f">
+                                    <div role="tabpanel" class="tab-pane active in" id="f">
                                         @{
                                             var ExItemLn = _db.MenuItem.Where(x => x.MealTypeId == 2 && x.Day == day).ToList();
 
@@ -2002,17 +2975,374 @@
         </div>
 
 
+        <div class="card">
+            <div class=" card-header-tabs card-header-success" style="text-align: center; font-size: 15px; font-weight: bold;">
+                Daily Food Routine
+            </div>
+            <div class="card-body">
+                @*<div class="row">*@
+                @{
+                    int dcnt = 0;
+
+                }
+                @foreach (var d in Days)
+                {
+                    var daynm = WeekDays.ElementAt(dcnt);
+                    var brkID = "#" + daynm + "_1";
+                    var tbrkID = "#" + daynm + "_3";
+                    var lnID = "#" + daynm + "_2";
+
+                    <div class="row">
+                        <div class="card">
+                            <div class="body">
+                                <div class="row">
+                                    <div class="col-xs-12 col-sm-12 col-md-6 col-md-6"><div class="font-bold m-b--35">@daynm</div></div>
+
+
+                                </div>
+                            </div>
+                            <div class="body">
+                                <ul class="nav nav-tabs tab-nav-right" role="tablist">
+
+                                    <li role="presentation" class="active"><a href="@brkID" data-toggle="tab" aria-expanded="true">Breakfast</a></li>
+                                    <li role="presentation" class=""><a href="@lnID" data-toggle="tab" aria-expanded="false">Lunch</a></li>
+                                    <li role="presentation" class=""><a href="@tbrkID" data-toggle="tab" aria-expanded="false">Tea Break</a></li>
+
+                                </ul>
+
+                                <!-- Tab panes -->
+                                <div class="tab-content">
+                                    @foreach (var m in _context.MealType.Where(x => x.Id <= 3).ToList())
+                                    {
+                                        var pnlId = daynm + "_" + @m.Id.ToString();
+                                        var panelClass = @m.Id == 1 ? "tab-pane active in" : "tab-pane";
+                                        var ExItemFromCutomerMenuChoice = _db.CustomerDailyMenuChoice.Where(x => x.MealTypeId == @m.Id && x.OrderTypeId == 10003 && x.Day == d && x.UserId == UserId).ToList();
+                                        var userMealStatus = _db.PreOrderSchedule.Where(x => x.MealTypeId == m.Id && x.UserId == UserId).FirstOrDefault() == null ? false :
+                                            _db.PreOrderSchedule.Where(x => x.MealTypeId == m.Id && x.UserId == UserId).FirstOrDefault().IsPreOrderSet;
+
+                                        <div role="tabpanel" class="@panelClass" id="@pnlId">
+                                            @{
+                                                var ExItemMeal = _db.MenuItem.Where(x => x.MealTypeId == @m.Id && x.Day == d).ToList();
+
+                                                var itemInpId = "ExItemInp_" + pnlId;
+                                                var itemChkId = "ExItemChk_" + pnlId;
+                                            }
+
+                                            @if (userMealStatus == true)
+                                            {
+
+                                                Boolean c = true;
 
 
 
+                                                if (SetMenuListBrk.Count > 0 && ExItemFromCutomerMenuChoice.Count == 0)
+                                                {
+                                                    @foreach (var item in ExItemMeal)
+                                                    {
+                                                        @*<div class="row">*@
+
+                                                        <div class="col-sm-2">
+                                                            <div class="form-check">
+                                                                <label class="form-check-label">
+                                                                    <input class="form-check-input" name="@itemChkId" type="checkbox" value="@item.ExtraItemId" unchecked>
+                                                                    <span class="form-check-sign">
+                                                                        <span class="check"></span>
+                                                                    </span>
+                                                                </label>
+                                                            </div>
+                                                        </div>
+
+                                                        <div class="col-sm-4" style="padding-top:20px;">
+                                                            @{
+                                                                var ex = _context.ExtraItem.Where(x => x.Id == @item.ExtraItemId).FirstOrDefault();
+                                                            }
+
+                                                            @_db.StoreOutItem.Where(x => x.Id == ex.StoreOutItemId).FirstOrDefault().Name
+                                                        </div>
+
+                                                        <div class="col-sm-6" style="padding-top:6px;">
+                                                            <input type="number" id="@itemInpId" name="@itemInpId" class="form-control col-sm-5" value="" placeholder="Quantity">
+
+                                                        </div>
+
+                                                        @*</div>*@
+                                                    }
+                                                    @*<div class="row">*@
+                                                    <div class="col-sm-4">
+
+                                                    </div>
+
+                                                    <div class="col-sm-4">
+
+                                                    </div>
+                                                    <div class="col-sm-4">
+                                                        @*<button onclick="ExtraItemUpdate(1)" class="btn bg-pink waves-effect">Order</button>*@
+
+                                                    </div>
+
+
+                                                    @*</div>*@
+                                                }
+                                                else
+                                                {
+
+                                                    @if (ExItemFromCutomerMenuChoice.Count == 0)
+                                                    {
+                                                        var sl = 0;
+                                                        @*@if(SetMenuListBrk.Count == 0)
+                                                            {*@
+                                                        @foreach (var item in ExItemMeal)
+                                                        {
+                                                            sl++;
+                                                            <div class="row">
+
+
+                                                                <div class="col-sm-2">
+                                                                    <div class="form-check">
+                                                                        <label class="form-check-label">
+                                                                            <input class="form-check-input" name="@itemChkId" onchange="CreteDailyMenu()" type="checkbox" value="@item.ExtraItemId" unchecked>
+                                                                            <span class="form-check-sign">
+                                                                                <span class="check"></span>
+                                                                            </span>
+                                                                        </label>
+                                                                    </div>
+                                                                </div>
+
+                                                                <div class="col-sm-4" style="padding-top:20px;">
+
+                                                                    @{
+                                                                        var ex = _context.ExtraItem.Where(x => x.Id == @item.ExtraItemId).FirstOrDefault();
+                                                                    }
+
+                                                                    @_db.StoreOutItem.Where(x => x.Id == ex.StoreOutItemId).FirstOrDefault().Name
+                                                                </div>
+
+                                                                <div class="col-sm-3" style="padding-top:6px;">
+                                                                    <input type="number" id="@itemInpId" name="@itemInpId" oninput="CreteDailyMenu()" class="form-control col-sm-5" value="" placeholder="Quantity">
+
+                                                                </div>
+                                                                <div class="col-sm-3" style="padding-top:6px;">
+                                                                    <div class="col-sm-3">
+                                                                        @if (sl == 1)
+                                                                        {
+                                                                            @if (m.Id == 1)
+                                                                            {
+                                                                                <p style="font-size:14px;font-weight: bold;color: red;">
+                                                                                    Extra - @brkItemList
+                                                                                </p>
+
+
+                                                                            }
+                                                                            else if (m.Id == 2)
+                                                                            {
+                                                                                <p style="font-size:14px;font-weight: bold;color: red;">
+                                                                                    Extra - @lunchItemList
+                                                                                </p>
+
+                                                                            }
+                                                                            else
+
+                                                                            {
+                                                                                <p style="font-size:14px;font-weight: bold;color: red;">
+                                                                                    Extra - @tbrkItemList
+                                                                                </p>
+
+                                                                            }
+                                                                        }
+                                                                    </div>
+
+                                                                </div>
+
+                                                            </div>
+                                                        }
+
+
+                                                    }
+                                                    else
+                                                    {
+
+                                                        double q = 0;
+                                                        var sl = 0;
+                                                        @foreach (var item in ExItemMeal)
+                                                        {
+                                                            int ct = 0;
+                                                            sl++;
+                                                            foreach (var i in ExItemFromCutomerMenuChoice)
+                                                            {
+
+                                                                if (item.ExtraItemId == i.ExtraItemId)
+                                                                {
+                                                                    ct = 1;
+                                                                    q = i.quantity;
+                                                                    break;
+                                                                }
+
+                                                            }
+                                                            <div class="row">
+
+                                                                @if (ct == 1)
+                                                                {
+
+                                                                    <div class="col-sm-2">
+                                                                        <div class="form-check">
+                                                                            <label class="form-check-label">
+                                                                                <input class="form-check-input" name="@itemChkId" onchange="CreteDailyMenu()" type="checkbox" value="@item.ExtraItemId" checked>
+                                                                                <span class="form-check-sign">
+                                                                                    <span class="check"></span>
+                                                                                </span>
+                                                                            </label>
+                                                                        </div>
+                                                                    </div>
+
+                                                                    <div class="col-sm-4" style="padding-top:20px;">
+
+                                                                        @{
+                                                                            var ex = _context.ExtraItem.Where(x => x.Id == @item.ExtraItemId).FirstOrDefault();
+                                                                        }
+
+                                                                        @_db.StoreOutItem.Where(x => x.Id == ex.StoreOutItemId).FirstOrDefault().Name
+                                                                    </div>
+
+                                                                    <div class="col-sm-3" style="padding-top:6px;">
+                                                                        <input type="number" id="@itemInpId" name="@itemInpId" oninput="CreteDailyMenu()" class="form-control col-sm-5" value="@q" placeholder="Quantity">
+
+                                                                    </div>
+
+
+                                                                }
+                                                                else
+                                                                {
+                                                                    @*<div class="row">*@
+
+                                                                    <div class="col-sm-2">
+                                                                        <div class="form-check">
+                                                                            <label class="form-check-label">
+                                                                                <input class="form-check-input" name="@itemChkId" onchange="CreteDailyMenu()" type="checkbox" value="@item.ExtraItemId" unchecked>
+                                                                                <span class="form-check-sign">
+                                                                                    <span class="check"></span>
+                                                                                </span>
+                                                                            </label>
+                                                                        </div>
+                                                                    </div>
+
+                                                                    <div class="col-sm-4" style="padding-top:20px;">
+
+                                                                        @{
+                                                                            var ex = _context.ExtraItem.Where(x => x.Id == @item.ExtraItemId).FirstOrDefault();
+                                                                        }
+
+                                                                        @_db.StoreOutItem.Where(x => x.Id == ex.StoreOutItemId).FirstOrDefault().Name
+                                                                    </div>
+
+                                                                    <div class="col-sm-3" style="padding-top:6px;">
+                                                                        <input type="number" id="@itemInpId" name="@itemInpId" oninput="CreteDailyMenu()" class="form-control col-sm-5" value="" placeholder="Quantity">
+
+                                                                    </div>
+
+                                                                    @*</div>*@
+
+                                                                }
+
+                                                            <div class="col-sm-3">
+                                                                @if (sl == 1)
+                                                                {
+                                                                    @if (m.Id == 1)
+                                                                    {
+                                                                        <p style="font-size:14px;font-weight: bold;color: red;">
+                                                                            Extra - @brkItemList
+                                                                        </p>
+
+
+                                                                    }
+                                                                    else if (m.Id == 2)
+                                                                    {
+                                                                        <p style="font-size:14px;font-weight: bold;color: red;">
+                                                                            Extra - @lunchItemList
+                                                                        </p>
+
+                                                                    }
+                                                                    else
+
+                                                                    {
+                                                                        <p style="font-size:14px;font-weight: bold;color: red;">
+                                                                            Extra - @tbrkItemList
+                                                                        </p>
+
+                                                                    }
+                                                                }
+                                                            </div>
+                                                            </div>
+                                                        }
+                                                        @*<div class="row">*@
+                                                        <div class="col-sm-4">
+
+                                                        </div>
+
+                                                        <div class="col-sm-4">
+
+                                                        </div>
+                                                        <div class="col-sm-4">
+                                                            @*<button onclick="ExtraItemUpdate(1)" class="btn bg-pink waves-effect">Order</button>*@
+
+                                                        </div>
 
 
 
+                                                    }
+                                                }
 
 
+                                            }
+                                            else
+                                            {
+                                                @foreach (var item in ExItemMeal)
+                                                {
+                                                    <div class="row">
+                                                        <div class="col-sm-4">
+                                                        </div>
+                                                        <div class="col-sm-4">
+
+                                                            @{
+                                                                var ex = _context.ExtraItem.Where(x => x.Id == @item.ExtraItemId).FirstOrDefault();
+                                                            }
+
+                                                            @_db.StoreOutItem.Where(x => x.Id == ex.StoreOutItemId).FirstOrDefault().Name
+                                                        </div>
+                                                        <div class="col-sm-4">
+                                                        </div>
+                                                    </div>
+
+                                                }
+                                                <div class="row">
+                                                    You can just view, can't choose extra item.As Meal is Off.
+                                                </div>
+                                            }
 
 
+                                        </div>
+                                    }
 
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    dcnt++;
+                }
+
+                @*</div>*@
+
+                <div class="row">
+                    <div class="col-sm-10">
+
+                    </div>
+                    <div class="col-sm-2">
+                        @*<button class="btn btn-success" style="padding:3px;" onclick="CreteDailyMenu()"> Submit </button>*@
+                    </div>
+                </div>
+            </div>
+
+        </div>
 
 
 
@@ -2025,515 +3355,92 @@
 
 
     <script src="~/lib/jquery/dist/jquery.js"></script>
+    <script src="~/js/ConsumerDashboardController.js"></script>
 
 
 
 
 
-    @*@section Scripts{*@
 
 
-    <script>
-    function OnOffModify(MealId) {
-         var checked;
-        if (MealId == 1) {
-           checked =  document.getElementById("BrkOnOff").checked;
-        }
-         if (MealId == 2) {
-           checked =  document.getElementById("LncOnOff").checked;
-        }
-          if (MealId == 3) {
-           checked =  document.getElementById("TOnOff").checked;
-        }
+</section>
 
+<script>
 
-         $.ajax({
+    function CreteDailyMenu() {
+        var mod = document.getElementById("loadModal");
+        mod.style.display = "block";
+        var dayList = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday"];
+        var itemInpPrefix = "ExItemInp_";
+        var itemChkPrefix = "ExItemChk_";
+        var addedItem = [];
+        var quantityList = [];
+        var checkBoxAdded = [];
+        var totalItemList;
+        for (var i = 0; i < 5; i++) {
+            var day = i + 1;
+            for (var j = 0; j < 3; j++) {
+                var meal = j + 1;
+                quantityList = document.getElementsByName(itemInpPrefix + dayList[i] + "_" + meal);
+                checkBoxAdded = document.getElementsByName(itemChkPrefix + dayList[i] + "_" + meal);
+                var checkBoxLengthAdded = checkBoxAdded.length;
+                for (var k = 0; k < checkBoxLengthAdded; k++) {
 
-                    url: '@Url.Action("OnOffModify", "Consumer")',
-                    type: "POST",
-                    //dataType: 'json',
-                    data: {  Checked: checked, MealId: MealId },
-                    //contentType: 'application/json; charset=utf-8',
-                    success: function (response) {
-                        if (response.success) {
+                    if (checkBoxAdded[k].checked == true) {
 
+                        var tempQuantityValueAdded = quantityList[k].value.toString();
+                        var tempItemValueAdded = checkBoxAdded[k].value.toString();
 
-                            alert(response.responseText);
+                        if (parseInt(tempQuantityValueAdded) <= 0 || tempQuantityValueAdded === "") {
+                            mod.style.display = "none";
 
-                            window.location.reload(true);
-
-
-                        } else {
-                            // DoSomethingElse()
-                            alert(response.responseText);
-                            window.location.reload(true);
+                            alert("Quantity should be greater than 0");
+                            return;
                         }
+
+                        var obj = { ItemId: tempItemValueAdded, Quantity: tempQuantityValueAdded, Day: day, Meal: meal };
+                        addedItem.push(obj);
                     }
 
+                }
 
-                })
-
-
-
-    }
-
-    @*function OnOffModify(MealId) {
-
-        var checked;
-        if (MealId == 1) {
-           checked =  document.getElementById("BrkOnOff").checked;
-        }
-         if (MealId == 2) {
-           checked =  document.getElementById("LncOnOff").checked;
-        }
-          if (MealId == 3) {
-           checked =  document.getElementById("TOnOff").checked;
-        }
-
-
-         $.ajax({
-
-                    url: '@Url.Action("OnOffModify", "Consumer")',
-                    type: "POST",
-                    //dataType: 'json',
-                    data: {  Checked: checked, MealId: MealId },
-                    //contentType: 'application/json; charset=utf-8',
-                    success: function (response) {
-                        if (response.success) {
-
-
-                            alert(response.responseText);
-                            //window.location.reload(true);
-
-
-                        } else {
-                            // DoSomethingElse()
-                            alert(response.responseText);
-                            window.location.reload(true);
-                        }
-                    }
-
-
-                })
-
-
-
-
-    }*@
-
-    function ExtraItemUpdate(mealId) {
-
-      var addedItem = [];
-
-        var textsAdded;
-
-        var checkBoxAdded;
-        var checkBoxLengthAdded;
-        if (mealId == 1) {
-            textsAdded = document.getElementsByName("EitmBrkQ");
-              checkBoxAdded = document.getElementsByName("itemcheck");
-         checkBoxLengthAdded = checkBoxAdded.length;
-
-        }
-        if (mealId == 2) {
-            textsAdded = document.getElementsByName("EitmLnQ");
-                  checkBoxAdded = document.getElementsByName("itemcheck2");
-         checkBoxLengthAdded = checkBoxAdded.length;
-
-        }
-          if (mealId == 3) {
-            textsAdded = document.getElementsByName("EitmTQ");
-                  checkBoxAdded = document.getElementsByName("itemcheck3");
-         checkBoxLengthAdded = checkBoxAdded.length;
-
-        }
-        var tempItemValueAdded = "";
-        var tempPriceValueAdded = "";
-        var date = document.getElementById("menudate").value.toString();
-        console.log(date);
-        //console.log(checkBoxAdded);
-        //console.log(textsAdded);
-
-
-
-
-        for (var i = 0; i < checkBoxLengthAdded; i++) {
-
-            if (checkBoxAdded[i].checked == true) {
-
-                tempPriceValueAdded = textsAdded[i].value.toString();
-                tempItemValueAdded = checkBoxAdded[i].value.toString();
-                console.log(checkBoxAdded[i].value.toString() + "  " + textsAdded[i].value.toString());
-
-
-                var obj = { ItemId: tempItemValueAdded, Quantity: tempPriceValueAdded };
-                addedItem.push(obj);
-            }
-
-        }
-        //-------------------
-        extraItemList = JSON.stringify(addedItem);
-
-         $.ajax({
-
-        url: '@Url.Action("UpdateExtraItemList", "Consumer")',
-             type: "POST",
-             data: { ExtraItemList: extraItemList, MealId: mealId,Date:date },
-        success: function (response) {
-            if (response.success) {
-
-                //alert(response.responseText);
-                window.location.reload(true);
-
-
-            } else {
-                // DoSomethingElse()
-                alert(response.responseText);
+                quantityList = [];
+                checkBoxAdded = [];
             }
         }
 
+        totalItemList = JSON.stringify(addedItem);
+        console.log(addedItem);
+        $.ajax({
+            url: '/Consumer/CreateDailyMenu',
+            type: "POST",
+            data: { ItemList: totalItemList },
+            success: function (response) {
+                if (response.success) {
+                    mod.style.display = "none";
 
-    })
-
-    }
-
-    function PeriodModify(MealId) {
-        console.log(MealId);
-        console.log(document.getElementById("BrkPeriod").checked);
-        var from;
-        var to;
-        var checked;
-        if (MealId == 1) {
-             from = document.getElementById("datepicker").value.toString();
-             to = document.getElementById("datepicker2").value.toString();
-             checked = document.getElementById("BrkPeriod").checked;
-        }
-         if (MealId == 3) {
-             from = document.getElementById("datepicker3").value.toString();
-             to = document.getElementById("datepicker4").value.toString();
-             checked = document.getElementById("TBrkPeriod").checked;
-        }
-            if (MealId == 2) {
-             from = document.getElementById("datepicker5").value.toString();
-             to = document.getElementById("datepicker6").value.toString();
-             checked = document.getElementById("LnPeriod").checked;
-        }
-
-        if (from.length == 0 || to.length == 0) {
-            //jQuery.noConflict();
-
-            var modal = document.getElementById("myModal");
-
-            // Get the button that opens the modal
-            var btn = document.getElementById("myBtn");
-
-            // Get the <span> element that closes the modal
-            var span = document.getElementsByClassName("closeModify")[0];
-            modal.style.display = "block";
+                    alert(response.responseText);
+                    window.location.reload(true);
 
 
-            // When the user clicks the button, open the modal
+                } else {
+                    // DoSomethingElse()
+                    //if (response.responseText == "Expire") {
+                    //    window.location.href = "https://ucam.bup.edu.bd/Security/LogOut.aspx";
+                    //}
+                    //else {
+                    //    alert(response.responseText);
+                    //    window.location.reload(true);
 
+                    //}
 
-            // When the user clicks on <span> (x), close the modal
-            span.onclick = function () {
-                modal.style.display = "none";
-            }
-
-            // When the user clicks anywhere outside of the modal, close it
-            window.onclick = function (event) {
-                if (event.target == modal) {
-                    modal.style.display = "none";
                 }
             }
 
 
-
-
-        }
-        else {
-
-                            $.ajax({
-
-                    url: '@Url.Action("UserPeriodModify", "Consumer")',
-                    type: "POST",
-                    //dataType: 'json',
-                    data: { From: from, To: to, Checked: checked, MealId: MealId },
-                    //contentType: 'application/json; charset=utf-8',
-                    success: function (response) {
-                        if (response.success) {
-
-
-                            alert(response.responseText);
-                            window.location.reload(true);
-
-
-                        } else {
-                            // DoSomethingElse()
-                            alert(response.responseText);
-                            window.location.reload(true);
-                        }
-                    }
-
-
-                })
-
-        }
-
-
-
-
-
-
-
-
-
+        })
     }
 
-      $(function () {
-        $("#datepicker").datepicker({
-            dateFormat: "dd-mm-yy"
-            , duration: "fast"
-        });
-          $("#datepicker2").datepicker({
-            dateFormat: "dd-mm-yy"
-            , duration: "fast"
-          });
-           $("#datepicker3").datepicker({
-            dateFormat: "dd-mm-yy"
-            , duration: "fast"
-           });
-           $("#datepicker4").datepicker({
-            dateFormat: "dd-mm-yy"
-            , duration: "fast"
-           });
-           $("#datepicker5").datepicker({
-            dateFormat: "dd-mm-yy"
-            , duration: "fast"
-           });
-           $("#datepicker6").datepicker({
-            dateFormat: "dd-mm-yy"
-            , duration: "fast"
-           });
-           $("#menudate").datepicker({
-            dateFormat: "dd-mm-yy"
-            , duration: "fast"
-        });
-    });
 
-
-    $(document).ready(function () {
-        var switchStatus = false;
-        $("#checkboxBreakfastOnOffId").on('change', function () {
-            if ($(this).is(':checked')) {
-                switchStatus = $(this).is(':checked');
-                //.... Switch On
-                // alert(switchStatus);// To verify
-
-                $.ajax({
-
-                    url: '@Url.Action("UpdateMealActivation", "Consumer")',
-                    type: "POST",
-                    //dataType: 'json',
-                    data: { CheckBoxValue: switchStatus, categoryIdValue: 1 },
-                    //contentType: 'application/json; charset=utf-8',
-                    success: function (response) {
-                        if (response.success) {
-
-                            alert(response.responseText);
-                            window.location.reload(true);
-
-
-                        } else {
-                            // DoSomethingElse()
-                            alert(response.responseText);
-                            window.location.reload(true);
-                        }
-                    }
-
-
-                })
-
-
-
-            }
-            else {
-                switchStatus = $(this).is(':checked');
-                //.... Switch Off
-                //alert(switchStatus);// To verify
-
-
-                $.ajax({
-
-                    url: '@Url.Action("UpdateMealActivation", "Consumer")',
-                    type: "POST",
-                    //dataType: 'json',
-                    data: { CheckBoxValue: switchStatus, categoryIdValue: 1 },
-                    //contentType: 'application/json; charset=utf-8',
-                    success: function (response) {
-                        if (response.success) {
-
-                            //alert(response.responseText);
-                            window.location.reload(true);
-
-
-                        } else {
-                            // DoSomethingElse()
-                            //alert(response.responseText);
-                            window.location.reload(true);
-                        }
-                    }
-
-
-                })
-
-
-
-            }
-        })
-    });
-
-
-    $(document).ready(function () {
-        var switchStatusV2 = false;
-        $("#checkboxLunchOnOffId").on('change', function () {
-            if ($(this).is(':checked')) {
-                switchStatusV2 = $(this).is(':checked');
-                // alert(switchStatus);// To verify
-
-                $.ajax({
-
-                    url: '@Url.Action("UpdateMealActivation", "Consumer")',
-                    type: "POST",
-                    //dataType: 'json',
-                    data: { CheckBoxValue: switchStatusV2, categoryIdValue: 2 },
-                    //contentType: 'application/json; charset=utf-8',
-                    success: function (response) {
-                        if (response.success) {
-
-                            //alert(response.responseText);
-                            window.location.reload(true);
-                            window.location.reload(true);
-
-                        } else {
-                            // DoSomethingElse()
-                            //alert(response.responseText);
-                            window.location.reload(true);
-                        }
-                    }
-
-
-                })
-
-
-
-            }
-            else {
-                switchStatusV2 = $(this).is(':checked');
-                //alert(switchStatus);// To verify
-
-
-                $.ajax({
-
-                    url: '@Url.Action("UpdateMealActivation", "Consumer")',
-                    type: "POST",
-                    //dataType: 'json',
-                    data: { CheckBoxValue: switchStatusV2, categoryIdValue: 2 },
-                    //contentType: 'application/json; charset=utf-8',
-                    success: function (response) {
-                        if (response.success) {
-
-                            //alert(response.responseText);
-                            window.location.reload(true);
-
-
-                        } else {
-                            // DoSomethingElse()
-                            //alert(response.responseText);
-                            window.location.reload(true);
-                        }
-                    }
-
-
-                })
-
-
-
-            }
-        })
-    });
-
-    $(document).ready(function () {
-        var switchStatusV3 = false;
-        $("#checkboxTeaBreakOnOffId").on('change', function () {
-            if ($(this).is(':checked')) {
-                switchStatusV3 = $(this).is(':checked');
-                // alert(switchStatus);// To verify
-
-                $.ajax({
-
-                    url: '@Url.Action("UpdateMealActivation", "Consumer")',
-                    type: "POST",
-                    //dataType: 'json',
-                    data: { CheckBoxValue: switchStatusV3, categoryIdValue: 3 },
-                    //contentType: 'application/json; charset=utf-8',
-                    success: function (response) {
-                        if (response.success) {
-
-                            //alert(response.responseText);
-                            window.location.reload(true);
-
-
-                        } else {
-                            // DoSomethingElse()
-                            //alert(response.responseText);
-                            window.location.reload(true);
-                        }
-                    }
-
-
-                })
-
-
-
-            }
-            else {
-                switchStatusV3 = $(this).is(':checked');
-                //alert(switchStatus);// To verify
-
-
-                $.ajax({
-
-                    url: '@Url.Action("UpdateMealActivation", "Consumer")',
-                    type: "POST",
-                    //dataType: 'json',
-                    data: { CheckBoxValue: switchStatusV3, categoryIdValue: 3 },
-                    //contentType: 'application/json; charset=utf-8',
-                    success: function (response) {
-                        if (response.success) {
-
-                            //alert(response.responseText);
-                            window.location.reload(true);
-
-
-                        } else {
-                            // DoSomethingElse()
-                            //alert(response.responseText);
-                            window.location.reload(true);
-                        }
-                    }
-
-
-                })
-
-
-
-            }
-        })
-    });
-
-    </script>
-
-</section>
-@*}*@
+</script>
 

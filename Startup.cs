@@ -14,6 +14,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Mess_Management_System_Alpha_V2.Services.Drop_Down_List_Helper;
+using BupMessManagement.Email;
 
 namespace Mess_Management_System_Alpha_V2
 {
@@ -42,7 +43,7 @@ namespace Mess_Management_System_Alpha_V2
                     Configuration.GetConnectionString("DefaultConnection")));
 
 
-            services.AddIdentity<ApplicationUser, IdentityRole>(options =>
+            services.AddIdentity<ApplicationUser, UserIdentityRole>(options =>
             {
                 options.Password.RequireDigit = false;
                 options.Password.RequiredLength = 3;
@@ -70,6 +71,9 @@ namespace Mess_Management_System_Alpha_V2
                 options.Conventions.AddAreaPageRoute("Identity", "/Account/Login", "");
             })
             .SetCompatibilityVersion(CompatibilityVersion.Version_2_1);
+            services.AddSingleton<IEmailConfiguration>(Configuration.GetSection("EmailConfiguration").Get<EmailConfiguration>());
+
+            services.AddTransient<IEmailService, EmailService>();
 
         }
 

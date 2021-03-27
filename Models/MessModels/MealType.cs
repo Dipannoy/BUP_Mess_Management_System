@@ -29,6 +29,11 @@ namespace Mess_Management_System_Alpha_V2.Models.MessModels
         public virtual ICollection<DailySetMenu> DailySetMenuList { get; set; }
 
         public virtual ICollection<SpecialMenuParent> SpecialMenuParentList { get; set; }
+        public virtual ICollection<CustomerDailyMenuChoice> CustomerDailyMenuChoiceList { get; set; }
+        public virtual ICollection<UserDateChoiceMaster> UserDateChoiceMasterList { get; set; }
+
+        public virtual ICollection<ConsumerMealWiseExtraChitParent> ConsumerMealWiseExtraChitParentList { get; set; }
+
 
 
 

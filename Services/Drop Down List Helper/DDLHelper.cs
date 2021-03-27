@@ -128,7 +128,7 @@ namespace Mess_Management_System_Alpha_V2.Services.Drop_Down_List_Helper
         public Dictionary<string, string> GetStoreOutItem()
         {
             var list = new Dictionary<string, string>();
-            _db.StoreOutItem
+            _db.StoreOutItem.Where(x=>x.IsOpen == true)
                 .Include(x=> x.UnitType)
                 .Include(x => x.StoreOutItemCategory)
                 .ToList()

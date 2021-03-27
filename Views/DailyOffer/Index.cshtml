@@ -1,0 +1,673 @@
+﻿@inject ApplicationDbContext _context
+@inject Microsoft.AspNetCore.Identity.UserManager<ApplicationUser> _userManager
+@inject IDDLHelper _ddlHelper
+
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+
+    var MenuList = new Dictionary<string, string>();
+    var roleDict = new Dictionary<string, string>();
+    var OnSpotList = new Dictionary<string, string>(); ;
+
+    var fullMenuList = _context.NavigationMenu.Where(x => x.Id > 0).ToList();
+    var menuLayer1 = _context.NavigationMenu.Where(x => x.ParentId == 0).ToList();
+    var storeOutItem = _context.StoreOutItem.Where(x => x.IsOpen == true).ToList();
+
+    var roleList = _context.Roles.Where(x => x.Id.Count() > 0).ToList();
+    var onSpotOrderList = _context.DailyOfferItem.Where(x => x.Date.Date == DateTime.Now.Date || x.IsActive == true).ToList();
+
+    foreach (var i in fullMenuList)
+    {
+
+        MenuList.Add(i.Id.ToString(), i.Name);
+    }
+
+    foreach (var r in roleList)
+    {
+        roleDict.Add(r.Id.ToString(), r.Name);
+    }
+    foreach (var s in storeOutItem)
+    {
+        OnSpotList.Add(s.Id.ToString(), s.Name);
+    }
+}
+<head>
+    <link href="~/assets/css/material-dashboard.css?v=2.1.1" rel="stylesheet" />
+    <link href="~/assets/demo/demo.css" rel="stylesheet" />
+</head>
+
+<style>
+    .selectStl {
+        margin-top: 35px;
+    }
+
+ /*   .labelStl {
+        margin-top: 30px;
+    }*/
+
+    .modal {
+        display: none; /* Hidden by default */
+        position: fixed; /* Stay in place */
+        /*z-index: 1;*/ /* Sit on top */
+        padding-top: 100px; /* Location of the box */
+        left: 0;
+        top: 0;
+        width: 100%; /* Full width */
+        height: 100%; /* Full height */
+        overflow: auto; /* Enable scroll if needed */
+        background-color: rgb(0,0,0); /* Fallback color */
+        background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+        padding-left: 100px;
+    }
+
+    /* Modal Content */
+    .modal-content {
+        background-color: #fefefe;
+        margin: auto;
+        padding: 20px;
+        border: 1px solid #888;
+        width: 40%;
+    }
+
+    /* The Close Button */
+    .close {
+        color: #aaaaaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+    }
+
+        .close:hover,
+        .close:focus {
+            color: #000;
+            text-decoration: none;
+            cursor: pointer;
+        }
+</style>
+
+<div class="content">
+    <div class="container-fluid">
+
+        <div id="onSpotEdit" class="modal">
+            <div class="modal-content">
+                <div class="row">
+
+                    <div class="col-sm-3" id="removeLabel">
+
+                    </div>
+                    <div class="col-sm-1" id="removeCheck">
+
+                    </div>
+                    <div class="col-sm-3" id="itemFld">
+
+                    </div>
+                    <div class="col-sm-3" id="itemQntFld">
+
+                    </div>
+                    <div class="col-sm-2" id="itemQntFld">
+
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-sm-2">
+
+                    </div>
+                    <div class="col-sm-4" id="moreItemDropEdit">
+
+                    </div>
+                    <div class="col-sm-4" id="moreItemQuantityEdit">
+                    </div>
+                    <div class="col-sm-2">
+
+                    </div>
+
+                </div>
+
+
+                <div class="row" style="padding-top:20px;">
+                    <div class="col-sm-3">
+
+                    </div>
+                    <div class="col-sm-3">
+
+                    </div>
+
+                    <div class="col-sm-3">
+                        <button class="btn" onclick="ConfirmEdit()" style="padding:3px;"> Save</button>
+                    </div>
+                    <div class="col-sm-3">
+                        <button class="btn" onclick="CloseModal()" style="padding:3px;"> Close</button>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        <div class="row" style="padding-top:100px;">
+            <div class="col-sm-6">
+                <div class="card">
+                    <div class="card-header card-header-success">
+                        Add Today's Offer
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+
+                            <div class="col-sm-4">
+                                <div class="form-group">
+                                    <label class="bmd-label-floating">Item</label>
+                                    <br />
+                                    <div style="display:inline-flex">
+
+                                        @*<i class="material-icons" style="padding-top:6px;">local_dining</i>*@
+                                        <select id="onspotItem1" name="onspotItem1" class="form-control border-radius-none" asp-items="@(new SelectList(OnSpotList.Prepend(new KeyValuePair<string, string>("0", "")), "Key", "Value", ""))"></select>
+
+                                    </div>
+
+
+                                </div>
+                            </div>
+                            <div class="col-sm-4">
+                                <div class="form-group">
+                                    <label class="bmd-label-floating">Quantity</label>
+                                    <div style="display:inline-flex">
+                                        @*<i class="material-icons" style="padding-top:6px;">double_arrow</i>*@
+                                        <input type="number" id="itmQ1" name="itmQ1" class="form-control" min="1" required />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-1">
+                                <input type="checkbox" name="CheckBox" id="CheckBox" style="margin-top:50px;" unchecked />
+                            </div>
+                            <div class="col-sm-3">
+                                <label style="padding-top:46px;"> To Continue</label>
+                            </div>
+
+                        </div>
+                        <div class="row">
+
+                            <div class="col-sm-4" id="moreItemDrop">
+
+                            </div>
+                            <div class="col-sm-4" id="moreItemQuantity">
+                            </div>
+                            <div class="col-sm-1" id="editremoveCheck">
+
+                            </div>
+                            <div class="col-sm-3" id="editremoveLabel">
+
+                            </div>
+
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-4">
+
+                            </div>
+                            <div class="col-sm-4">
+                                <button class="btn btn-success" style="padding:2px;" onclick="addMoreOnSpot(1)">Add More</button>
+                            </div>
+                            <div class="col-sm-4">
+                                <button class="btn btn-success" style="padding:2px;" onclick="addOnSpotItem(1)">Confirm</button>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-sm-6">
+                <div class="card">
+                    <div class="card-header card-header-success">
+                        Today's Offer Limit
+                    </div>
+                    <div class="card-body">
+                        @if (onSpotOrderList.Count > 0)
+                        {
+                        <table class="table table-bordered table-striped table-hover">
+                            <thead>
+                                <tr>
+
+                                    <th>Item </th>
+                                    <th>Order Limit</th>
+
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in onSpotOrderList)
+                                {
+
+                                    <tr>
+
+
+                                        <td>
+                                            @item.StoreOutItem.Name
+                                        </td>
+                                        <td>
+                                            @item.OrderLimit
+                                        </td>
+                                        <td>
+                                            @*<a asp-action="EditOnSpotItem" asp-route-id="@onSpotDetailList.ElementAt(0).Id"><i class="far fa-edit"></i></a>*@
+
+                                        </td>
+                                        @*<td>
+                                            <a asp-action="OnSpotItem" asp-route-id="@onSpotDetailList.ElementAt(0).Id"><i class="far fa-edit"></i></a>
+
+                                        </td>*@
+                                    </tr>
+
+
+                                }
+
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <td>
+
+                                    </td>
+                                    <td>
+
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-success" style="padding:3px;" onclick="editOrder()"> Edit </button>
+
+                                    </td>
+
+                                </tr>
+
+                            </tfoot>
+                        </table>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+    </div>
+</div>
+
+<script>
+
+    var onSpotList = [];
+    var selectCount = 1;
+    var selectCountOffice = 1;
+    var numOfEdittedOptions = 0;
+    var editCount = 0;
+
+    function addMoreOnSpot(type) {
+
+        $.ajax({
+            url: '/DailyOffer/GetExtraChit',
+            dataType: "json",
+            data: {},
+            success: function (data) {
+                onSpotList = data;
+                formMoreHTMLString(type);
+            },
+            error: function (xhr, status, error) {
+                alert("Error");
+            }
+        });
+
+
+
+
+    }
+
+    function formMoreHTMLString(type) {
+        var moreDropId = "";
+        var selectId = "";
+        var count = 0;
+        var itemId = "";
+        var itemInpId = "";
+        if (type == 1) {
+            if (parseInt(document.getElementById("onspotItem" + selectCount).value) == 0
+                || document.getElementById("itmQ" + selectCount).value === "") {
+
+                alert("First fill up the empty input field");
+                return;
+            }
+
+            selectCount++;
+            moreDropId = "moreItemDrop";
+            selectId = "onspotItem";
+            count = selectCount;
+            itemId = "moreItemQuantity";
+            itemInpId = "itmQ";
+
+        }
+        else {
+            if (parseInt(document.getElementById("onspotOfficeItem" + selectCountOffice).value) == 0
+                || document.getElementById("itmOfficeQ" + selectCountOffice).value === "") {
+                alert("First fill up the empty input field");
+
+                return;
+            }
+            selectCountOffice++;
+            moreDropId = "moreOfficeItemDrop";
+            selectId = "onspotOfficeItem";
+            count = selectCountOffice;
+            itemId = "moreOfficeItemQuantity";
+            itemInpId = "itmOfficeQ";
+        }
+        //var htmlString = '<div class="form-group">';
+        //var htmlString = '<label class="bmd-label-floating">Item</label>';
+        //htmlString += '<div style="display:inline-flex">';
+        //htmlString += '<i class="material-icons" style="padding-top:6px;">local_dining</i>';
+
+        //document.getElementById(moreDropId).innerHTML += htmlString;
+        $("#" + moreDropId).append('<div><label for="name">Item</label></div>');
+
+        var moreSelect = document.createElement("select");
+        moreSelect.setAttribute('id', selectId + count);
+        moreSelect.setAttribute('name', selectId + count);
+        moreSelect.setAttribute('class', "form-control border-radius-none");
+
+
+        var selectParent = document.getElementById(moreDropId);
+        selectParent.appendChild(moreSelect);
+        //document.getElementById(moreDropId).innerHTML += '</div></div>';
+
+        var Select = document.getElementById(selectId + count);
+        var el = document.createElement("option");
+        el.textContent = "Select Item";
+        el.value = 0;
+        Select.appendChild(el);
+
+        for (var i = 0; i < onSpotList.length; i++) {
+            var optn = onSpotList[i];
+            var el = document.createElement("option");
+            el.textContent = optn.itemName;
+            el.value = optn.id;
+            Select.appendChild(el);
+
+        }
+        var x = document.createElement("INPUT");
+        x.setAttribute("type", "checkbox");
+        x.setAttribute("class", "form-check-input");
+        x.setAttribute("name", "CheckBox");
+        x.setAttribute("Id", "CheckBox");
+        x.setAttribute("class", "checkStl");
+        x.style.marginTop = "50px";
+        var checkParent = document.getElementById("editremoveCheck");
+        checkParent.appendChild(x);
+        //document.getElementById("CheckBox").style.marginTop = "50px";
+
+
+        $("#" + "editremoveLabel").append('<div><label class="labelStl" style="padding-top:46px;" for="name">To Continue</label></div>');
+
+
+        //var htmlString2 = '<div class="form-group">';
+        //var htmlString2 = '<label class="bmd-label-floating">Item</label>';
+        //htmlString2 += '<div style="display:inline-flex">';
+        //htmlString2 += '<i class="material-icons" style="padding-top:6px;">double_arrow</i>';
+        // document.getElementById(itemId).innerHTML += htmlString2;
+        $("#" + itemId).append('<div><label for="name">Quantity</label></div>');
+
+        var input = document.createElement("input");
+        input.setAttribute('type', 'number');
+        input.setAttribute('id', itemInpId + count);
+        input.setAttribute('class', 'form-control');
+        input.setAttribute('min', 1);
+        var quantutyParent = document.getElementById(itemId);
+        quantutyParent.appendChild(input);
+        //document.getElementById(itemId).innerHTML += '</div></div>';
+
+    }
+
+
+
+    function addOnSpotItem(type) {
+        var moreDropId = "";
+        var selectId = "";
+        var count = 0;
+        var itemId = "";
+        var itemInpId = "";
+        var itemList = [];
+        var isOffice = false;
+        var bearer = "";
+        var office = "No";
+        var user = "No";
+        var checkValues = document.getElementsByName("CheckBox");
+        if (type == 1) {
+            selectId = "onspotItem";
+            itemInpId = "itmQ";
+            count = selectCount;
+           
+        }
+        else {
+
+            selectId = "onspotOfficeItem";
+            itemInpId = "itmOfficeQ";
+            count = selectCountOffice;
+            isOffice = true;
+            bearer = document.getElementById("onspotOfficeBearer").value === "" ? "No" : document.getElementById("onspotOfficeBearer").value;
+            office = document.getElementById("onspotOffice").value;
+            if (office === "") {
+                alert("Selelct Office");
+            }
+
+        }
+
+        for (var i = 0; i < count; i++) {
+            var itemId = document.getElementById(selectId + (i + 1)).value;
+            var q = document.getElementById(itemInpId + (i + 1)).value;
+            
+            if (parseInt(itemId) == 0 || q === "") {
+
+            }
+            else {
+                var obj = { Id: itemId, Quantity: q, IsContinued: checkValues[i].checked };
+                itemList.push(obj);
+            }
+
+        }
+        $.ajax({
+            url: '/DailyOffer/AddOnSpotItem',
+            type: "POST",
+
+            dataType: "json",
+            data: { ItemList: JSON.stringify(itemList) },
+            success: function (response) {
+                if (response.success) {
+
+                    alert(response.responseText);
+                    window.location.reload(true);
+
+
+                } else {
+                    // DoSomethingElse()
+                    if (response.responseText == "Expire") {
+                        window.location.href = "https://ucam.bup.edu.bd/Security/LogOut.aspx";
+                    }
+                    else {
+                        alert(response.responseText);
+                        window.location.reload(true);
+
+                    }
+
+                }
+            },
+            error: function (xhr, status, error) {
+                alert(error);
+            }
+        });
+
+    }
+
+
+    function editOrder() {
+
+
+        $("#" + "removeCheck").empty();
+        $("#" + "removeLabel").empty();
+        $("#" + "itemFld").empty();
+        $("#" + "itemQntFld").empty();
+
+
+
+        $.ajax({
+            url: '/DailyOffer/GetOnSpotItemList',
+            dataType: "json",
+            data: {  },
+            success: function (data) {
+
+                //var data = JSON.parse(datum);
+                // console.log(data);
+                //console.log(JSON.parse(data));
+                //var y = JSON.parse(data);
+
+                numOfEdittedOptions = data[1].length;
+                for (var i = 0; i < data[1].length; i++) {
+                    var x = document.createElement("INPUT");
+                    x.setAttribute("type", "checkbox");
+                    x.setAttribute("class", "form-check-input");
+                    x.setAttribute("name", "CheckBox_" + (i + 1));
+                    x.setAttribute("Id", "CheckBox_" + (i + 1));
+                    //x.setAttribute("class", "selectStl");
+                    var checkParent = document.getElementById("removeCheck");
+                    checkParent.appendChild(x);
+                    document.getElementById("CheckBox_" + (i + 1)).style.marginTop = "35px";
+
+                    $("#" + "removeCheck").append('</br>');
+                    $("#" + "CheckBox_" + (i + 1)).val(data[1][i].Id.toString());
+
+
+                    $("#" + "removeLabel").append('<div><label class="labelStl" for="name">Remove Item</label></div>');
+
+                    $("#" + "itemFld").append('<div><label for="name">Item</label></div>');
+
+
+                    var moreSelect = document.createElement("select");
+                    moreSelect.setAttribute('id', "RemoveSelect_" + (i + 1));
+                    moreSelect.setAttribute('name', "RemoveSelect_" + (i + 1));
+                    moreSelect.setAttribute('class', "form-control border-radius-none");
+
+
+                    var selectParent = document.getElementById("itemFld");
+                    selectParent.appendChild(moreSelect);
+
+                    var Select = document.getElementById("RemoveSelect_" + (i + 1));
+                    var el = document.createElement("option");
+                    var ex = data[0].find(x => x.Id === data[1][i].StoreOutItemId.toString());
+                    el.textContent = ex.ItemName;
+                    el.value = ex.Id;
+                    Select.appendChild(el);
+                    var val = ex.Id;
+
+                    for (var j = 0; j < data[2].length; j++) {
+                        var optn = data[2][j];
+                        if (data[2][j].Id == val) {
+
+                        }
+                        else {
+                            var el = document.createElement("option");
+                            el.textContent = data[2][j].Name;
+                            el.value = data[2][j].Id;
+                            Select.appendChild(el);
+                        }
+
+                    }
+                    $("#" + "itemQntFld").append('<div><label for="name">Quantity</label></div>');
+
+
+                    var input = document.createElement("input");
+                    input.setAttribute('type', 'number');
+                    input.setAttribute('id', 'EditQnt_' + (i + 1));
+                    input.setAttribute('class', 'form-control');
+                    //input.setAttribute('min', 1);
+
+
+                    var quantityParent = document.getElementById("itemQntFld");
+                    quantityParent.appendChild(input);
+                    document.getElementById('EditQnt_' + (i + 1)).value = data[1][i].OrderLimit;
+                }
+
+            },
+            error: function (xhr, status, error) {
+                alert(error);
+            }
+        });
+        var modal = document.getElementById("onSpotEdit");
+
+        //var span = document.getElementsByClassName("close")[0];
+        modal.style.display = "block";
+
+        //document.getElementById("modalStrInDel").innerHTML = htmlString;
+
+
+
+        //span.onclick = function () {
+        //    modal.style.display = "none";
+        //}
+        window.onclick = function (event) {
+            if (event.target == modal) {
+                modal.style.display = "none";
+            }
+        }
+    }
+
+    function ConfirmEdit() {
+        var list = [];
+        for (var i = 0; i < numOfEdittedOptions; i++) {
+            var checkValue = document.getElementById("CheckBox_" + (i + 1)).value.toString();
+            var checked = document.getElementById("CheckBox_" + (i + 1)).checked;
+            var item = document.getElementById("RemoveSelect_" + (i + 1)).value.toString();
+            var quantity = document.getElementById('EditQnt_' + (i + 1)).value.toString();
+            if (quantity === "" && checked == false) {
+                alert("Empty Quantity");
+                return;
+            }
+
+            var isDelete = checked == true ? 1 : 0;
+
+            var obj = { IsDelete: isDelete, ItemId: item, Quantity: quantity, OfferId: checkValue };
+            list.push(obj);
+
+        }
+      
+        $.ajax({
+            url: '/DailyOffer/EditOnSpotItem',
+            type: "POST",
+
+            dataType: "json",
+            data: { ItemList: JSON.stringify(list) },
+            success: function (response) {
+                if (response.success) {
+
+                    alert(response.responseText);
+                    window.location.reload(true);
+
+
+                } else {
+                    // DoSomethingElse()
+                    if (response.responseText == "Expire") {
+                        window.location.href = "https://ucam.bup.edu.bd/Security/LogOut.aspx";
+                    }
+                    else {
+                        alert(response.responseText);
+                        window.location.reload(true);
+
+                    }
+
+                }
+            },
+            error: function (xhr, status, error) {
+                alert(error);
+            }
+        });
+    }
+
+    function CloseModal() {
+
+        var modal = document.getElementById("onSpotEdit");
+
+
+        modal.style.display = "none";
+
+
+    }
+
+</script>

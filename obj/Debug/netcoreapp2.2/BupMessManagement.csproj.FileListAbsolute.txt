@@ -173,7 +173,6 @@ D:\AllSolution\BUP_Mess\Mess_All_Versions\BUP_Mess_20.2.20\bin\Debug\netcoreapp2
 D:\AllSolution\BUP_Mess\Mess_All_Versions\BUP_Mess_20.2.20\obj\Debug\netcoreapp2.2\BupMessManagement.csprojAssemblyReference.cache
 D:\AllSolution\BUP_Mess\Mess_All_Versions\BUP_Mess_20.2.20\obj\Debug\netcoreapp2.2\BupMessManagement.AssemblyInfoInputs.cache
 D:\AllSolution\BUP_Mess\Mess_All_Versions\BUP_Mess_20.2.20\obj\Debug\netcoreapp2.2\BupMessManagement.AssemblyInfo.cs
-D:\AllSolution\BUP_Mess\Mess_All_Versions\BUP_Mess_20.2.20\obj\Debug\netcoreapp2.2\BupMessManagement.csproj.CoreCompileInputs.cache
 D:\AllSolution\BUP_Mess\Mess_All_Versions\BUP_Mess_20.2.20\obj\Debug\netcoreapp2.2\BupMessManagement.RazorAssemblyInfo.cache
 D:\AllSolution\BUP_Mess\Mess_All_Versions\BUP_Mess_20.2.20\obj\Debug\netcoreapp2.2\BupMessManagement.RazorAssemblyInfo.cs
 D:\AllSolution\BUP_Mess\Mess_All_Versions\BUP_Mess_20.2.20\obj\Debug\netcoreapp2.2\BupMessManagement.TagHelpers.input.cache
@@ -214,6 +213,9 @@ D:\AllSolution\BUP_Mess\Mess_All_Versions\BUP_Mess_20.2.20\obj\Debug\netcoreapp2
 D:\AllSolution\BUP_Mess\Mess_All_Versions\BUP_Mess_20.2.20\obj\Debug\netcoreapp2.2\Razor\Areas\Identity\Pages\_ViewImports.cshtml.g.cs
 D:\AllSolution\BUP_Mess\Mess_All_Versions\BUP_Mess_20.2.20\obj\Debug\netcoreapp2.2\Razor\Areas\Identity\Pages\_ViewStart.cshtml.g.cs
 D:\AllSolution\BUP_Mess\Mess_All_Versions\BUP_Mess_20.2.20\obj\Debug\netcoreapp2.2\Razor\Views\AccessCheck\Index.cshtml.g.cs
+D:\AllSolution\BUP_Mess\Mess_All_Versions\BUP_Mess_20.2.20\obj\Debug\netcoreapp2.2\Razor\Views\AdminBillGenerate\BillPayment.cshtml.g.cs
+D:\AllSolution\BUP_Mess\Mess_All_Versions\BUP_Mess_20.2.20\obj\Debug\netcoreapp2.2\Razor\Views\AdminBillGenerate\ConsumerPaymentHistory.cshtml.g.cs
+D:\AllSolution\BUP_Mess\Mess_All_Versions\BUP_Mess_20.2.20\obj\Debug\netcoreapp2.2\Razor\Views\AdminBillGenerate\ConsumerPaymentSlip.cshtml.g.cs
 D:\AllSolution\BUP_Mess\Mess_All_Versions\BUP_Mess_20.2.20\obj\Debug\netcoreapp2.2\Razor\Views\AdminBillGenerate\Index.cshtml.g.cs
 D:\AllSolution\BUP_Mess\Mess_All_Versions\BUP_Mess_20.2.20\obj\Debug\netcoreapp2.2\Razor\Views\AdminMenu\Menu.cshtml.g.cs
 D:\AllSolution\BUP_Mess\Mess_All_Versions\BUP_Mess_20.2.20\obj\Debug\netcoreapp2.2\Razor\Views\AdminMenu\test.cshtml.g.cs
@@ -232,10 +234,13 @@ D:\AllSolution\BUP_Mess\Mess_All_Versions\BUP_Mess_20.2.20\obj\Debug\netcoreapp2
 D:\AllSolution\BUP_Mess\Mess_All_Versions\BUP_Mess_20.2.20\obj\Debug\netcoreapp2.2\Razor\Views\Admin\ConsumerDetails.cshtml.g.cs
 D:\AllSolution\BUP_Mess\Mess_All_Versions\BUP_Mess_20.2.20\obj\Debug\netcoreapp2.2\Razor\Views\Admin\Index.cshtml.g.cs
 D:\AllSolution\BUP_Mess\Mess_All_Versions\BUP_Mess_20.2.20\obj\Debug\netcoreapp2.2\Razor\Views\Admin\IndexHome.cshtml.g.cs
+D:\AllSolution\BUP_Mess\Mess_All_Versions\BUP_Mess_20.2.20\obj\Debug\netcoreapp2.2\Razor\Views\ConsumerBill\Index.cshtml.g.cs
 D:\AllSolution\BUP_Mess\Mess_All_Versions\BUP_Mess_20.2.20\obj\Debug\netcoreapp2.2\Razor\Views\ConsumerDashboard\Index.cshtml.g.cs
 D:\AllSolution\BUP_Mess\Mess_All_Versions\BUP_Mess_20.2.20\obj\Debug\netcoreapp2.2\Razor\Views\ConsumerOrder\Index.cshtml.g.cs
 D:\AllSolution\BUP_Mess\Mess_All_Versions\BUP_Mess_20.2.20\obj\Debug\netcoreapp2.2\Razor\Views\Consumer\Index.cshtml.g.cs
+D:\AllSolution\BUP_Mess\Mess_All_Versions\BUP_Mess_20.2.20\obj\Debug\netcoreapp2.2\Razor\Views\Consumer\OnSpotOrder.cshtml.g.cs
 D:\AllSolution\BUP_Mess\Mess_All_Versions\BUP_Mess_20.2.20\obj\Debug\netcoreapp2.2\Razor\Views\Consumer\PaymentHistory.cshtml.g.cs
+D:\AllSolution\BUP_Mess\Mess_All_Versions\BUP_Mess_20.2.20\obj\Debug\netcoreapp2.2\Razor\Views\Consumer\PaymentSlipUpload.cshtml.g.cs
 D:\AllSolution\BUP_Mess\Mess_All_Versions\BUP_Mess_20.2.20\obj\Debug\netcoreapp2.2\Razor\Views\Home\About.cshtml.g.cs
 D:\AllSolution\BUP_Mess\Mess_All_Versions\BUP_Mess_20.2.20\obj\Debug\netcoreapp2.2\Razor\Views\Home\Contact.cshtml.g.cs
 D:\AllSolution\BUP_Mess\Mess_All_Versions\BUP_Mess_20.2.20\obj\Debug\netcoreapp2.2\Razor\Views\Home\Dashboard.cshtml.g.cs
@@ -316,3 +321,10 @@ D:\AllSolution\BUP_Mess\Mess_All_Versions\BUP_Mess_20.2.20\obj\Debug\netcoreapp2
 D:\AllSolution\BUP_Mess\Mess_All_Versions\BUP_Mess_20.2.20\obj\Debug\netcoreapp2.2\BupMessManagement.dll
 D:\AllSolution\BUP_Mess\Mess_All_Versions\BUP_Mess_20.2.20\obj\Debug\netcoreapp2.2\BupMessManagement.pdb
 D:\AllSolution\BUP_Mess\Mess_All_Versions\BUP_Mess_20.2.20\obj\Debug\netcoreapp2.2\BupMessManagement.genruntimeconfig.cache
+D:\AllSolution\BUP_Mess\Mess_All_Versions\BUP_Mess_20.2.20\obj\Debug\netcoreapp2.2\BupMessManagement.csproj.CoreCompileInputs.cache
+D:\AllSolution\BUP_Mess\Mess_All_Versions\BUP_Mess_20.2.20\obj\Debug\netcoreapp2.2\Razor\Views\AdminRoleMenu\Index.cshtml.g.cs
+D:\AllSolution\BUP_Mess\Mess_All_Versions\BUP_Mess_20.2.20\obj\Debug\netcoreapp2.2\Razor\Views\AdminRoleMenu\RoleManagement.cshtml.g.cs
+D:\AllSolution\BUP_Mess\Mess_All_Versions\BUP_Mess_20.2.20\obj\Debug\netcoreapp2.2\Razor\Views\AdminRoleMenu\MenuManagement.cshtml.g.cs
+D:\AllSolution\BUP_Mess\Mess_All_Versions\BUP_Mess_20.2.20\obj\Debug\netcoreapp2.2\Razor\Views\AdminShowOrder\HomePage.cshtml.g.cs
+D:\AllSolution\BUP_Mess\Mess_All_Versions\BUP_Mess_20.2.20\obj\Debug\netcoreapp2.2\Razor\Views\DailyOffer\Index.cshtml.g.cs
+D:\AllSolution\BUP_Mess\Mess_All_Versions\BUP_Mess_20.2.20\obj\Debug\netcoreapp2.2\Razor\Views\AdminReport\StoreOutReport.cshtml.g.cs

@@ -38,10 +38,10 @@ namespace Mess_Management_System_Alpha_V2.Controllers.Admin
 
         private readonly ApplicationDbContext _context;
         private UserManager<ApplicationUser> _userManager;
-        private RoleManager<IdentityRole> _roleManager;
+        private RoleManager<UserIdentityRole> _roleManager;
 
         private SignInManager<ApplicationUser> _signInManager;
-        public AdminShowOrderController(ApplicationDbContext context, UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager, SignInManager<ApplicationUser> signInManager)
+        public AdminShowOrderController(ApplicationDbContext context, UserManager<ApplicationUser> userManager, RoleManager<UserIdentityRole> roleManager, SignInManager<ApplicationUser> signInManager)
         {
             _context = context;
             _userManager = userManager;
@@ -72,153 +72,61 @@ namespace Mess_Management_System_Alpha_V2.Controllers.Admin
 
 
         }
-        public async Task<IActionResult> Dashboard()
-        {
-
-            if (!SessionExist())
-            {
-                string tokenType = HttpContext.Request.Query["TokenType"].ToString();
-                string accessToken = HttpContext.Request.Query["AccessToken"].ToString();
-
-                if (GetUserInfoFromSSO(tokenType, accessToken) == null)
-                {
-
-                    return LocalRedirect("~/AccessCheck/Index");
-
-                }
-                else
-                {
-                    User usr = GetUserInfoFromSSO(tokenType, accessToken);
-                    string unEncode = HttpContext.Request.Headers["UserName"].ToString();
-                    string un = DecodeServerName(unEncode);
-
-                    SessionExtensions.SetString(HttpContext.Session, "user", usr.name);
-                    string usrName = SessionExtensions.GetString(HttpContext.Session, "user");
-
-                    if (usrName == null)
-                    {
-                        HttpContext.Session.Remove("user");
-
-                        return LocalRedirect("~/AccessCheck/Index");
-
-                    }
-                    else
-                    {
-                        if (await UserExistMess())
-                        {
-                            if (await GetLogInUserRoleAsync() == "Admin"
-                                || await GetLogInUserRoleAsync() == "MessAdmin")
-                            {
-                                ViewBag.FullName = await GetUserName();
-                                return View();
-                            }
-                            else
-                            {
-                                return LocalRedirect("~/Consumer/Index");
-
-                            }
-                        }
-                        else
-                        {
-                            HttpContext.Session.Remove("user");
-
-                            return LocalRedirect("~/AccessCheck/Index");
-
-                        }
-                    }
-                }
-
-
-
-            }
-            else
-            {
-                if (await UserExistMess())
-                {
-                    if (await GetLogInUserRoleAsync() == "Admin"
-                        || await GetLogInUserRoleAsync() == "MessAdmin")
-                    {
-                        ViewBag.FullName = await GetUserName();
-
-                        return View();
-                    }
-                    else
-                    {
-                        return LocalRedirect("~/Consumer/Index");
-
-                    }
-                }
-                else
-                {
-                    HttpContext.Session.Remove("user");
-
-                    return LocalRedirect("~/AccessCheck/Index");
-
-                }
-            }
-
-
-
-
-
-
-
-            //    string usrName = SessionExtensions.GetString(HttpContext.Session, "user");
-
-            //    string pass = HttpContext.Request.Query["Password"].ToString();
-            //    var result = await _signInManager.PasswordSignInAsync(un, pass, true, true);
-
-            //    var nm = Request.QueryString["UserName"];
-            //    return LocalRedirect("~/Consumer/Index");
-
-            //return View();
-        }
-
         //public async Task<IActionResult> Dashboard()
         //{
 
         //    if (!SessionExist())
         //    {
+        //        string tokenType = HttpContext.Request.Query["TokenType"].ToString();
+        //        string accessToken = HttpContext.Request.Query["AccessToken"].ToString();
 
-
-        //        string unEncode = HttpContext.Request.Query["UserName"].ToString();
-        //        string un = DecodeServerName(unEncode);
-
-        //        SessionExtensions.SetString(HttpContext.Session, "user", un);
-        //        string usrName = SessionExtensions.GetString(HttpContext.Session, "user");
-
-        //        if (usrName == null)
+        //        if (GetUserInfoFromSSO(tokenType, accessToken) == null)
         //        {
-        //            HttpContext.Session.Remove("user");
 
         //            return LocalRedirect("~/AccessCheck/Index");
 
         //        }
         //        else
         //        {
-        //            if (await UserExistMess())
-        //            {
-        //                if (await GetLogInUserRoleAsync() == "Admin"
-        //                    || await GetLogInUserRoleAsync() == "MessAdmin")
-        //                {
-        //                    ViewBag.FullName = await GetUserName();
-        //                    return View();
-        //                }
-        //                else
-        //                {
-        //                    return LocalRedirect("~/Consumer/Index");
+        //            User usr = GetUserInfoFromSSO(tokenType, accessToken);
+        //            string unEncode = HttpContext.Request.Headers["UserName"].ToString();
+        //            string un = DecodeServerName(unEncode);
 
-        //                }
-        //            }
-        //            else
+        //            SessionExtensions.SetString(HttpContext.Session, "user", usr.name);
+        //            string usrName = SessionExtensions.GetString(HttpContext.Session, "user");
+
+        //            if (usrName == null)
         //            {
         //                HttpContext.Session.Remove("user");
 
         //                return LocalRedirect("~/AccessCheck/Index");
 
         //            }
-        //        }
+        //            else
+        //            {
+        //                if (await UserExistMess())
+        //                {
+        //                    if (await GetLogInUserRoleAsync() == "Admin"
+        //                        || await GetLogInUserRoleAsync() == "MessAdmin")
+        //                    {
+        //                        ViewBag.FullName = await GetUserName();
+        //                        return View();
+        //                    }
+        //                    else
+        //                    {
+        //                        return LocalRedirect("~/Consumer/Index");
 
+        //                    }
+        //                }
+        //                else
+        //                {
+        //                    HttpContext.Session.Remove("user");
+
+        //                    return LocalRedirect("~/AccessCheck/Index");
+
+        //                }
+        //            }
+        //        }
 
 
 
@@ -255,17 +163,278 @@ namespace Mess_Management_System_Alpha_V2.Controllers.Admin
 
 
 
-        //    // string usrName = SessionExtensions.GetString(HttpContext.Session, "user");
+        //    //string usrName = SessionExtensions.GetString(HttpContext.Session, "user");
 
-        //    // string pass = HttpContext.Request.Query["Password"].ToString();
-        //    //var result = await _signInManager.PasswordSignInAsync(un,pass,true,true);
+        //    //string pass = HttpContext.Request.Query["Password"].ToString();
+        //    //var result = await _signInManager.PasswordSignInAsync(un, pass, true, true);
 
         //    //var nm = Request.QueryString["UserName"];
         //    //return LocalRedirect("~/Consumer/Index");
 
-        //    // return View();
+        //    //return View();
         //}
 
+        public async Task<IActionResult> Dashboard()
+        {
+
+            if (!SessionExist())
+            {
+
+
+                string unEncode = HttpContext.Request.Query["UserName"].ToString();
+                string un = DecodeServerName(unEncode);
+
+                SessionExtensions.SetString(HttpContext.Session, "user", un);
+                string usrName = SessionExtensions.GetString(HttpContext.Session, "user");
+
+                if (usrName == null)
+                {
+                    HttpContext.Session.Remove("user");
+
+                    return LocalRedirect("~/AccessCheck/Index");
+
+                }
+                else
+                {
+                    if (await UserExistMess())
+                    {
+                        var role = await GetLogInUserRoleObjectAsync();
+                        var roleMenuList = _context.RoleMenu.Where(x => x.UserIdentityRoleId == role.Id).ToList();
+                        var nevMenuList = _context.NavigationMenu.Where(x => x.Id > 0).ToList();
+                        var pr = from r in roleMenuList
+                                 join n in nevMenuList
+                                 on r.NavigationMenuId equals n.Id
+                                 // where o.LastModifiedDate.ToShortDateString() == OD.AddDays(-1).ToShortDateString() && o.MealTypeId == 1
+                                 select n;
+                        var filterMenuList = pr.ToList();
+                        ViewBag.FilterMenuList = filterMenuList;
+                        ViewBag.FullName = await GetUserName();
+                        return View();
+                    }
+                    else
+                    {
+                        HttpContext.Session.Remove("user");
+                        
+                        return LocalRedirect("~/AccessCheck/Index");
+
+                    }
+                }
+
+
+
+
+            }
+            else
+            {
+                if (await UserExistMess())
+                {
+                    var role = await GetLogInUserRoleObjectAsync();
+                    var roleMenuList = _context.RoleMenu.Where(x => x.UserIdentityRoleId == role.Id).ToList();
+                    var nevMenuList = _context.NavigationMenu.Where(x => x.Id > 0).ToList();
+                    var pr = from r in roleMenuList
+                             join n in nevMenuList
+                             on r.NavigationMenuId equals n.Id
+                             // where o.LastModifiedDate.ToShortDateString() == OD.AddDays(-1).ToShortDateString() && o.MealTypeId == 1
+                             select n;
+                    var filterMenuList = pr.ToList();
+                    ViewBag.FilterMenuList = filterMenuList;
+                    ViewBag.FullName = await GetUserName();
+                    return View();
+                }
+                else
+                {
+                    HttpContext.Session.Remove("user");
+
+                    return LocalRedirect("~/AccessCheck/Index");
+
+                }
+            }
+
+
+
+
+
+
+
+            // string usrName = SessionExtensions.GetString(HttpContext.Session, "user");
+
+            // string pass = HttpContext.Request.Query["Password"].ToString();
+            //var result = await _signInManager.PasswordSignInAsync(un,pass,true,true);
+
+            //var nm = Request.QueryString["UserName"];
+            //return LocalRedirect("~/Consumer/Index");
+
+            // return View();
+        }
+
+        //public async Task<IActionResult> HomePage()
+        //{
+
+        //    if (!SessionExist())
+        //    {
+
+
+        //        string unEncode = HttpContext.Request.Query["UserName"].ToString();
+        //        string un = DecodeServerName(unEncode);
+
+        //        SessionExtensions.SetString(HttpContext.Session, "user", un);
+        //        string usrName = SessionExtensions.GetString(HttpContext.Session, "user");
+
+        //        if (usrName == null)
+        //        {
+        //            HttpContext.Session.Remove("user");
+
+        //            return LocalRedirect("~/AccessCheck/Index");
+
+        //        }
+        //        else
+        //        {
+        //            if (await UserExistMess())
+        //            {
+        //                var role = await GetLogInUserRoleObjectAsync();
+        //                var roleMenuList = _context.RoleMenu.Where(x => x.UserIdentityRoleId == role.Id).ToList();
+        //                var nevMenuList = _context.NavigationMenu.Where(x => x.Id > 0).ToList();
+        //                var pr = from r in roleMenuList
+        //                         join n in nevMenuList
+        //                         on r.NavigationMenuId equals n.Id
+        //                         // where o.LastModifiedDate.ToShortDateString() == OD.AddDays(-1).ToShortDateString() && o.MealTypeId == 1
+        //                         select n;
+        //                var filterMenuList = pr.ToList();
+        //                ViewBag.FilterMenuList = filterMenuList;
+        //                ViewBag.FullName = await GetUserName();
+        //                return View();
+
+        //            }
+        //            else
+        //            {
+        //                HttpContext.Session.Remove("user");
+
+        //                return LocalRedirect("~/AccessCheck/Index");
+
+        //            }
+        //        }
+
+
+
+
+        //    }
+        //    else
+        //    {
+        //        if (await UserExistMess())
+        //        {
+
+        //            var role = await GetLogInUserRoleObjectAsync();
+        //            var roleMenuList = _context.RoleMenu.Where(x => x.UserIdentityRoleId == role.Id).ToList();
+        //            var nevMenuList = _context.NavigationMenu.Where(x => x.Id > 0).ToList();
+        //            var pr = from r in roleMenuList
+        //                     join n in nevMenuList
+        //                     on r.NavigationMenuId equals n.Id
+        //                     // where o.LastModifiedDate.ToShortDateString() == OD.AddDays(-1).ToShortDateString() && o.MealTypeId == 1
+        //                     select n;
+        //            var filterMenuList = pr.ToList();
+        //            ViewBag.FilterMenuList = filterMenuList;
+        //            ViewBag.FullName = await GetUserName();
+        //            return View();
+        //        }
+        //        else
+        //        {
+        //            HttpContext.Session.Remove("user");
+
+        //            return LocalRedirect("~/AccessCheck/Index");
+
+        //        }
+        //    }
+
+
+        //}
+
+        public async Task<IActionResult> HomePage()
+        {
+
+            if (!SessionExist())
+            {
+                string tokenType = HttpContext.Request.Query["TokenType"].ToString();
+                string accessToken = HttpContext.Request.Query["AccessToken"].ToString();
+
+                if (GetUserInfoFromSSO(tokenType, accessToken) == null)
+                {
+
+                    return LocalRedirect("~/AccessCheck/Index");
+
+                }
+                else
+                {
+                    User usr = GetUserInfoFromSSO(tokenType, accessToken);
+                    string unEncode = HttpContext.Request.Headers["UserName"].ToString();
+                    string un = DecodeServerName(unEncode);
+
+                    SessionExtensions.SetString(HttpContext.Session, "user", usr.name);
+                    string usrName = SessionExtensions.GetString(HttpContext.Session, "user");
+
+                    if (usrName == null)
+                    {
+                        HttpContext.Session.Remove("user");
+
+                        return LocalRedirect("~/AccessCheck/Index");
+
+                    }
+                    else
+                    {
+                        if (await UserExistMess())
+                        {
+                            var role = await GetLogInUserRoleObjectAsync();
+                            var roleMenuList = _context.RoleMenu.Where(x => x.UserIdentityRoleId == role.Id).ToList();
+                            var nevMenuList = _context.NavigationMenu.Where(x => x.Id > 0).ToList();
+                            var pr = from r in roleMenuList
+                                     join n in nevMenuList
+                                     on r.NavigationMenuId equals n.Id
+                                     select n;
+                            var filterMenuList = pr.ToList();
+                            ViewBag.FilterMenuList = filterMenuList;
+                            ViewBag.FullName = await GetUserName();
+                            return View();
+
+                        }
+                        else
+                        {
+                            HttpContext.Session.Remove("user");
+
+                            return LocalRedirect("~/AccessCheck/Index");
+
+                        }
+
+                    }
+                }
+
+
+
+            }
+            else
+            {
+                if (await UserExistMess())
+                {
+                    var role = await GetLogInUserRoleObjectAsync();
+                    var roleMenuList = _context.RoleMenu.Where(x => x.UserIdentityRoleId == role.Id).ToList();
+                    var nevMenuList = _context.NavigationMenu.Where(x => x.Id > 0).ToList();
+                    var pr = from r in roleMenuList
+                             join n in nevMenuList
+                             on r.NavigationMenuId equals n.Id
+                             select n;
+                    var filterMenuList = pr.ToList();
+                    ViewBag.FilterMenuList = filterMenuList;
+                    ViewBag.FullName = await GetUserName();
+                    return View();
+                }
+                else
+                {
+                    HttpContext.Session.Remove("user");
+
+                    return LocalRedirect("~/AccessCheck/Index");
+
+                }
+            }
+
+        }
 
 
 
@@ -391,7 +560,16 @@ namespace Mess_Management_System_Alpha_V2.Controllers.Admin
             var pn = Request.Form["setmenu"];
             var osi = Request.Form["onspotItem"];
 
-            if(Int32.Parse(pn[0]) == -1 && Int32.Parse(osi[0]) == -1)
+            //if(Int32.Parse(pn[0]) == -1 && Int32.Parse(osi[0]) == -1)
+            //{
+            //    ViewBag.FullName = await GetUserName();
+            //    ViewBag.OnSpotMessage = "Please select any item or set menu";
+
+
+            //    return View("Dashboard");
+            //}
+
+            if ( Int32.Parse(osi[0]) == -1)
             {
                 ViewBag.FullName = await GetUserName();
                 ViewBag.OnSpotMessage = "Please select any item or set menu";
@@ -400,65 +578,80 @@ namespace Mess_Management_System_Alpha_V2.Controllers.Admin
                 return View("Dashboard");
             }
 
-                if (Int32.Parse(pn[0]) != -1 )
-            {
-                if (!String.IsNullOrEmpty(Request.Form["stmQ"]) && decimal.Parse(Request.Form["stmQ"]) > 0)
-                {
-                    double stmQ = Double.Parse(Request.Form["stmQ"]);
-                    decimal stmQt = decimal.Parse(Request.Form["stmQ"]);
-                    long setmenuId = long.Parse(Request.Form["setmenu"]);
+            //if (Int32.Parse(pn[0]) != -1 )
+            //{
+            //    if (!String.IsNullOrEmpty(Request.Form["stmQ"]) && decimal.Parse(Request.Form["stmQ"]) > 0)
+            //    {
+            //        double stmQ = Double.Parse(Request.Form["stmQ"]);
+            //        decimal stmQt = decimal.Parse(Request.Form["stmQ"]);
+            //        long setmenuId = long.Parse(Request.Form["setmenu"]);
 
-                    var smdtl = _context.SetMenu.Where(x => x.Id == setmenuId).FirstOrDefault();
-                    var setMenuDetail = _context.SetMenuDetails.Where(x => x.SetMenuId == setmenuId).ToList();
+            //        var smdtl = _context.SetMenu.Where(x => x.Id == setmenuId).FirstOrDefault();
+            //        var setMenuDetail = _context.SetMenuDetails.Where(x => x.SetMenuId == setmenuId).ToList();
 
-                    foreach (var item in setMenuDetail)
-                    {
-                        CustomerChoiceV2 cc = new CustomerChoiceV2();
-                        // cc.LastModifiedBy = userID;
-                        cc.LastModifiedDate = DateTime.Now;
-                        cc.Date = DateTime.Now;
-                        cc.ExtraItemId = item.ExtraItemId;
-                        cc.quantity = stmQ;
-                        cc.UserId = prsndtl.Id;
-                        cc.OrderTypeId = 10002;
-                        //cc.OrderTypeId = 10002;Should Be Updated
+            //        var setMenuOrder = _context.CustomerChoiceV2.Where(x => x.SetMenuId == setmenuId && 
+            //        x.UserId == prsndtl.Id && x.OrderTypeId == 10002 && x.MealTypeId == mealId).ToList();
 
-                        cc.SetMenuId = setmenuId;
-                        cc.CreatedBy = userID;
-                        cc.MealTypeId = mealId;
-                        cc.CreatedDate = DateTime.Now;
-                        _context.CustomerChoiceV2.Add(cc);
-                        _context.SaveChanges();
+            //        if (setMenuOrder.Count > 0)
+            //        { 
+            //            foreach(var obj in setMenuOrder)
+            //            {
+            //                obj.quantity = stmQ + obj.quantity;
+            //                _context.CustomerChoiceV2.Update(obj);
+            //                _context.SaveChanges();
+            //            }
+            //        }
+            //        else
+            //        {
+            //            foreach (var item in setMenuDetail)
+            //            {
+            //                CustomerChoiceV2 cc = new CustomerChoiceV2();
+            //                // cc.LastModifiedBy = userID;
+            //                cc.LastModifiedDate = DateTime.Now;
+            //                cc.Date = DateTime.Now;
+            //                cc.ExtraItemId = item.ExtraItemId;
+            //                cc.quantity = stmQ;
+            //                cc.UserId = prsndtl.Id;
+            //                cc.OrderTypeId = 10002;
+            //                //cc.OrderTypeId = 10002;Should Be Updated
 
-                    }
-                }
-                else
-                {
-                    onSpotMessage = "Invalid input format";
-                }
+            //                cc.SetMenuId = setmenuId;
+            //                cc.CreatedBy = userID;
+            //                cc.MealTypeId = mealId;
+            //                cc.CreatedDate = DateTime.Now;
+            //                _context.CustomerChoiceV2.Add(cc);
+            //                _context.SaveChanges();
 
-                //OrderHistory oh = new OrderHistory();
-                //oh.UserId = prsndtl.Id;
-                //oh.MealTypeId = mealId;
-                ////oh.StoreOutItemId = itmdtl.Id;
-                //oh.UnitOrdered = stmQ;
-                //oh.SetMenuId = setmenuId;
-                //oh.OrderAmount = Convert.ToDouble(smdtl.SetMenuPrice * stmQt);
-                ////Here 20 will be omitted in future when pricing issue will be solved.
-                //oh.IsPreOrder = false;
-                //oh.OrderDate = DateTime.Now;
+            //            }
+            //        }
+            //    }
+            //    else
+            //    {
+            //        onSpotMessage = "Invalid input format";
+            //    }
 
-                //oh.CreatedBy = userID;
-                //oh.CreatedDate = DateTime.Now;
-                //oh.LastModifiedDate = DateTime.Now;
+            //    //OrderHistory oh = new OrderHistory();
+            //    //oh.UserId = prsndtl.Id;
+            //    //oh.MealTypeId = mealId;
+            //    ////oh.StoreOutItemId = itmdtl.Id;
+            //    //oh.UnitOrdered = stmQ;
+            //    //oh.SetMenuId = setmenuId;
+            //    //oh.OrderAmount = Convert.ToDouble(smdtl.SetMenuPrice * stmQt);
+            //    ////Here 20 will be omitted in future when pricing issue will be solved.
+            //    //oh.IsPreOrder = false;
+            //    //oh.OrderDate = DateTime.Now;
+
+            //    //oh.CreatedBy = userID;
+            //    //oh.CreatedDate = DateTime.Now;
+            //    //oh.LastModifiedDate = DateTime.Now;
 
 
-                //_context.OrderHistory.Add(oh);
-                //_context.SaveChanges();
-                //long orderHistoryId = oh.Id;
+            //    //_context.OrderHistory.Add(oh);
+            //    //_context.SaveChanges();
+            //    //long orderHistoryId = oh.Id;
 
 
-            }
+            //}
             if (Int32.Parse(osi[0]) !=  -1)
             {
                 if (!String.IsNullOrEmpty(Request.Form["itmQ"]) && Double.Parse(Request.Form["itmQ"]) > 0)
@@ -467,39 +660,34 @@ namespace Mess_Management_System_Alpha_V2.Controllers.Admin
                     var exItm = _context.ExtraItem.Where(x => x.Id == long.Parse(item)).FirstOrDefault();
                     var itmdtl = _context.StoreOutItem.Where(x => x.Id == exItm.StoreOutItemId).FirstOrDefault();
                     double itemQ = Double.Parse(Request.Form["itmQ"]);
-                    //    OrderHistory oh = new OrderHistory();
-                    //    oh.UserId = prsndtl.Id;
-                    //    oh.MealTypeId = mealId;
-                    //    oh.StoreOutItemId = itmdtl.Id;
-                    //    oh.UnitOrdered = itemQ;
-                    //    oh.OrderAmount = Convert.ToDouble(20 * itemQ);
-                    //    //Here 20 will be omitted in future when pricing issue will be solved.
-                    //    oh.IsPreOrder = false;
-                    //    oh.OrderDate = DateTime.Now;
+                    var exItemOrder = _context.CustomerChoiceV2.Where(x => x.ExtraItemId == Int32.Parse(item) &&
+                    x.UserId == prsndtl.Id && x.CreatedDate.ToShortDateString() == DateTime.Now.ToShortDateString()
+                    && x.OrderTypeId == 10002 && x.MealTypeId == mealId).FirstOrDefault();
 
-                    //    oh.CreatedBy = userID;
-                    //    oh.CreatedDate = DateTime.Now;
-                    //    oh.LastModifiedDate = DateTime.Now;
+                    if (exItemOrder == null)
+                    {
+                        CustomerChoiceV2 cc = new CustomerChoiceV2();
+                        //  cc.LastModifiedBy = userID;
+                        cc.LastModifiedDate = DateTime.Now;
+                        cc.Date = DateTime.Now;
+                        cc.ExtraItemId = Int32.Parse(Request.Form["onspotItem"]);
+                        cc.quantity = itemQ;
+                        cc.UserId = prsndtl.Id;
+                        cc.OrderTypeId = 10002;
+                        //cc.OrderTypeId = 10002;Should Be updated
 
-
-                    //    _context.OrderHistory.Add(oh);
-                    //    _context.SaveChanges();
-
-                    CustomerChoiceV2 cc = new CustomerChoiceV2();
-                    //  cc.LastModifiedBy = userID;
-                    cc.LastModifiedDate = DateTime.Now;
-                    cc.Date = DateTime.Now;
-                    cc.ExtraItemId = Int32.Parse(Request.Form["onspotItem"]);
-                    cc.quantity = itemQ;
-                    cc.UserId = prsndtl.Id;
-                    cc.OrderTypeId = 10002;
-                    //cc.OrderTypeId = 10002;Should Be updated
-
-                    cc.CreatedBy = userID;
-                    cc.MealTypeId = mealId;
-                    cc.CreatedDate = DateTime.Now;
-                    _context.CustomerChoiceV2.Add(cc);
-                    _context.SaveChanges();
+                        cc.CreatedBy = userID;
+                        cc.MealTypeId = mealId;
+                        cc.CreatedDate = DateTime.Now;
+                        _context.CustomerChoiceV2.Add(cc);
+                        _context.SaveChanges();
+                    }
+                    else
+                    {
+                        exItemOrder.quantity = exItemOrder.quantity + itemQ;
+                        _context.CustomerChoiceV2.Update(exItemOrder);
+                        _context.SaveChanges();
+                    }
                 }
                 else
                 {
@@ -648,7 +836,7 @@ namespace Mess_Management_System_Alpha_V2.Controllers.Admin
 
         public JsonResult GetSearchPerson(string search)
         {
-            var PersonList = _userManager.Users.Where(x => x.BUPFullName.Contains(search)).ToList();
+            var PersonList = _userManager.Users.Where(x => x.BUPFullName.Contains(search) || x.OfficeName.Contains(search) || x.BUPNumber.Contains(search)).ToList();
 
             return Json(PersonList);
         }
@@ -671,7 +859,439 @@ namespace Mess_Management_System_Alpha_V2.Controllers.Admin
             return Json(ItemList);
         }
 
-        public async Task<string> AddPartyItem(string Person, string Item, string Date, string Quantity, string Price)
+        public JsonResult GetExtraChit()
+        {
+
+            int day = (int)DateTime.Today.DayOfWeek + 1;
+            List<ExtraChitObject> exChtList = new List<ExtraChitObject>();
+
+            //var OnSpotItemList = _context.MenuItem.Where(x => x.Day == day).ToList();
+            var OnSpotItemList = _context.DailyOfferItem.Where(x => x.Date.Date == DateTime.Now.Date || x.IsActive == true).ToList();
+
+            foreach (var i in OnSpotItemList)
+            {
+                var itemCount = _context.CustomerChoiceV2.Where(x => x.Date.Date == DateTime.Now.Date && x.OrderTypeId == 10002
+                                && x.MealTypeId == 10005 && x.StoreOutItemId == i.StoreOutItemId).Sum(x => x.quantity);
+
+                var availableAmount = i.OrderLimit - itemCount;
+                var storeOutItem = _context.StoreOutItem.Where(x => x.Id == i.StoreOutItemId).FirstOrDefault();
+                ExtraChitObject o = new ExtraChitObject();
+                o.Id = i.StoreOutItemId.ToString();
+                o.ItemName = storeOutItem.Name + "[" + availableAmount.ToString() + "pcs available]";
+                exChtList.Add(o);
+            }
+            return Json(exChtList);
+
+        }
+
+
+        [HttpPost]
+        public async Task<JsonResult> AddOnSpotItem(string ItemList, string IsOffice, string Person, string Office, string Bearer)
+        {
+            string usrName = SessionExtensions.GetString(HttpContext.Session, "user");
+
+            if (usrName == null)
+            {
+                return Json(new { success = false, responseText = "Expire" });
+
+            }
+
+            try
+            {
+                bool isOffice = IsOffice == "true" ? true : false;
+                OnSpotParent onSpotObj = new OnSpotParent();
+                var consumerId = "";
+                long officeId = 0;
+                var bearerId = "";
+                long onSpotParentId = 0;
+                var user = await _userManager.FindByNameAsync(usrName);
+                string UserId = user.Id;
+                var bearer = new ApplicationUser();
+                if (Bearer == "No")
+                {
+                    bearer = null;
+                }
+                else
+                {
+                    var personArray = Bearer.Split("-");
+                    var prsndtl2 = _userManager.Users.Where(x => x.BUPNumber == personArray[1]).FirstOrDefault();
+                    bearer = prsndtl2;
+                }
+                //Bearer == "No" ? null : _userManager.Users.Where(x => x.BUPFullName == Bearer).FirstOrDefault();
+                if (isOffice == false)
+                {
+                    var personArray = Person.Split("-");
+                    var prsndtl = _userManager.Users.Where(x => x.BUPNumber == personArray[1]).FirstOrDefault();
+                    consumerId = prsndtl.Id;
+                    //officeId = null;
+                    if (bearer == null)
+                    {
+                        bearerId = null;
+                        //onSpotObj = _context.OnSpotParent.Where(x => x.UserId == consumerId && x.Date.Date == DateTime.Now.Date && x.IsOfficeOrder == isOffice && x.BearerId == null).FirstOrDefault();
+
+                    }
+                    else
+                    {
+                        bearerId = bearer.Id;
+                        //onSpotObj = _context.OnSpotParent.Where(x => x.UserId == consumerId && x.Date.Date == DateTime.Now.Date && x.BearerId == bearer.Id && x.IsOfficeOrder == isOffice).FirstOrDefault();
+
+                    }
+
+                }
+                else
+                {
+                    var officeDtl = _context.Office.Where(x => x.Name == Office).FirstOrDefault();
+                    officeId = officeDtl.Id;
+                    consumerId = UserId;
+
+                    if (bearer == null)
+                    {
+                        bearerId = null;
+                        //onSpotObj = _context.OnSpotParent.Where(x => x.UserId == consumerId && x.Date.Date == DateTime.Now.Date && x.IsOfficeOrder == isOffice && x.BearerId == null).FirstOrDefault();
+
+                    }
+                    else
+                    {
+                        bearerId = bearer.Id;
+                        //onSpotObj = _context.OnSpotParent.Where(x => x.UserId == consumerId && x.Date.Date == DateTime.Now.Date && x.BearerId == bearer.Id && x.IsOfficeOrder == isOffice).FirstOrDefault();
+
+                    }
+                }
+                //if (onSpotObj == null)
+                //{
+                    if (officeId > 0)
+                    {
+                        OnSpotParent osp = new OnSpotParent();
+                        osp.OfficeId = officeId;
+                        osp.UserId = consumerId;
+                        osp.BearerId = bearerId;
+                        osp.IsOfficeOrder = isOffice;
+                        osp.CreatedBy = UserId;
+                        osp.Date = DateTime.Now;
+                        
+                        osp.CreatedDate = DateTime.Now;
+                        _context.OnSpotParent.Add(osp);
+                        _context.SaveChanges();
+                        onSpotParentId = osp.Id;
+                    }
+                    else
+                    {
+                        OnSpotParent osp = new OnSpotParent();
+                        osp.UserId = consumerId;
+                        osp.BearerId = bearerId;
+                        osp.IsOfficeOrder = isOffice;
+                        osp.Date = DateTime.Now;
+                        osp.CreatedBy = UserId;
+                        osp.CreatedDate = DateTime.Now;
+                        _context.OnSpotParent.Add(osp);
+                        _context.SaveChanges();
+                        onSpotParentId = osp.Id;
+                    }
+
+                //}
+                //else
+                //{
+                //    onSpotParentId = onSpotObj.Id;
+                //}
+                List<OnSpotItemObject> tempItemList = (List<OnSpotItemObject>)JsonConvert.DeserializeObject(ItemList, typeof(List<OnSpotItemObject>));
+                //var user = await _userManager.FindByNameAsync(usrName);
+                //string UserId = user.Id;
+                foreach (var it in tempItemList)
+                {
+                    var prevObj = _context.CustomerChoiceV2.Where(x => x.UserId == UserId && x.Date.Date == DateTime.Now.Date &&
+                   x.StoreOutItemId == long.Parse(it.Id) && x.OrderTypeId == 10002 && x.MealTypeId == 10005 && x.OnSpotParentId == onSpotParentId).FirstOrDefault();
+
+                    var itemCount = _context.CustomerChoiceV2.Where(x => x.Date.Date == DateTime.Now.Date && x.OrderTypeId == 10002
+                               && x.MealTypeId == 10005 && x.StoreOutItemId == long.Parse(it.Id)).Sum(x => x.quantity);
+                    var dailyObj = _context.DailyOfferItem.Where(x => x.StoreOutItemId == long.Parse(it.Id) && (x.Date.Date == DateTime.Now.Date || x.IsActive == true)).FirstOrDefault();
+                    var availableAmount = dailyObj.OrderLimit - (itemCount + double.Parse(it.Quantity));
+                    var storeOutObj = _context.StoreOutItem.Where(x => x.Id == long.Parse(it.Id)).FirstOrDefault();
+                    if (availableAmount < 0)
+                    {
+                        return Json(new { success = false, responseText = "Not sufficient amount for " + storeOutObj.Name });
+
+                    }
+
+                    if (prevObj == null)
+                    {
+                        CustomerChoiceV2 cc = new CustomerChoiceV2();
+                        cc.UserId = consumerId;
+                        cc.StoreOutItemId = long.Parse(it.Id);
+                        cc.quantity = double.Parse(it.Quantity);
+                        cc.OrderTypeId = 10002;
+                        cc.MealTypeId = 10005;
+                        cc.OnSpotParentId = onSpotParentId;
+                        cc.ExtraChitParentId = 1;
+                        cc.CreatedBy = UserId;
+                        cc.Date = DateTime.Now;
+                        cc.CreatedDate = DateTime.Now;
+                        cc.LastModifiedBy = UserId;
+
+                        cc.LastModifiedDate = DateTime.Now;
+                        _context.CustomerChoiceV2.Add(cc);
+                        _context.SaveChanges();
+                    }
+                    else
+                    {
+                        prevObj.quantity = double.Parse(it.Quantity);
+                        _context.CustomerChoiceV2.Update(prevObj);
+                        _context.SaveChanges();
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, responseText = ex.Message });
+
+            }
+            return Json(new { success = true, responseText = "Items have been added successfully.." });
+
+        }
+
+
+        public string GetOnSpotItemList(string ParentId)
+        {
+            int day = (int)DateTime.Today.DayOfWeek + 1;
+            List<ExtraChitObject> exChtList = new List<ExtraChitObject>();
+            List<IList> full = new List<IList>();
+
+
+            //var OnSpotItemList = _context.MenuItem.Where(x => x.Day == day).ToList();
+            var OnSpotItemList = _context.DailyOfferItem.Where(x => x.Date.Date == DateTime.Now.Date || x.IsActive == true).ToList();
+
+
+            foreach (var i in OnSpotItemList)
+            {
+                var itemCount = _context.CustomerChoiceV2.Where(x => x.Date.Date == DateTime.Now.Date && x.OrderTypeId == 10002
+                                && x.MealTypeId == 10005 && x.StoreOutItemId == i.StoreOutItemId).Sum(x => x.quantity);
+
+                //if (itemCount < i.OrderLimit)
+                //{
+                    var availableAmount = i.OrderLimit - itemCount;
+                    var storeOutItem = _context.StoreOutItem.Where(x => x.Id == i.StoreOutItemId).FirstOrDefault();
+                    ExtraChitObject o = new ExtraChitObject();
+                    o.Id = i.StoreOutItemId.ToString();
+                    o.ItemName = storeOutItem.Name +"[" + availableAmount.ToString() + "pcs available]";
+                    exChtList.Add(o);
+                //}
+            }
+            List<CustomerChoiceV2> ccList = _context.CustomerChoiceV2.Where(x => x.OnSpotParentId == long.Parse(ParentId)).ToList();
+            List<OnSpotParent> parentList = _context.OnSpotParent.Where(x => x.Id == ccList.ElementAt(0).OnSpotParentId).ToList();
+            full.Add(exChtList);
+            full.Add(ccList);
+            full.Add(parentList);
+            string json = JsonConvert.SerializeObject(full, Formatting.Indented, new JsonSerializerSettings
+            {
+                ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+            });
+            return json;
+        }
+
+        [HttpPost]
+        public async Task<JsonResult> EditOnSpotItem(string ItemList)
+        {
+            string usrName = SessionExtensions.GetString(HttpContext.Session, "user");
+
+            if (usrName == null)
+            {
+                return Json(new { success = false, responseText = "Expire" });
+
+            }
+            try
+            {
+                var user = await _userManager.FindByNameAsync(usrName);
+                string UserId = user.Id;
+                List<EditableOnSpotItemObject> tempItemList = (List<EditableOnSpotItemObject>)JsonConvert.DeserializeObject(ItemList, typeof(List<EditableOnSpotItemObject>));
+                var onSpotParentId = _context.CustomerChoiceV2.Where(x => x.Id == long.Parse(tempItemList.ElementAt(0).OrderId)).FirstOrDefault().OnSpotParentId;
+                var consumerId = _context.OnSpotParent.Where(x => x.Id == onSpotParentId).FirstOrDefault().UserId;
+                foreach (var item in tempItemList)
+                {
+                    if (item.IsDelete == "1")
+                    {
+                        var ordObj = _context.CustomerChoiceV2.Where(x => x.Id == long.Parse(item.OrderId)).FirstOrDefault();
+                        _context.CustomerChoiceV2.Remove(ordObj);
+                        _context.SaveChanges();
+                    }
+                    else if (item.IsNew == "1")
+                    {
+                        var itemCount = _context.CustomerChoiceV2.Where(x => x.Date.Date == DateTime.Now.Date && x.OrderTypeId == 10002
+                              && x.MealTypeId == 10005 && x.StoreOutItemId == long.Parse(item.ItemId)).Sum(x => x.quantity);
+                        var dailyObj = _context.DailyOfferItem.Where(x => x.StoreOutItemId == long.Parse(item.ItemId) && (x.Date.Date == DateTime.Now.Date || x.IsActive == true) ).FirstOrDefault();
+                        var availableAmount = dailyObj.OrderLimit - (itemCount + double.Parse(item.Quantity));
+                        var storeOutObj = _context.StoreOutItem.Where(x => x.Id == long.Parse(item.ItemId)).FirstOrDefault();
+                        if (availableAmount < 0)
+                        {
+                            return Json(new { success = false, responseText = "Not sufficient amount for " + storeOutObj.Name });
+
+                        }
+                        CustomerChoiceV2 cc = new CustomerChoiceV2();
+                        cc.UserId = consumerId;
+                        cc.StoreOutItemId = long.Parse(item.ItemId);
+                        cc.quantity = double.Parse(item.Quantity);
+                        cc.OrderTypeId = 10002;
+                        cc.MealTypeId = 10005;
+                        cc.Date = DateTime.Now;
+                        cc.OnSpotParentId = onSpotParentId;
+                        cc.ExtraChitParentId = 1;
+                        cc.CreatedBy = UserId;
+                        cc.CreatedDate = DateTime.Now;
+                        cc.LastModifiedBy = UserId;
+
+                        cc.LastModifiedDate = DateTime.Now;
+                        _context.CustomerChoiceV2.Add(cc);
+                        _context.SaveChanges();
+                    }
+                    else
+                    {
+                        var ordObj = _context.CustomerChoiceV2.Where(x => x.Id == long.Parse(item.OrderId)).FirstOrDefault();
+                        var qnt = ordObj.quantity - double.Parse(item.Quantity);
+                        var itemCount = _context.CustomerChoiceV2.Where(x => x.Date.Date == DateTime.Now.Date && x.OrderTypeId == 10002
+                            && x.MealTypeId == 10005 && x.StoreOutItemId == long.Parse(item.ItemId)).Sum(x => x.quantity);
+                        var dailyObj = _context.DailyOfferItem.Where(x => x.StoreOutItemId == long.Parse(item.ItemId) && (x.Date.Date == DateTime.Now.Date || x.IsActive == true)).FirstOrDefault();
+                        var availableAmount = dailyObj.OrderLimit - (itemCount - qnt);
+                        var storeOutObj = _context.StoreOutItem.Where(x => x.Id == long.Parse(item.ItemId)).FirstOrDefault();
+                        if (availableAmount < 0)
+                        {
+                            return Json(new { success = false, responseText = "Not sufficient amount for " + storeOutObj.Name });
+
+                        }
+                        //var ordObj = _context.CustomerChoiceV2.Where(x => x.Id == long.Parse(item.OrderId)).FirstOrDefault();
+                        ordObj.StoreOutItemId = long.Parse(item.ItemId);
+                        ordObj.quantity = double.Parse(item.Quantity);
+                        _context.CustomerChoiceV2.Update(ordObj);
+                        _context.SaveChanges();
+                    }
+                }
+
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, responseText = ex.Message });
+
+            }
+
+            return Json(new { success = true, responseText = "Successfully updated..." });
+
+        }
+
+        [HttpPost]
+        public async Task<JsonResult> EditApproveOnSpotItem(string ItemList)
+        {
+            string usrName = SessionExtensions.GetString(HttpContext.Session, "user");
+
+            if (usrName == null)
+            {
+                return Json(new { success = false, responseText = "Expire" });
+
+            }
+            try
+            {
+                var user = await _userManager.FindByNameAsync(usrName);
+                string UserId = user.Id;
+                List<EditableOnSpotItemObject> tempItemList = (List<EditableOnSpotItemObject>)JsonConvert.DeserializeObject(ItemList, typeof(List<EditableOnSpotItemObject>));
+                var onSpotParentId = _context.CustomerChoiceV2.Where(x => x.Id == long.Parse(tempItemList.ElementAt(0).OrderId)).FirstOrDefault().OnSpotParentId;
+                var onSpotParent = _context.OnSpotParent.Where(x => x.Id == onSpotParentId).FirstOrDefault();
+                onSpotParent.IsApproved = true;
+                onSpotParent.LastModifiedBy = UserId;
+                onSpotParent.LastModifiedDate = DateTime.Now;
+                _context.OnSpotParent.Update(onSpotParent);
+                var consumerId = _context.OnSpotParent.Where(x => x.Id == onSpotParentId).FirstOrDefault().UserId;
+                foreach (var item in tempItemList)
+                {
+                    if (item.IsDelete == "1")
+                    {
+                        var ordObj = _context.CustomerChoiceV2.Where(x => x.Id == long.Parse(item.OrderId)).FirstOrDefault();
+                        _context.CustomerChoiceV2.Remove(ordObj);
+                        _context.SaveChanges();
+                    }
+                    else if (item.IsNew == "1")
+                    {
+                        var itemCount = _context.CustomerChoiceV2.Where(x => x.Date.Date == DateTime.Now.Date && x.OrderTypeId == 10002
+                              && x.MealTypeId == 10005 && x.StoreOutItemId == long.Parse(item.ItemId)).Sum(x => x.quantity);
+                        var dailyObj = _context.DailyOfferItem.Where(x => x.StoreOutItemId == long.Parse(item.ItemId) && (x.Date.Date == DateTime.Now.Date || x.IsActive == true)).FirstOrDefault();
+                        var availableAmount = dailyObj.OrderLimit - (itemCount + double.Parse(item.Quantity));
+                        var storeOutObj = _context.StoreOutItem.Where(x => x.Id == long.Parse(item.ItemId)).FirstOrDefault();
+                        if (availableAmount < 0)
+                        {
+                            return Json(new { success = false, responseText = "Not sufficient amount for " + storeOutObj.Name });
+
+                        }
+                        CustomerChoiceV2 cc = new CustomerChoiceV2();
+                        cc.UserId = consumerId;
+                        cc.StoreOutItemId = long.Parse(item.ItemId);
+                        cc.quantity = double.Parse(item.Quantity);
+                        cc.OrderTypeId = 10002;
+                        cc.MealTypeId = 10005;
+                        cc.Date = DateTime.Now;
+                        cc.OnSpotParentId = onSpotParentId;
+                        cc.ExtraChitParentId = 1;
+                        cc.CreatedBy = UserId;
+                        cc.CreatedDate = DateTime.Now;
+                        cc.LastModifiedBy = UserId;
+
+                        cc.LastModifiedDate = DateTime.Now;
+                        _context.CustomerChoiceV2.Add(cc);
+                        _context.SaveChanges();
+                    }
+                    else
+                    {
+                        var ordObj = _context.CustomerChoiceV2.Where(x => x.Id == long.Parse(item.OrderId)).FirstOrDefault();
+                        var qnt = ordObj.quantity - double.Parse(item.Quantity);
+                        var itemCount = _context.CustomerChoiceV2.Where(x => x.Date.Date == DateTime.Now.Date && x.OrderTypeId == 10002
+                            && x.MealTypeId == 10005 && x.StoreOutItemId == long.Parse(item.ItemId)).Sum(x => x.quantity);
+                        var dailyObj = _context.DailyOfferItem.Where(x => x.StoreOutItemId == long.Parse(item.ItemId) && (x.Date.Date == DateTime.Now.Date || x.IsActive == true)).FirstOrDefault();
+                        var availableAmount = dailyObj.OrderLimit - (itemCount - qnt);
+                        var storeOutObj = _context.StoreOutItem.Where(x => x.Id == long.Parse(item.ItemId)).FirstOrDefault();
+                        if (availableAmount < 0)
+                        {
+                            return Json(new { success = false, responseText = "Not sufficient amount for " + storeOutObj.Name });
+
+                        }
+                        //var ordObj = _context.CustomerChoiceV2.Where(x => x.Id == long.Parse(item.OrderId)).FirstOrDefault();
+                        ordObj.StoreOutItemId = long.Parse(item.ItemId);
+                        ordObj.quantity = double.Parse(item.Quantity);
+                        _context.CustomerChoiceV2.Update(ordObj);
+                        _context.SaveChanges();
+                    }
+                }
+
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, responseText = ex.Message });
+
+            }
+
+            return Json(new { success = true, responseText = "Successfully updated..." });
+
+        }
+
+        public async Task<JsonResult> ApproveOrder(string ParentId)
+        {
+            string usrName = SessionExtensions.GetString(HttpContext.Session, "user");
+
+            if (usrName == null)
+            {
+                return Json(new { success = false, responseText = "Expire" });
+
+            }
+            try
+            {
+                var parentObj = _context.OnSpotParent.Where(x => x.Id == long.Parse(ParentId)).FirstOrDefault();
+                parentObj.IsApproved = true;
+                _context.OnSpotParent.Update(parentObj);
+                _context.SaveChanges();
+                return Json(new { success = false, responseText = "Successfully approved." });
+
+            }
+            catch(Exception ex)
+            {
+                return Json(new { success = false, responseText = ex.Message });
+
+            }
+        }
+
+            public async Task<string> AddPartyItem(string Person, string Item, string Date, string Quantity, string Price)
         {
             List<String> ErrorList = new List<string>();
             List<String> ErrorBit = new List<string>();
@@ -1686,11 +2306,45 @@ namespace Mess_Management_System_Alpha_V2.Controllers.Admin
 
 
 
+        public async Task<string> SetOrderTime(string OrderTime)
+        {
+            var timeConstant = _context.Constants.Where(x => x.Name == "Last Time").FirstOrDefault();
+            string usrName = SessionExtensions.GetString(HttpContext.Session, "user");
+            var admin = await _userManager.FindByNameAsync(usrName);
+            List<String> timeList = new List<string>();
+            if (timeConstant != null)
+            {
+                timeConstant.Value = OrderTime;
+                timeConstant.LastModifiedBy = admin.Id;
+                timeConstant.LastModifiedDate = DateTime.Now;
+                _context.Constants.Update(timeConstant);
+                _context.SaveChanges();
+            }
+            else
+            {
+                Constants constObj = new Constants();
+                constObj.Name = "Last Time";
+                constObj.Value = OrderTime;
+                constObj.CreatedBy = admin.Id;
+                constObj.CreatedDate = DateTime.Now;
+                constObj.LastModifiedBy = admin.Id;
+                constObj.LastModifiedDate = DateTime.Now;
+                _context.Constants.Add(constObj);
+                _context.SaveChanges();
+            }
+            timeList.Add(OrderTime);
+            string json = JsonConvert.SerializeObject(timeList, Formatting.Indented, new JsonSerializerSettings
+            {
+                ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+            });
+
+
+            return json;
+        }
 
 
 
-
-        public string SaveSpecialOfficeMenuEdit(string Id, string Item, string Quantity)
+            public string SaveSpecialOfficeMenuEdit(string Id, string Item, string Quantity)
         {
 
 
@@ -1803,6 +2457,16 @@ namespace Mess_Management_System_Alpha_V2.Controllers.Admin
 
             return role.Name;
         }
+        public async Task<UserIdentityRole> GetLogInUserRoleObjectAsync()
+        {
+            string usrName = SessionExtensions.GetString(HttpContext.Session, "user");
+            var user = await _userManager.FindByNameAsync(usrName);
+            var userrole = _context.UserRoles.Where(x => x.UserId == user.Id).FirstOrDefault();
+
+            var role = await _roleManager.FindByIdAsync(userrole.RoleId);
+
+            return role;
+        }
         public async Task<string> GetUserName()
         {
             string usrName = SessionExtensions.GetString(HttpContext.Session, "user");
@@ -1870,6 +2534,36 @@ namespace Mess_Management_System_Alpha_V2.Controllers.Admin
 
 
 
+        public class ItemObject
+        {
+            public string ItemId { set; get; }
+            public string Quantity { set; get; }
+            public string Day { set; get; }
+            public string Meal { set; get; }
+
+
+        }
+
+        public class ExtraChitObject
+        {
+            public string Id;
+            public string ItemName;
+        }
+
+        public class OnSpotItemObject
+        {
+            public string Id;
+            public string Quantity;
+        }
+
+        public class EditableOnSpotItemObject
+        {
+            public string IsDelete;
+            public string OrderId;
+            public string ItemId;
+            public string Quantity;
+            public string IsNew;
+        }
 
 
 

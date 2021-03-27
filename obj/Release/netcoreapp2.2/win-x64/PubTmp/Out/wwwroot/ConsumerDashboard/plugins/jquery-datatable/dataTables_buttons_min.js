@@ -72,7 +72,7 @@
     }; l.defaults = {
         buttons: ["copy", "excel", "csv", "pdf", "print"], name: "main", tabIndex: 0, dom: {
             container: { tag: "div", className: "dt-buttons" }, collection: { tag: "div", className: "dt-button-collection" },
-            button: { tag: "a", className: "dt-button", active: "active", disabled: "disabled" }, buttonLiner: { tag: "span", className: "" }
+            button: { tag: "a", className: "dt-button", active: "", disabled: "enabled" }, buttonLiner: { tag: "span", className: "" }
         }
     }; l.version = "1.2.2"; d.extend(j, {
         collection: {

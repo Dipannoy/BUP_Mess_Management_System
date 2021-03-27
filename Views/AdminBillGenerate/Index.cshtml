@@ -52,7 +52,7 @@
     var DistinctUserId = _context.OrderHistoryVr2.Where(x => x.OrderDate.ToShortDateString() == billDate).Select(x => x.UserId).Distinct();
 
 
-                    var accsrBill = _context.AccessoryBill.Sum(x => x.DefaultCost);
+    var accsrBill = _context.AccessoryBill.Sum(x => x.DefaultCost);
 
 
 
@@ -72,13 +72,45 @@
         int y = ViewBag.Yr;
         if(ViewBag.StatusUser == "-1")
         {
-            cmb = _context.ConsumerMonthlyBillRecord.Where(x => x.Month == mn && x.Year == y).ToList();
+            if (mn != -1 && y != -1)
+            {
+                cmb = _context.ConsumerMonthlyBillRecord.Where(x => x.Month == mn && x.Year == y).ToList();
+            }
+            else if (mn != -1)
+            {
+                cmb = _context.ConsumerMonthlyBillRecord.Where(x => x.Month == mn).ToList();
+
+            }
+   
+            else
+            {
+                cmb = _context.ConsumerMonthlyBillRecord.Where(x => x.Year == y).ToList();
+
+            }
+
         }
         else
         {
             string u = ViewBag.StatusUser;
-          cmb = _context.ConsumerMonthlyBillRecord.Where(x => x.Month == mn && x.Year == y && x.UserId == u).ToList();
+            if (mn != -1 && y != -1)
+            {
+                cmb = _context.ConsumerMonthlyBillRecord.Where(x =>  x.Year == y && x.Month == mn && x.UserId == u).ToList();
+            }
+            else if(mn != -1)
+            {
+                cmb = _context.ConsumerMonthlyBillRecord.Where(x => x.Month == mn && x.UserId == u).ToList();
 
+            }
+            else if (y != -1)
+            {
+                cmb = _context.ConsumerMonthlyBillRecord.Where(x => x.Year == y && x.UserId == u).ToList();
+
+            }
+            else
+            {
+                cmb = _context.ConsumerMonthlyBillRecord.Where(x =>x.UserId == u).ToList();
+
+            }
         }
     }
 
@@ -247,18 +279,57 @@
 
         </div>
 
+        <div id="historyModal" class="modal">
+            <div class="modal-content">
+
+                <div class="row" id="orderTable">
+
+                </div>
+
+                <div class="row" style="padding-top:20px;">
+                    <div class="col-sm-3">
+
+                    </div>
+                    <div class="col-sm-3">
+                        @*<button class="btn" style="padding:2px;" onclick="addMoreOnSpotEdit()">Add More</button>*@
+
+                    </div>
+
+                    <div class="col-sm-3">
+                        @*<button class="btn" onclick="ConfirmEdit()" style="padding:3px;"> Save</button>*@
+                    </div>
+                    <div class="col-sm-3">
+                        <button class="btn" onclick="CloseModal()" style="padding:3px;"> Close</button>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
         <br />
-        <div id="Start" class="row">
-            <form asp-action="CreateDailyBill" asp-controller="AdminBillGenerate" method="post">
-                @*<input type="text" />*@
-                <button type="submit" rel="tooltip" class="btn">Create Today's Bill</button>
+        <div id="Start" class="row" style="padding-top:50px;">
 
+            <div class="col-sm-2">
+                <form asp-action="CreateDailyBill" asp-controller="AdminBillGenerate" method="post">
+                    <button type="submit" rel="tooltip" style="width:170px;" class="btn">Create Today's Bill</button>
+                </form>
+            </div>
+            <div class="col-sm-2">
+                <button rel="tooltip" class="btn" style="width:170px;" onclick="PrintOptionSpace()">Bill Print</button>
+            </div>
+            <div class="col-sm-2">
+                <button rel="tooltip" class="btn" style="width:170px;" onclick="ViewBill()">Bill View</button>
 
-            </form>
-            <button rel="tooltip" class="btn" onclick="PrintOptionSpace()">Bill Print</button>
-            <button rel="tooltip" class="btn" onclick="ViewBill()">Bill View</button>
-            <button rel="tooltip" class="btn" onclick="ViewAccsryBill()">Accessory Bill</button>
-            <button rel="tooltip" class="btn" onclick="ViewBillStatus()">Bill Status</button>
+            </div>
+            <div class="col-sm-2">
+                <button rel="tooltip" class="btn" style="width:170px;" onclick="ViewAccsryBill()">Accessory Bill</button>
+
+            </div>
+            <div class="col-sm-4">
+                <button rel="tooltip" class="btn" style="width:170px;" onclick="ViewBillStatus()">Bill Status</button>
+
+            </div>
 
 
 
@@ -274,7 +345,7 @@
                         <label class="bmd-label-floating">Person</label>
                         <div style="display:inline-flex">
 
-                                <input type="text" name="person" id="person" class="form-control" value="" />
+                            <input type="text" name="person" id="person" class="form-control" value="" />
                             <div id="suggesstion-box"></div>
 
                             @*<select id="person" name="person" class="form-control border-radius-none" asp-items="@(new SelectList(_ddlHelper.GetAllUsersList().Prepend(new KeyValuePair<string, string>("-1", "")), "Key", "Value", ""))"></select>*@
@@ -318,7 +389,7 @@
                             <label class="bmd-label-floating">From</label>
                             <div style="display:inline-flex">
 
-                                <input type="text" id="from" name="from" class="form-control" required>
+                                <input type="text" id="from" name="from" autocomplete="off" class="form-control" required>
                             </div>
                         </div>
                     </div>
@@ -327,7 +398,7 @@
                             <label class="bmd-label-floating">To</label>
                             <div style="display:inline-flex">
 
-                                <input type="text" id="to" name="to" class="form-control" required>
+                                <input type="text" id="to" name="to" autocomplete="off" class="form-control" required>
                             </div>
                         </div>
                     </div>
@@ -362,7 +433,7 @@
             string usrName = "";
             if (ViewBag.UserId == null)
             {
-                BillList = 
+                BillList =
             _context.OrderHistoryVr2.Where(x => DateTime.Parse(x.OrderDate.ToShortDateString()) >= DateTime.Parse(From.ToShortDateString()) &&
             DateTime.Parse(x.OrderDate.ToShortDateString()) <= DateTime.Parse(To.ToShortDateString())).ToList();
             }
@@ -374,152 +445,217 @@
             }
 
             <div id="BillViewRsp">
-            <div class="jumbotron" style="padding-bottom:0px;padding-left:10px;padding-right:10px;padding-top:10px;">
+                <div class="jumbotron" style="padding-bottom:0px;padding-left:10px;padding-right:10px;padding-top:10px;">
 
-                <form asp-action="ViewBill2" post>
-                    <div class="row">
-                        <div class="col-md-3">
-                            <div class="form-group">
-                                <label class="bmd-label-floating">From</label>
-                                <div style="display:inline-flex">
+                    <form asp-action="ViewBill2" post>
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label class="bmd-label-floating">From</label>
+                                    <div style="display:inline-flex">
 
-                                    <input type="text" id="from2" name="from2" value="@From.ToString("dd-MM-yyyy")" class="form-control" required>
+                                        <input type="text" id="from2" name="from2" value="@From.ToString("dd-MM-yyyy")" class="form-control" required>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="form-group">
-                                <label class="bmd-label-floating">To</label>
-                                <div style="display:inline-flex">
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label class="bmd-label-floating">To</label>
+                                    <div style="display:inline-flex">
 
-                                    <input type="text" id="to2" name="to2" value="@To.ToString("dd-MM-yyyy")" class="form-control" required>
+                                        <input type="text" id="to2" name="to2" value="@To.ToString("dd-MM-yyyy")" class="form-control" required>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                        <div class="col-md-5">
-                            <div class="form-group">
-                                <label class="bmd-label-floating">Person</label>
-                                <div style="display:inline-flex">
+                            <div class="col-md-5">
+                                <div class="form-group">
+                                    <label class="bmd-label-floating">Person</label>
+                                    <div style="display:inline-flex">
 
-                                    <input type="text" name="person3" id="person3" class="form-control" value="" />
-                                    <div id="suggesstion-box5"></div>
+                                        <input type="text" name="person3" id="person3" class="form-control" value="" />
+                                        <div id="suggesstion-box5"></div>
 
-                                    @*<select id="person2" name="person2" class="form-control border-radius-none" asp-items="@(new SelectList(_ddlHelper.GetAllUsersList().Prepend(new KeyValuePair<string, string>(userId, userName)), "Key", "Value", ""))"></select>*@
+                                        @*<select id="person2" name="person2" class="form-control border-radius-none" asp-items="@(new SelectList(_ddlHelper.GetAllUsersList().Prepend(new KeyValuePair<string, string>(userId, userName)), "Key", "Value", ""))"></select>*@
+                                    </div>
                                 </div>
                             </div>
+                            <div class="col-md-1" style="padding-left:0px;">
+                                <button rel="tooltip" type="submit" class="btn">Load</button>
+
+
+                            </div>
                         </div>
-                        <div class="col-md-1" style="padding-left:0px;">
-                            <button rel="tooltip" type="submit" class="btn">Load</button>
+                    </form>
 
+                </div>
 
-                        </div>
-                    </div>
-                </form>
-
-            </div>
-
-            @{BillList.OrderBy(x => x.OrderDate);
-                var BillListOnDateMeal =
-                from bl in BillList
-                group bl by new { bl.MealTypeId, bl.OrderDate.Date, bl.UserId } into BillMillDate
-                select new
-                {
-                    Team = BillMillDate.Key,
-                    TotalBill = BillMillDate.Sum(x => x.OrderAmount),
-                };
-                var BillListMD = BillListOnDateMeal.ToList();
-                //var accsrBill = _context.AccessoryBill.Sum(x => x.DefaultCost);
-                }
-            <table class="table table-striped table-bordered table-hover">
-                <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>Date</th>
-                        <th>Name</th>
-
-                        <th>Breakfast</th>
-                        <th>Lunch</th>
-                        <th>TeaBreak</th>
-                        <th>Extra Chit</th>
-
-
-                    </tr>
-                </thead>
-                <tbody>
-                    @{
-                        int j = 0;
-
-                    }
-                    @foreach (var itm in BillListMD)
+                @{BillList.OrderBy(x => x.OrderDate);
+                    var BillListOnDateMeal =
+                    from bl in BillList
+                    group bl by new { bl.MealTypeId, bl.OrderDate.Date, bl.UserId } into BillMillDate
+                    select new
                     {
-                        
-                        var TBill = @itm.TotalBill;
-                        string UsrId = itm.Team.UserId;
-                        double brkBill = 0;
-                        double tBrkBill = 0;
-                        double lnchBill = 0;
-                        double ecBill = 0;
-                        if (!BillViewDictionary.ContainsKey(UsrId))
-                        {
-                            j++;
+                        Team = BillMillDate.Key,
+                        TotalBill = BillMillDate.Sum(x => x.OrderAmount),
+                    };
+                    var BillListMD = BillListOnDateMeal.ToList();
+                }
+                <table class="table table-striped table-bordered table-hover">
+                    <thead>
                         <tr>
-                            <td>@j</td>
-                            <td>@itm.Team.Date.ToString("dd.MM.yyyy")</td>
+                            <th>#</th>
+                            <th>Date</th>
+                            <th>Name</th>
 
-                            <td>@_userManager.Users.Where(x => x.Id == UsrId).FirstOrDefault().BUPFullName</td>
-
-                            @{
-                                var brkBillObj = BillListMD.Where(x => x.Team.UserId == UsrId && x.Team.MealTypeId == 1).FirstOrDefault();
-                                var lnchBillObj = BillListMD.Where(x => x.Team.UserId == UsrId && x.Team.MealTypeId == 2).FirstOrDefault();
-                                var TbrkBillObj = BillListMD.Where(x => x.Team.UserId == UsrId && x.Team.MealTypeId == 3).FirstOrDefault();
-                                var ecBillObj = BillListMD.Where(x => x.Team.UserId == UsrId && x.Team.MealTypeId == 10005).FirstOrDefault();
-                                BillViewDictionary.Add(UsrId, UsrId);
-
-                                if (brkBillObj != null)
-                                {
-                                    brkBill = brkBillObj.TotalBill;
-                                    //BillListMD.Remove(brkBillObj);
-                                }
-                                if (lnchBillObj != null)
-                                {
-                                    lnchBill = lnchBillObj.TotalBill;
-                                    // BillListMD.Remove(lnchBillObj);
-                                }
-                                if (TbrkBillObj != null)
-                                {
-                                    tBrkBill = TbrkBillObj.TotalBill;
-                                    // BillListMD.Remove(TbrkBillObj);
-                                }
-                                if (ecBillObj != null)
-                                {
-                                    ecBill = ecBillObj.TotalBill;
-                                    //BillListMD.Remove(ecBillObj);
-                                }
-
-
-                             }
-
-                         
-
-                                <td> @brkBill</td>
-                        
-                          
-                                <td> @lnchBill</td>
-                            
-                         
-                                <td>@tBrkBill</td>
-                             
-                                <td> @ecBill </td>
-                            
-                        
+                            <th>Breakfast</th>
+                            <th>Lunch</th>
+                            <th>TeaBreak</th>
+                            <th>Extra Chit</th>
 
 
                         </tr>
+                    </thead>
+                    <tbody>
+                        @{
+                            int j = 0;
+
+                        }
+                        @foreach (var itm in BillListMD)
+                        {
+
+                            var TBill = @itm.TotalBill;
+                            string UsrId = itm.Team.UserId;
+                            double brkBill = 0;
+                            double tBrkBill = 0;
+                            double lnchBill = 0;
+                            double ecBill = 0;
+                            if (!BillViewDictionary.ContainsKey(UsrId))
+                            {
+                                j++;
+                                var bupNo = _userManager.Users.Where(x => x.Id == UsrId).FirstOrDefault().BUPNumber;
+                                <tr>
+                                    <td>@j</td>
+                                    <td>
+                                        @{var ordDate2 = itm.Team.Date.ToString("dd.MM.yyyy");
+                                            var dayy = itm.Team.Date.Day;
+                                            var monthh = itm.Team.Date.Month;
+                                            var yearr = itm.Team.Date.Year;
+                                        }
+                                        @ordDate2
+
+                                    </td>
+
+                                    <td>@_userManager.Users.Where(x => x.Id == UsrId).FirstOrDefault().BUPFullName</td>
+
+                                    @{
+                                        var brkBillObj = BillListMD.Where(x => x.Team.UserId == UsrId && x.Team.MealTypeId == 1).FirstOrDefault();
+                                        var lnchBillObj = BillListMD.Where(x => x.Team.UserId == UsrId && x.Team.MealTypeId == 2).FirstOrDefault();
+                                        var TbrkBillObj = BillListMD.Where(x => x.Team.UserId == UsrId && x.Team.MealTypeId == 3).FirstOrDefault();
+                                        var ecBillObj = BillListMD.Where(x => x.Team.UserId == UsrId && x.Team.MealTypeId == 10005).FirstOrDefault();
+                                        BillViewDictionary.Add(UsrId, UsrId);
+
+                                        if (brkBillObj != null)
+                                        {
+                                            brkBill = brkBillObj.TotalBill;
+                                            //BillListMD.Remove(brkBillObj);
+                                        }
+                                        if (lnchBillObj != null)
+                                        {
+                                            lnchBill = lnchBillObj.TotalBill;
+                                            // BillListMD.Remove(lnchBillObj);
+                                        }
+                                        if (TbrkBillObj != null)
+                                        {
+                                            tBrkBill = TbrkBillObj.TotalBill;
+                                            // BillListMD.Remove(TbrkBillObj);
+                                        }
+                                        if (ecBillObj != null)
+                                        {
+                                            ecBill = ecBillObj.TotalBill;
+                                            //BillListMD.Remove(ecBillObj);
+                                        }
+
+
                                     }
-                                }
-                </tbody>
-            </table>
-                </div>
+
+
+
+
+                                    <td>
+                                        <div class="row">
+                                            <div class="col-sm-6">
+                                                @brkBill
+
+                                            </div>
+                                            <div class="col-sm-6">
+                                                <button class="btn btn-success" style="padding:3px;" onclick="ShowOrderDetails(@dayy,@monthh,@yearr,1,@bupNo)">
+                                                    Details
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </td>
+
+
+                                    <td>
+                                        <div class="row">
+                                            <div class="col-sm-6">
+                                                @lnchBill
+
+                                            </div>
+                                            <div class="col-sm-6">
+                                                <button class="btn btn-success" style="padding:3px;" onclick="ShowOrderDetails(@dayy,@monthh,@yearr,2,@bupNo)">
+                                                    Details
+                                                </button>
+                                            </div>
+                                        </div>
+
+                                    </td>
+
+
+                                    <td>
+
+                                        <div class="row">
+                                            <div class="col-sm-6">
+                                                @tBrkBill
+
+                                            </div>
+                                            <div class="col-sm-6">
+                                                <button class="btn btn-success" style="padding:3px;" onclick="ShowOrderDetails(@dayy,@monthh,@yearr,3,@bupNo)">
+                                                    Details
+                                                </button>
+                                            </div>
+                                        </div>
+
+
+                                    </td>
+
+                                    <td>
+
+                                        <div class="row">
+                                            <div class="col-sm-6">
+                                                @ecBill
+
+                                            </div>
+                                            <div class="col-sm-6">
+                                                <button class="btn btn-success" style="padding:3px;" onclick="ShowOrderDetails(@dayy,@monthh,@yearr,10005,@bupNo)">
+                                                    Details
+                                                </button>
+                                            </div>
+                                        </div>
+
+
+                                    </td>
+
+
+
+
+
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+            </div>
 
         }
 
@@ -737,7 +873,7 @@
                         </div>
                     </div>
                     <div class="col-md-2">
-                        <button rel="tooltip" type="submit" class="btn" >Search</button>
+                        <button rel="tooltip" type="submit" class="btn">Search</button>
 
 
                     </div>
@@ -810,170 +946,170 @@
 
         @if (ViewBag.StatusUser != null)
         {
-    <div id="RspBillStatus">
-        @if (cmb.Count == 0)
-        {
-            <p>No record is found</p>
-        }
-        else
-        {
-            int a = 0;
-            String inMn = Month[ViewBag.Mnth.ToString()];
-            String inY = Year[ViewBag.Yr.ToString()];
-            String usrNm = "";
-            string UId = "-1";
-            if(ViewBag.StatusUser != "-1")
-            {
-                UId = ViewBag.StatusUser;
-                usrNm = _userManager.Users.Where(x => x.Id == UId).FirstOrDefault().BUPFullName;
-            }
-
-
-
-            <form asp-action="GetBillStatus2" post>
-                <div class="row jumbotron" style="padding-bottom:0px;padding-left:10px;padding-right:10px;padding-top:10px;">
-                    <div class="col-md-5">
-                        <div class="form-group">
-                            <label class="bmd-label-floating">Person</label>
-                            <div style="display:inline-flex">
-
-                                <input type="text" name="stperson2" id="stperson2" class="form-control" value="" />
-                                <div id="suggesstion-box3"></div>
-
-                                @*<select id="stperson2" name="stperson2" class="form-control border-radius-none" asp-items="@(new SelectList(_ddlHelper.GetAllUsersList().Prepend(new KeyValuePair<string, string>(UId, usrNm)), "Key", "Value", ""))"></select>*@
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="form-group">
-                            <label class="bmd-label-floating">Month</label>
-                            <div style="display:inline-flex">
-
-                                <select id="stmonth2" name="stmonth2" class="form-control border-radius-none" asp-items="@(new SelectList(Month.Prepend(new KeyValuePair<string, string>(ViewBag.Mnth.ToString(), @inMn)), "Key", "Value", ""))"></select>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-2">
-                        <div class="form-group">
-                            <label class="bmd-label-floating">Year</label>
-                            <div style="display:inline-flex">
-
-                                <select id="styear2" name="styear2" class="form-control border-radius-none" asp-items="@(new SelectList(Year.Prepend(new KeyValuePair<string, string>(ViewBag.Yr.ToString(), inY)), "Key", "Value", ""))"></select>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-2">
-                        <button rel="tooltip" type="submit" class="btn">Search</button>
-
-
-                    </div>
-                </div>
-            </form>
-            <table class="table table-striped table-bordered table-hover">
-                <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>Name</th>
-                        <th>Month</th>
-                        <th>Year</th>
-                        <th>Bill</th>
-                        <th>IsPaid</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var c in cmb)
+            <div id="RspBillStatus">
+                @if (cmb.Count == 0)
+                {
+                    <p>No record is found</p>
+                }
+                else
+                {
+                    int a = 0;
+                    String inMn = ViewBag.Mnth.ToString() == "-1" ? "" : Month[ViewBag.Mnth.ToString()];
+                    String inY = ViewBag.Yr.ToString() == "-1" ? "" : Year[ViewBag.Yr.ToString()];
+                    String usrNm = "";
+                    string UId = "-1";
+                    if (ViewBag.StatusUser != "-1")
                     {
-                        a++;
-                         var bill = @c.TotalAmount ;
-
-                        string check = "unchecked";
-                        if (c.IsPaid == true)
-                        {
-                            check = "checked";
-                        }
-                        <tr>
-                            <td>@a</td>
-                            <td>@_userManager.Users.Where(x => x.Id == c.UserId).FirstOrDefault().BUPFullName</td>
-                            <td>@Month[c.Month.ToString()]</td>
-                            <td>@Year[c.Year.ToString()]</td>
-                            <td>@bill</td>
-                            <td>
-                                <div class="custom-control custom-checkbox" style="margin-top: 2.5%;">
-                                    <input type="checkbox" onchange="PaidStatusModify(@c.Id)" id="@c.Id" name="@c.Id" value="" @check>
-                                </div>
-                            </td>
-
-
-
-
-                        </tr>
-
-
+                        UId = ViewBag.StatusUser;
+                        usrNm = _userManager.Users.Where(x => x.Id == UId).FirstOrDefault().BUPFullName;
                     }
 
-                </tbody>
-            </table>
-        }
+
+
+                    <form asp-action="GetBillStatus2" post>
+                        <div class="row jumbotron" style="padding-bottom:0px;padding-left:10px;padding-right:10px;padding-top:10px;">
+                            <div class="col-md-5">
+                                <div class="form-group">
+                                    <label class="bmd-label-floating">Person</label>
+                                    <div style="display:inline-flex">
+
+                                        <input type="text" name="stperson2" id="stperson2" class="form-control" value="" />
+                                        <div id="suggesstion-box3"></div>
+
+                                        @*<select id="stperson2" name="stperson2" class="form-control border-radius-none" asp-items="@(new SelectList(_ddlHelper.GetAllUsersList().Prepend(new KeyValuePair<string, string>(UId, usrNm)), "Key", "Value", ""))"></select>*@
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label class="bmd-label-floating">Month</label>
+                                    <div style="display:inline-flex">
+
+                                        <select id="stmonth2" name="stmonth2" class="form-control border-radius-none" asp-items="@(new SelectList(Month.Prepend(new KeyValuePair<string, string>(ViewBag.Mnth.ToString(), @inMn)), "Key", "Value", ""))"></select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label class="bmd-label-floating">Year</label>
+                                    <div style="display:inline-flex">
+
+                                        <select id="styear2" name="styear2" class="form-control border-radius-none" asp-items="@(new SelectList(Year.Prepend(new KeyValuePair<string, string>(ViewBag.Yr.ToString(), inY)), "Key", "Value", ""))"></select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <button rel="tooltip" type="submit" class="btn">Search</button>
+
+
+                            </div>
+                        </div>
+                    </form>
+                    <table class="table table-striped table-bordered table-hover">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Name</th>
+                                <th>Month</th>
+                                <th>Year</th>
+                                <th>Bill</th>
+                                <th>IsPaid</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var c in cmb)
+                            {
+                                a++;
+                                var bill = @c.TotalAmount;
+
+                                string check = "unchecked";
+                                if (c.IsPaid == true)
+                                {
+                                    check = "checked";
+                                }
+                                <tr>
+                                    <td>@a</td>
+                                    <td>@_userManager.Users.Where(x => x.Id == c.UserId).FirstOrDefault().BUPFullName</td>
+                                    <td>@Month[c.Month.ToString()]</td>
+                                    <td>@Year[c.Year.ToString()]</td>
+                                    <td>@bill</td>
+                                    <td>
+                                        <div class="custom-control custom-checkbox" style="margin-top: 2.5%;">
+                                            <input type="checkbox" onchange="PaidStatusModify(@c.Id)" id="@c.Id" name="@c.Id" value="" @check>
+                                        </div>
+                                    </td>
 
 
 
-    </div>
+
+                                </tr>
+
+
+                            }
+
+                        </tbody>
+                    </table>
+                }
+
+
+
+            </div>
         }
 
 
         @if (ViewBag.msg != null)
         {
             <div id="DailyBillView">
-            <div class="row" id="SM">
-                <div class="col-sm-6">
-                    <div class="jumbotron" style="padding-bottom:0px;padding-left:10px;padding-right:10px;padding-top:10px;">
-                        @ViewBag.msg
+                <div class="row" id="SM">
+                    <div class="col-sm-6">
+                        <div class="jumbotron" style="padding-bottom:0px;padding-left:10px;padding-right:10px;padding-top:10px;">
+                            @ViewBag.msg
+                        </div>
                     </div>
+                    <div class="col-sm-6"></div>
+
+
                 </div>
-                <div class="col-sm-6"></div>
 
-
-            </div>
-
-            <div class="bs-example container" data-example-id="striped-table">
-                <table class="table table-striped table-bordered table-hover">
-                    <thead>
-                        <tr>
-                            <th>#</th>
-                            <th>Name</th>
-                            <th>Breakfast</th>
-                            <th>TeaBreak</th>
-                            <th>Lunch</th>
-                            <th>Extra Chit</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @{
-                            int k = 0;
-                        }
-                        @foreach (var p in DistinctUserId)
-                        {
-                            k++;
-                            double brkcost = _context.OrderHistoryVr2.Where(x => x.OrderDate.ToShortDateString() == billDate && x.UserId == p && x.MealTypeId == 1).Select(x => x.OrderAmount).Sum();
-                            double Tbrkcost = _context.OrderHistoryVr2.Where(x => x.OrderDate.ToShortDateString() == billDate && x.UserId == p && x.MealTypeId == 3).Select(x => x.OrderAmount).Sum();
-                            double Lnccost = _context.OrderHistoryVr2.Where(x => x.OrderDate.ToShortDateString() == billDate && x.UserId == p && x.MealTypeId == 2).Select(x => x.OrderAmount).Sum();
-                            double Eccost = _context.OrderHistoryVr2.Where(x => x.OrderDate.ToShortDateString() == billDate && x.UserId == p && x.MealTypeId == 10005).Select(x => x.OrderAmount).Sum();
-
+                <div class="bs-example container" data-example-id="striped-table">
+                    <table class="table table-striped table-bordered table-hover">
+                        <thead>
                             <tr>
-                                <th scope="row">@k</th>
-                                <td>@_userManager.Users.Where(x => x.Id == p).FirstOrDefault().BUPFullName;</td>
-                                <td>@brkcost</td>
-                                <td>@Tbrkcost</td>
-                                <td>@Lnccost</td>
-                                <td>@Eccost</td>
+                                <th>#</th>
+                                <th>Name</th>
+                                <th>Breakfast</th>
+                                <th>TeaBreak</th>
+                                <th>Lunch</th>
+                                <th>Extra Chit</th>
                             </tr>
-                        }
+                        </thead>
+                        <tbody>
+                            @{
+                                int k = 0;
+                            }
+                            @foreach (var p in DistinctUserId)
+                            {
+                                k++;
+                                double brkcost = _context.OrderHistoryVr2.Where(x => x.OrderDate.ToShortDateString() == billDate && x.UserId == p && x.MealTypeId == 1).Select(x => x.OrderAmount).Sum();
+                                double Tbrkcost = _context.OrderHistoryVr2.Where(x => x.OrderDate.ToShortDateString() == billDate && x.UserId == p && x.MealTypeId == 3).Select(x => x.OrderAmount).Sum();
+                                double Lnccost = _context.OrderHistoryVr2.Where(x => x.OrderDate.ToShortDateString() == billDate && x.UserId == p && x.MealTypeId == 2).Select(x => x.OrderAmount).Sum();
+                                double Eccost = _context.OrderHistoryVr2.Where(x => x.OrderDate.ToShortDateString() == billDate && x.UserId == p && x.MealTypeId == 10005).Select(x => x.OrderAmount).Sum();
 
-                    </tbody>
+                                <tr>
+                                    <th scope="row">@k</th>
+                                    <td>@_userManager.Users.Where(x => x.Id == p).FirstOrDefault().BUPFullName;</td>
+                                    <td>@brkcost</td>
+                                    <td>@Tbrkcost</td>
+                                    <td>@Lnccost</td>
+                                    <td>@Eccost</td>
+                                </tr>
+                            }
 
-                </table>
-            </div>
+                        </tbody>
+
+                    </table>
                 </div>
+            </div>
 
 
         }
@@ -1408,14 +1544,12 @@
                 dataType: "json",
                 data: { search: $("#person").val() },
                 success: function (data) {
-                    console.log('Hiiii');
-                    console.log(data);
+                    var filterPerson = data.filter(x => x.employeeRank === 1 || x.employeeRank === 2);
                     var a = [];
-                    for (var i = 0; i < data.length; i++) {
+                    for (var i = 0; i < filterPerson.length; i++) {
 
-                        a.push(data[i].bupFullName);
+                        a.push("[" + filterPerson[i].officeName + "]-" + filterPerson[i].bupNumber + "-" + filterPerson[i].bupFullName);
                     }
-                    console.log(a);
 
                     response(a);
                     $("#suggesstion-box").show();
@@ -1434,17 +1568,12 @@
                 dataType: "json",
                 data: { search: $("#stperson").val() },
                 success: function (data) {
-                    console.log('Hiiii');
-                    console.log(data);
-
-
-                    
+                    var filterPerson = data.filter(x => x.employeeRank === 1 || x.employeeRank === 2);
                     var a = [];
-                    for (var i = 0; i < data.length; i++) {
+                    for (var i = 0; i < filterPerson.length; i++) {
 
-                        a.push(data[i].bupFullName);
+                        a.push("[" + filterPerson[i].officeName + "]-" + filterPerson[i].bupNumber + "-" + filterPerson[i].bupFullName);
                     }
-                    console.log(a);
 
                     response(a);
                     $("#suggesstion-box2").show();
@@ -1464,14 +1593,12 @@
                 dataType: "json",
                 data: { search: $("#stperson2").val() },
                 success: function (data) {
-                    console.log('Hiiii');
-                    console.log(data);
+                    var filterPerson = data.filter(x => x.employeeRank === 1 || x.employeeRank === 2);
                     var a = [];
-                    for (var i = 0; i < data.length; i++) {
+                    for (var i = 0; i < filterPerson.length; i++) {
 
-                        a.push(data[i].bupFullName);
+                        a.push("[" + filterPerson[i].officeName + "]-" + filterPerson[i].bupNumber + "-" + filterPerson[i].bupFullName);
                     }
-                    console.log(a);
 
                     response(a);
                     $("#suggesstion-box3").show();
@@ -1491,14 +1618,12 @@
                 dataType: "json",
                 data: { search: $("#person2").val() },
                 success: function (data) {
-                    console.log('Hiiii');
-                    console.log(data);
+                    var filterPerson = data.filter(x => x.employeeRank === 1 || x.employeeRank === 2);
                     var a = [];
-                    for (var i = 0; i < data.length; i++) {
+                    for (var i = 0; i < filterPerson.length; i++) {
 
-                        a.push(data[i].bupFullName);
+                        a.push("[" + filterPerson[i].officeName + "]-" + filterPerson[i].bupNumber + "-" + filterPerson[i].bupFullName);
                     }
-                    console.log(a);
 
                     response(a);
                     $("#suggesstion-box4").show();
@@ -1519,14 +1644,12 @@
                 dataType: "json",
                 data: { search: $("#person3").val() },
                 success: function (data) {
-                    console.log('Hiiii');
-                    console.log(data);
+                    var filterPerson = data.filter(x => x.employeeRank === 1 || x.employeeRank === 2);
                     var a = [];
-                    for (var i = 0; i < data.length; i++) {
+                    for (var i = 0; i < filterPerson.length; i++) {
 
-                        a.push(data[i].bupFullName);
+                        a.push("[" + filterPerson[i].officeName + "]-" + filterPerson[i].bupNumber + "-" + filterPerson[i].bupFullName);
                     }
-                    console.log(a);
 
                     response(a);
                     $("#suggesstion-box5").show();
@@ -1539,7 +1662,80 @@
         }
               });
 
+        function ShowOrderDetails(day, month, year, type, BupNo) {
+            //console.log(day);
+            //console.log(month);
+            //console.log(year);
+            //var type = 1;
+            console.log(BupNo);
+            $.ajax({
+                url: '/AdminBillGenerate/GetOrderDetails',
+                dataType: "json",
+                data: { Day: day, Month: month, Year: year, Type: type, BUPNo: BupNo },
+                success: function (data) {
+                    console.log(data);
+                    var htmlString = "";
+                    document.getElementById("orderTable").innerHTML = '';
+                    var totalPrice = 0;
+                    htmlString += '<table class="table table-bordered table-striped table-hover dataTable js-exportable">';
+                    htmlString += '<thead><tr>';
+                    htmlString += '<th>Item</th>';
+                    htmlString += '<th>Quantity</th>';
 
+                    htmlString += '<th>Unit Cost</th>';
+                    htmlString += '<th>Total Cost</th>';
+                    htmlString += '</tr></thead><tbody>';
+
+                    for (var i = 0; i < data[0].length; i++) {
+
+                        var item = data[1].find(x => x.Id === data[0][i].StoreOutItemId);
+                        var unitPrice = data[0][i].OrderAmount / data[0][i].UnitOrdered;
+                        totalPrice += data[0][i].OrderAmount;
+                        htmlString += '<tr>';
+                        htmlString += '<td>';
+                        htmlString += item.Name;
+                        htmlString += '</td>';
+                        htmlString += '<td>';
+                        htmlString += data[0][i].UnitOrdered;
+                        htmlString += '</td>';
+                        htmlString += '<td>';
+                        htmlString += unitPrice.toFixed(2);
+                        htmlString += '</td>';
+                        htmlString += '<td>';
+                        htmlString += data[0][i].UnitOrdered + ' * ' + unitPrice + ' = ' + data[0][i].OrderAmount.toFixed(2);
+                        htmlString += '</td>';
+                        htmlString += '<tr>';
+
+                    }
+                    htmlString += '<tr>';
+                    htmlString += '<td></td>';
+                    htmlString += '<td></td>';
+                    htmlString += '<td></td>';
+                    htmlString += '<td>' + totalPrice.toFixed(2) + '</td></tr></tbody></table>';
+                    var modal = document.getElementById("historyModal");
+                    modal.style.display = 'block';
+                    document.getElementById("orderTable").innerHTML = htmlString;
+                    //var a = [];
+                    //for (var i = 0; i < data.length; i++) {
+
+                    //    a.push(data[i].bupFullName);
+                    //}
+                    //console.log(a);
+
+                    //response(a);
+                    //$("#suggesstion-box").show();
+
+                },
+                error: function (xhr, status, error) {
+                    alert("Error");
+                }
+            });
+        }
+
+        function CloseModal() {
+            var modal = document.getElementById("historyModal");
+            modal.style.display = 'none';
+        }
 
 
 

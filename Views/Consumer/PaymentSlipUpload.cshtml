@@ -1,0 +1,663 @@
+﻿@inject ApplicationDbContext _db
+@inject IDDLHelper _ddlHelper
+@inject ApplicationDbContext _context
+@{ ViewData["Title"] = "PaySlipUpload";
+    Layout = "~/Views/Shared/_ConsumerDashboardLayout.cshtml"; }
+
+<head>
+
+    @*<link href="~/assets/css/material-dashboardCut.css" rel="stylesheet" />*@
+
+</head>
+<style>
+
+
+    .btn {
+        /*padding: 2px 2px;*/
+        font-size: 12px;
+        cursor: pointer;
+        margin: 0;
+        padding-top: 2px;
+        padding-left: 2px;
+        padding-right: 2px;
+        padding-bottom: 8px;
+        color: black;
+    }
+
+    hr.divider {
+        margin: .5em;
+        border-width: 2px;
+        margin-top: 2px;
+    }
+
+    body {
+        font-family: 'Roboto', sans-serif;
+        color: #546E7A;
+    }
+
+    .wrapper {
+        max-width: 18rem;
+        padding: 0 0.5rem;
+        margin-left: auto;
+        margin-right: auto;
+        padding-top: 4rem;
+    }
+
+    hr.divider {
+        margin: .5em;
+        border-width: 2px;
+    }
+
+
+    input:focus {
+        outline: none;
+    }
+
+    #ui-datepicker-div {
+        display: none;
+        background-color: #fff;
+        box-shadow: 0 0.125rem 0.5rem rgba(0,0,0,0.1);
+        margin-top: 0.25rem;
+        border-radius: 0.5rem;
+        padding: 0.5rem;
+    }
+
+    table {
+        border-collapse: collapse;
+        border-spacing: 0;
+    }
+
+    .ui-datepicker-calendar thead th {
+        padding: 0.25rem 0;
+        text-align: center;
+        font-size: 0.75rem;
+        font-weight: 400;
+        color: #78909C;
+    }
+
+    .ui-datepicker-calendar tbody td {
+        width: 2.5rem;
+        text-align: center;
+        padding: 0;
+    }
+
+        .ui-datepicker-calendar tbody td a {
+            display: block;
+            border-radius: 0.25rem;
+            line-height: 2rem;
+            transition: 0.3s all;
+            color: #546E7A;
+            font-size: 0.875rem;
+            text-decoration: none;
+        }
+
+            .ui-datepicker-calendar tbody td a:hover {
+                background-color: #E0F2F1;
+            }
+
+            .ui-datepicker-calendar tbody td a.ui-state-active {
+                background-color: #009688;
+                color: white;
+            }
+
+    .ui-datepicker-header a.ui-corner-all {
+        cursor: pointer;
+        position: absolute;
+        top: 0;
+        width: 2rem;
+        height: 2rem;
+        margin: 0.5rem;
+        border-radius: 0.25rem;
+        transition: 0.3s all;
+    }
+
+        .ui-datepicker-header a.ui-corner-all:hover {
+            background-color: #ECEFF1;
+        }
+
+    .ui-datepicker-header a.ui-datepicker-prev {
+        left: 0;
+        background: url("~/assets/img/prev.png");
+        background-repeat: no-repeat;
+        background-size: 0.5rem;
+        background-position: 50%;
+        transform: rotate(180deg);
+    }
+
+    .ui-datepicker-header a.ui-datepicker-next {
+        right: 0;
+        background: url("~/assets/img/prev.png");
+        background-repeat: no-repeat;
+        background-size: 10px;
+        background-position: 50%;
+    }
+
+    .ui-datepicker-header a > span {
+        display: none;
+    }
+
+    .ui-datepicker-title {
+        text-align: center;
+        line-height: 2rem;
+        margin-bottom: 0.25rem;
+        font-size: 0.875rem;
+        font-weight: 500;
+        padding-bottom: 0.25rem;
+    }
+
+    .ui-datepicker-week-col {
+        color: #78909C;
+        font-weight: 400;
+        font-size: 0.75rem;
+    }
+
+    .modalModify {
+        display: none; /* Hidden by default */
+        position: fixed; /* Stay in place */
+        z-index: 1; /* Sit on top */
+        padding-top: 100px; /* Location of the box */
+        left: 0;
+        top: 0;
+        width: 100%; /* Full width */
+        height: 100%; /* Full height */
+        overflow: auto; /* Enable scroll if needed */
+        background-color: rgb(0,0,0); /* Fallback color */
+        background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+    }
+
+    /* Modal Content */
+    .modalModify-content {
+        background-color: #fefefe;
+        margin: auto;
+        padding: 20px;
+        border: 1px solid #888;
+        width: 40%;
+    }
+
+    /* The Close Button */
+    .closeModify {
+        color: #aaaaaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+    }
+
+        .closeModify:hover,
+        .closeModify:focus {
+            color: #000;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+    .checkBoxClass {
+        position: inherit;
+        opacity: 1;
+        left: 0px;
+    }
+
+    .textBox {
+        width: 300px;
+        border: 1px solid;
+        /* padding: 2px;
+        margin: 2px;*/
+        height: 150px;
+        font-size: 14px;
+    }
+
+    .modal {
+        display: none; /* Hidden by default */
+        position: fixed; /* Stay in place */
+        /*z-index: 1;*/ /* Sit on top */
+        padding-top: 100px; /* Location of the box */
+        left: 0;
+        top: 0;
+        width: 100%; /* Full width */
+        height: 100%; /* Full height */
+        overflow: auto; /* Enable scroll if needed */
+        background-color: rgb(0,0,0); /* Fallback color */
+        background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+        padding-left: 100px;
+    }
+
+    /* Modal Content */
+    .modal-content {
+        background-color: #fefefe;
+        margin: auto;
+        padding: 20px;
+        border: 1px solid #888;
+        width: 40%;
+    }
+
+    /* The Close Button */
+    .close {
+        color: #aaaaaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+    }
+
+        .close:hover,
+        .close:focus {
+            color: #000;
+            text-decoration: none;
+            cursor: pointer;
+        }
+</style>
+
+<section class="content">
+    <div class="container-fluid">
+        <div class="col-sm-3">
+            
+        </div>
+        <div class="col-sm-5">
+
+            <div class="card">
+                <div class="header" style="background:lightgreen;">
+                    <h2>
+                        Upload Pay Slip
+                    </h2>
+                </div>
+                <div class="body">
+                    <div class="row">
+                        <div class="col-sm-2">
+
+                        </div>
+                        <div class="col-sm-4">
+                            <input type="radio" name="paymentType" onchange="loadPaymentType()" id="Bkash" checked>Bkash
+                        </div>
+                        <div class="col-sm-4">
+                            <input type="radio" name="paymentType" onchange="loadPaymentType()" id="Check">Check
+
+                        </div>
+                        <div class="col-sm-2">
+
+                        </div>
+                    </div>
+
+                    <div id="bkashPayment">
+                        <div class="row">
+
+
+                            <div class="col-sm-4">
+                                <label class="bmd-label-floating">Mobile No</label>
+
+                            </div>
+                            <div class="col-sm-4">
+                                <input id="mobileNum" maxlength="11" class="form-control" type="text" />
+
+                            </div>
+
+                            <div class="col-sm-4">
+
+                            </div>
+                        </div>
+                        <div class="row">
+
+
+                            <div class="col-sm-4">
+                                <label class="bmd-label-floating">Transaction No</label>
+
+                            </div>
+                            <div class="col-sm-4">
+                                <input id="transNum" maxlength="10" class="form-control" type="text" />
+
+                            </div>
+
+                            <div class="col-sm-4">
+
+                            </div>
+                        </div>
+                        <div class="row">
+
+
+                            <div class="col-sm-4">
+                                <label class="bmd-label-floating">Amount</label>
+
+                            </div>
+                            <div class="col-sm-4">
+                                <input id="bkashAmnt" class="form-control" type="number" />
+
+                            </div>
+
+                            <div class="col-sm-4">
+
+                            </div>
+                        </div>
+
+                        <div class="row">
+
+
+                            <div class="col-sm-4">
+                                <label class="bmd-label-floating">Attachment</label>
+
+                            </div>
+                            <div class="col-sm-4">
+                                <input id="inputFileBkash" style="height: 40px;" class="form-control" type="file" />
+
+                            </div>
+
+                            <div class="col-sm-4">
+
+                            </div>
+                        </div>
+                        <div class="row">
+
+
+                            <div class="col-sm-4">
+                                <label class="bmd-label-floating">Payment Date</label>
+
+                            </div>
+                            <div class="col-sm-4">
+                                <input id="bkashpmntDate" class="form-control" type="text" />
+
+                            </div>
+
+                            <div class="col-sm-4">
+
+                            </div>
+                        </div>
+                        <div class="row">
+
+
+                            <div class="col-sm-4">
+                                <label class="bmd-label-floating">Remarks</label>
+
+                            </div>
+                            <div class="col-sm-6">
+                                @*<input id="remarks" class="form-control" type="text" />*@
+                                <textarea id="bkashremarks" class="form-control custom-control" rows="3"></textarea>
+
+                            </div>
+
+                            <div class="col-sm-2">
+
+                            </div>
+                        </div>
+
+                        <div class="row">
+
+
+                            <div class="col-sm-4">
+
+                            </div>
+                            <div class="col-sm-4">
+
+                            </div>
+
+                            <div class="col-sm-4">
+
+                                <button class="btn btn-danger" style="padding:3px;" onclick="uploadAttachment()"> Upload</button>
+
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div id="checkPayment" style="display:none;">
+                        <div class="row">
+
+
+                            <div class="col-sm-4">
+                                <label class="bmd-label-floating">Bank Name</label>
+
+                            </div>
+                            <div class="col-sm-4">
+                                <input id="bank"  class="form-control" type="text" />
+
+                            </div>
+
+                            <div class="col-sm-4">
+
+                            </div>
+                        </div>
+                        <div class="row">
+
+
+                            <div class="col-sm-4">
+                                <label class="bmd-label-floating">Account No</label>
+
+                            </div>
+                            <div class="col-sm-4">
+                                <input id="account"  class="form-control" type="text" />
+
+                            </div>
+
+                            <div class="col-sm-4">
+
+                            </div>
+                        </div>
+                        <div class="row">
+
+
+                            <div class="col-sm-4">
+                                <label class="bmd-label-floating">Amount</label>
+
+                            </div>
+                            <div class="col-sm-4">
+                                <input id="checkAmount" class="form-control" type="number" />
+
+                            </div>
+
+                            <div class="col-sm-4">
+
+                            </div>
+                        </div>
+                        <div class="row">
+
+
+                            <div class="col-sm-4">
+                                <label class="bmd-label-floating">Attachment</label>
+
+                            </div>
+                            <div class="col-sm-4">
+                                <input id="inputFileCheck" style="height: 40px;" class="form-control" type="file" />
+
+                            </div>
+
+                            <div class="col-sm-4">
+
+                            </div>
+                        </div>
+                        <div class="row">
+
+
+                            <div class="col-sm-4">
+                                <label class="bmd-label-floating">Payment Date</label>
+
+                            </div>
+                            <div class="col-sm-4">
+                                <input id="checkDate" class="form-control" type="text" />
+
+                            </div>
+
+                            <div class="col-sm-4">
+
+                            </div>
+                        </div>
+                        <div class="row">
+
+
+                            <div class="col-sm-4">
+                                <label class="bmd-label-floating">Remarks</label>
+
+                            </div>
+                            <div class="col-sm-6">
+                                @*<input id="remarks" class="form-control" type="text" />*@
+                                <textarea id="checkremarks" class="form-control custom-control" rows="3"></textarea>
+
+                            </div>
+
+                            <div class="col-sm-2">
+
+                            </div>
+                        </div>
+
+                        <div class="row">
+
+
+                            <div class="col-sm-4">
+
+                            </div>
+                            <div class="col-sm-4">
+
+                            </div>
+
+                            <div class="col-sm-4">
+
+                                <button class="btn btn-danger" style="padding:3px;" onclick="uploadAttachment()"> Upload</button>
+
+                            </div>
+                        </div>
+
+                    </div>
+
+
+
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-4">
+
+        </div>
+    </div>
+</section>
+
+@*<script src="~/lib/jquery/dist/jquery.js"></script>*@
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.12.0/themes/smoothness/jquery-ui.css" />
+<script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+<script src="https://code.jquery.com/ui/1.12.0/jquery-ui.min.js"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.js"></script>
+
+
+<script>
+
+    $("#bkashpmntDate").datepicker({
+        dateFormat: "dd-mm-yy"
+        , duration: "fast"
+    });
+
+    $("#checkDate").datepicker({
+        dateFormat: "dd-mm-yy"
+        , duration: "fast"
+    });
+
+   
+
+    function uploadAttachment() {
+        var moblNum = null;
+        var transId = null;
+        var amount = null;
+        var bankName = null;
+        var accountNum = null;
+        var receiver = null;
+        var selectedFile = null;
+        var date = null;
+        var remarks = null;
+        var method = 0;
+        if (document.getElementById("Bkash").checked) {
+            amount = document.getElementById('bkashAmnt').value;
+            moblNum = document.getElementById('mobileNum').value;
+            transId = document.getElementById('transNum').value;
+            selectedFile = document.getElementById("inputFileBkash").files;
+            date = document.getElementById("bkashpmntDate").value;
+            remarks = document.getElementById("bkashremarks").value;
+            method = 1;
+        }
+        else  {
+            amount = document.getElementById('checkAmount').value;
+            bankName = document.getElementById('bank').value;
+            accountNo = document.getElementById('account').value;
+            selectedFile = document.getElementById("inputFileCheck").files;
+            date = document.getElementById("checkDate").value;
+            remarks = document.getElementById("checkremarks").value;
+
+            method = 2;
+
+        }
+       
+
+        var fileToLoad = selectedFile[0];
+
+        var index = fileToLoad.name.lastIndexOf(".");
+        var ext = fileToLoad.name.substring(index + 1, fileToLoad.name.length);
+        var title = fileToLoad.name.substring(0, index);
+
+        var fileReader = new FileReader();
+        var base64;
+        var encode;
+
+        fileReader.onload = function (fileLoadedEvent) {
+            base64 = fileLoadedEvent.target.result;
+            //encode = base64.split(',');
+
+            if (base64.includes(',')) {
+                encode = base64.split(',');
+            }
+            else {
+                encode = base64;
+            }
+
+            //  console.log(encode);
+
+
+
+            $.ajax({
+                url: '/Consumer/UploadAttachment',
+                type: "POST",
+
+                dataType: "json",
+                data: {
+                    Method: method,
+                    Mobile: moblNum, TransId: transId, Bank: bankName, Account: accountNum,
+                    Amount: amount, 
+                    File: encode[1],
+                    FileExtension: ext,
+                    LinkUrl: null,
+                    PaymentDate: date,
+                    Remarks: remarks
+                },
+                success: function (response) {
+                    if (response.success) {
+
+                        alert(response.responseText);
+                        window.location.reload(true);
+
+
+                    } else {
+                        // DoSomethingElse()
+                        if (response.responseText == "Expire") {
+                            window.location.href = "https://ucam.bup.edu.bd/Security/LogOut.aspx";
+                        }
+                        else {
+                            alert(response.responseText);
+                            window.location.reload(true);
+
+                        }
+
+                    }
+                },
+                error: function (xhr, status, error) {
+                    alert(error);
+                }
+            });
+        }
+        fileReader.readAsDataURL(fileToLoad);
+
+    }
+
+
+    function loadPaymentType() {
+        if (document.getElementById("Bkash").checked) {
+            $("#bkashPayment").css("display", "block");
+            $("#checkPayment").css("display", "none");
+        }
+        else {
+            $("#bkashPayment").css("display", "none");
+            $("#checkPayment").css("display", "block");
+
+        }
+    }
+</script>
+
+

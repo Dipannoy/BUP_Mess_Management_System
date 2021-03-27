@@ -38,6 +38,8 @@ namespace Mess_Management_System_Alpha_V2.Data.Migrations
 
                     b.Property<string>("BUPLogInID");
 
+                    b.Property<string>("BUPNumber");
+
                     b.Property<string>("BUPPassword");
 
                     b.Property<string>("BUPPhone");
@@ -54,6 +56,8 @@ namespace Mess_Management_System_Alpha_V2.Data.Migrations
 
                     b.Property<bool>("EmailConfirmed");
 
+                    b.Property<int?>("EmployeeRank");
+
                     b.Property<bool>("LockoutEnabled");
 
                     b.Property<DateTimeOffset?>("LockoutEnd");
@@ -63,6 +67,8 @@ namespace Mess_Management_System_Alpha_V2.Data.Migrations
 
                     b.Property<string>("NormalizedUserName")
                         .HasMaxLength(256);
+
+                    b.Property<string>("OfficeName");
 
                     b.Property<string>("PasswordHash");
 
@@ -88,6 +94,30 @@ namespace Mess_Management_System_Alpha_V2.Data.Migrations
                         .HasFilter("[NormalizedUserName] IS NOT NULL");
 
                     b.ToTable("AspNetUsers");
+                });
+
+            modelBuilder.Entity("Mess_Management_System_Alpha_V2.Data.UserIdentityRole", b =>
+                {
+                    b.Property<string>("Id")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<string>("ConcurrencyStamp")
+                        .IsConcurrencyToken();
+
+                    b.Property<string>("Name")
+                        .HasMaxLength(256);
+
+                    b.Property<string>("NormalizedName")
+                        .HasMaxLength(256);
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("NormalizedName")
+                        .IsUnique()
+                        .HasName("RoleNameIndex")
+                        .HasFilter("[NormalizedName] IS NOT NULL");
+
+                    b.ToTable("AspNetRoles");
                 });
 
             modelBuilder.Entity("Mess_Management_System_Alpha_V2.Models.Menu", b =>
@@ -198,6 +228,189 @@ namespace Mess_Management_System_Alpha_V2.Data.Migrations
                     b.ToTable("BillHistory");
                 });
 
+            modelBuilder.Entity("Mess_Management_System_Alpha_V2.Models.MessModels.Constants", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("CreatedBy");
+
+                    b.Property<DateTime>("CreatedDate");
+
+                    b.Property<string>("LastModifiedBy");
+
+                    b.Property<DateTime>("LastModifiedDate");
+
+                    b.Property<string>("Name");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate();
+
+                    b.Property<string>("Value");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Constants");
+                });
+
+            modelBuilder.Entity("Mess_Management_System_Alpha_V2.Models.MessModels.ConsumerBillHistory", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("Attachment");
+
+                    b.Property<string>("Attribute1");
+
+                    b.Property<string>("Attribute2");
+
+                    b.Property<long>("ConsumerBillParentId");
+
+                    b.Property<long>("ConsumerPaymentInfoId");
+
+                    b.Property<string>("CreatedBy");
+
+                    b.Property<DateTime>("CreatedDate");
+
+                    b.Property<double>("Due");
+
+                    b.Property<bool>("IsPartial");
+
+                    b.Property<string>("LastModifiedBy");
+
+                    b.Property<DateTime>("LastModifiedDate");
+
+                    b.Property<double>("PaymentAmount");
+
+                    b.Property<DateTime>("PaymentDate");
+
+                    b.Property<string>("ReceivedBy");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate();
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ConsumerBillParentId");
+
+                    b.HasIndex("ConsumerPaymentInfoId");
+
+                    b.ToTable("ConsumerBillHistory");
+                });
+
+            modelBuilder.Entity("Mess_Management_System_Alpha_V2.Models.MessModels.ConsumerBillParent", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("Attribute1");
+
+                    b.Property<string>("Attribute2");
+
+                    b.Property<string>("Attribute3");
+
+                    b.Property<string>("CreatedBy");
+
+                    b.Property<DateTime>("CreatedDate");
+
+                    b.Property<string>("LastModifiedBy");
+
+                    b.Property<DateTime>("LastModifiedDate");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate();
+
+                    b.Property<string>("UserId");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("ConsumerBillParent");
+                });
+
+            modelBuilder.Entity("Mess_Management_System_Alpha_V2.Models.MessModels.ConsumerMealWiseExtraChitParent", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("Attribute1");
+
+                    b.Property<string>("Attribute2");
+
+                    b.Property<string>("Attribute3");
+
+                    b.Property<string>("CreatedBy");
+
+                    b.Property<DateTime>("CreatedDate");
+
+                    b.Property<string>("LastModifiedBy");
+
+                    b.Property<DateTime>("LastModifiedDate");
+
+                    b.Property<long>("MealTypeId");
+
+                    b.Property<long>("OrderTypeId");
+
+                    b.Property<string>("Remarks");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate();
+
+                    b.Property<string>("UserId");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MealTypeId");
+
+                    b.HasIndex("OrderTypeId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("ConsumerMealWiseExtraChitParent");
+                });
+
+            modelBuilder.Entity("Mess_Management_System_Alpha_V2.Models.MessModels.ConsumerMealWiseExtrachit", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<long>("ConsumerMealWiseExtraChitParentId");
+
+                    b.Property<string>("CreatedBy");
+
+                    b.Property<DateTime>("CreatedDate");
+
+                    b.Property<string>("LastModifiedBy");
+
+                    b.Property<DateTime>("LastModifiedDate");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate();
+
+                    b.Property<long>("StoreOutItemId");
+
+                    b.Property<double?>("quantity");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ConsumerMealWiseExtraChitParentId");
+
+                    b.HasIndex("StoreOutItemId");
+
+                    b.ToTable("ConsumerMealWiseExtrachit");
+                });
+
             modelBuilder.Entity("Mess_Management_System_Alpha_V2.Models.MessModels.ConsumerMonthlyBillRecord", b =>
                 {
                     b.Property<long>("Id")
@@ -231,6 +444,98 @@ namespace Mess_Management_System_Alpha_V2.Data.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("ConsumerMonthlyBillRecord");
+                });
+
+            modelBuilder.Entity("Mess_Management_System_Alpha_V2.Models.MessModels.ConsumerPaymentAttachment", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<double?>("Amount");
+
+                    b.Property<string>("Attachment");
+
+                    b.Property<string>("Attribute1");
+
+                    b.Property<string>("Attribute2");
+
+                    b.Property<long>("ConsumerBillParentId");
+
+                    b.Property<long>("ConsumerPaymentInfoId");
+
+                    b.Property<string>("CreatedBy");
+
+                    b.Property<DateTime>("CreatedDate");
+
+                    b.Property<bool>("EntryDone");
+
+                    b.Property<string>("LastModifiedBy");
+
+                    b.Property<DateTime>("LastModifiedDate");
+
+                    b.Property<string>("Remarks");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate();
+
+                    b.Property<DateTime>("UploadDate");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ConsumerBillParentId");
+
+                    b.HasIndex("ConsumerPaymentInfoId");
+
+                    b.ToTable("ConsumerPaymentAttachment");
+                });
+
+            modelBuilder.Entity("Mess_Management_System_Alpha_V2.Models.MessModels.ConsumerPaymentInfo", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("AccountNumber");
+
+                    b.Property<string>("Attribute1");
+
+                    b.Property<string>("Attribute2");
+
+                    b.Property<string>("Attribute3");
+
+                    b.Property<string>("BankName");
+
+                    b.Property<long>("ConsumerBillParentId");
+
+                    b.Property<string>("CreatedBy");
+
+                    b.Property<DateTime>("CreatedDate");
+
+                    b.Property<bool>("IsActive");
+
+                    b.Property<string>("LastModifiedBy");
+
+                    b.Property<DateTime>("LastModifiedDate");
+
+                    b.Property<string>("MobileNumber");
+
+                    b.Property<long>("PaymentMethodId");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate();
+
+                    b.Property<string>("TransactionID");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ConsumerBillParentId");
+
+                    b.HasIndex("PaymentMethodId");
+
+                    b.ToTable("ConsumerPaymentInfo");
                 });
 
             modelBuilder.Entity("Mess_Management_System_Alpha_V2.Models.MessModels.CustomerChoice", b =>
@@ -292,6 +597,65 @@ namespace Mess_Management_System_Alpha_V2.Data.Migrations
 
                     b.Property<DateTime>("Date");
 
+                    b.Property<long>("ExtraChitParentId");
+
+                    b.Property<long?>("ExtraItemId");
+
+                    b.Property<string>("LastModifiedBy");
+
+                    b.Property<DateTime>("LastModifiedDate");
+
+                    b.Property<long>("MealTypeId");
+
+                    b.Property<long>("OnSpotParentId");
+
+                    b.Property<long>("OrderTypeId");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate();
+
+                    b.Property<long?>("SetMenuId");
+
+                    b.Property<long?>("StoreOutItemId");
+
+                    b.Property<string>("UserId");
+
+                    b.Property<double>("quantity");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ExtraChitParentId");
+
+                    b.HasIndex("ExtraItemId");
+
+                    b.HasIndex("MealTypeId");
+
+                    b.HasIndex("OnSpotParentId");
+
+                    b.HasIndex("OrderTypeId");
+
+                    b.HasIndex("SetMenuId");
+
+                    b.HasIndex("StoreOutItemId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("CustomerChoiceV2");
+                });
+
+            modelBuilder.Entity("Mess_Management_System_Alpha_V2.Models.MessModels.CustomerDailyMenuChoice", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("CreatedBy");
+
+                    b.Property<DateTime>("CreatedDate");
+
+                    b.Property<int>("Day");
+
                     b.Property<long?>("ExtraItemId");
 
                     b.Property<string>("LastModifiedBy");
@@ -306,8 +670,6 @@ namespace Mess_Management_System_Alpha_V2.Data.Migrations
                         .IsConcurrencyToken()
                         .ValueGeneratedOnAddOrUpdate();
 
-                    b.Property<long?>("SetMenuId");
-
                     b.Property<string>("UserId");
 
                     b.Property<double>("quantity");
@@ -320,11 +682,42 @@ namespace Mess_Management_System_Alpha_V2.Data.Migrations
 
                     b.HasIndex("OrderTypeId");
 
-                    b.HasIndex("SetMenuId");
-
                     b.HasIndex("UserId");
 
-                    b.ToTable("CustomerChoiceV2");
+                    b.ToTable("CustomerDailyMenuChoice");
+                });
+
+            modelBuilder.Entity("Mess_Management_System_Alpha_V2.Models.MessModels.DailyOfferItem", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("CreatedBy");
+
+                    b.Property<DateTime>("CreatedDate");
+
+                    b.Property<DateTime>("Date");
+
+                    b.Property<bool>("IsActive");
+
+                    b.Property<string>("LastModifiedBy");
+
+                    b.Property<DateTime>("LastModifiedDate");
+
+                    b.Property<long?>("OrderLimit");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate();
+
+                    b.Property<long>("StoreOutItemId");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("StoreOutItemId");
+
+                    b.ToTable("DailyOfferItem");
                 });
 
             modelBuilder.Entity("Mess_Management_System_Alpha_V2.Models.MessModels.DailySetMenu", b =>
@@ -360,6 +753,29 @@ namespace Mess_Management_System_Alpha_V2.Data.Migrations
                     b.HasIndex("SetMenuId");
 
                     b.ToTable("DailySetMenu");
+                });
+
+            modelBuilder.Entity("Mess_Management_System_Alpha_V2.Models.MessModels.ExtraChitParent", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("CreatedBy");
+
+                    b.Property<DateTime>("CreatedDate");
+
+                    b.Property<string>("LastModifiedBy");
+
+                    b.Property<DateTime>("LastModifiedDate");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate();
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ExtraChitParent");
                 });
 
             modelBuilder.Entity("Mess_Management_System_Alpha_V2.Models.MessModels.ExtraItem", b =>
@@ -497,13 +913,54 @@ namespace Mess_Management_System_Alpha_V2.Data.Migrations
                         .IsConcurrencyToken()
                         .ValueGeneratedOnAddOrUpdate();
 
+                    b.Property<long?>("StoreOutItemId");
+
                     b.HasKey("Id");
 
                     b.HasIndex("ExtraItemId");
 
                     b.HasIndex("MealTypeId");
 
+                    b.HasIndex("StoreOutItemId");
+
                     b.ToTable("MenuItem");
+                });
+
+            modelBuilder.Entity("Mess_Management_System_Alpha_V2.Models.MessModels.NavigationMenu", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("Action");
+
+                    b.Property<string>("Controller");
+
+                    b.Property<string>("CreatedBy");
+
+                    b.Property<DateTime>("CreatedDate");
+
+                    b.Property<bool>("IsActive");
+
+                    b.Property<string>("LastModifiedBy");
+
+                    b.Property<DateTime>("LastModifiedDate");
+
+                    b.Property<string>("Name");
+
+                    b.Property<long>("ParentId");
+
+                    b.Property<string>("RouteVariable");
+
+                    b.Property<string>("RouteVariableValue");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate();
+
+                    b.HasKey("Id");
+
+                    b.ToTable("NavigationMenu");
                 });
 
             modelBuilder.Entity("Mess_Management_System_Alpha_V2.Models.MessModels.Office", b =>
@@ -522,6 +979,8 @@ namespace Mess_Management_System_Alpha_V2.Data.Migrations
 
                     b.Property<string>("Name");
 
+                    b.Property<int?>("PIMSOfficeId");
+
                     b.Property<byte[]>("RowVersion")
                         .IsConcurrencyToken()
                         .ValueGeneratedOnAddOrUpdate();
@@ -529,6 +988,45 @@ namespace Mess_Management_System_Alpha_V2.Data.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Office");
+                });
+
+            modelBuilder.Entity("Mess_Management_System_Alpha_V2.Models.MessModels.OnSpotParent", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("BearerId");
+
+                    b.Property<string>("CreatedBy");
+
+                    b.Property<DateTime>("CreatedDate");
+
+                    b.Property<DateTime>("Date");
+
+                    b.Property<bool>("IsApproved");
+
+                    b.Property<bool>("IsOfficeOrder");
+
+                    b.Property<string>("LastModifiedBy");
+
+                    b.Property<DateTime>("LastModifiedDate");
+
+                    b.Property<long?>("OfficeId");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate();
+
+                    b.Property<string>("UserId");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OfficeId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("OnSpotParent");
                 });
 
             modelBuilder.Entity("Mess_Management_System_Alpha_V2.Models.MessModels.OrderHistory", b =>
@@ -662,6 +1160,31 @@ namespace Mess_Management_System_Alpha_V2.Data.Migrations
                     b.ToTable("OrderType");
                 });
 
+            modelBuilder.Entity("Mess_Management_System_Alpha_V2.Models.MessModels.PaymentMethod", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("CreatedBy");
+
+                    b.Property<DateTime>("CreatedDate");
+
+                    b.Property<string>("LastModifiedBy");
+
+                    b.Property<DateTime>("LastModifiedDate");
+
+                    b.Property<string>("MethodName");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate();
+
+                    b.HasKey("Id");
+
+                    b.ToTable("PaymentMethod");
+                });
+
             modelBuilder.Entity("Mess_Management_System_Alpha_V2.Models.MessModels.Period", b =>
                 {
                     b.Property<long>("Id")
@@ -769,6 +1292,37 @@ namespace Mess_Management_System_Alpha_V2.Data.Migrations
                     b.HasIndex("StoreInItemId");
 
                     b.ToTable("RemainingBalanceAndWeightedPriceCalculation");
+                });
+
+            modelBuilder.Entity("Mess_Management_System_Alpha_V2.Models.MessModels.RoleMenu", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("CreatedBy");
+
+                    b.Property<DateTime>("CreatedDate");
+
+                    b.Property<string>("LastModifiedBy");
+
+                    b.Property<DateTime>("LastModifiedDate");
+
+                    b.Property<long>("NavigationMenuId");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate();
+
+                    b.Property<string>("UserIdentityRoleId");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("NavigationMenuId");
+
+                    b.HasIndex("UserIdentityRoleId");
+
+                    b.ToTable("RoleMenu");
                 });
 
             modelBuilder.Entity("Mess_Management_System_Alpha_V2.Models.MessModels.SetMenu", b =>
@@ -1130,6 +1684,68 @@ namespace Mess_Management_System_Alpha_V2.Data.Migrations
                     b.ToTable("UnitType");
                 });
 
+            modelBuilder.Entity("Mess_Management_System_Alpha_V2.Models.MessModels.UserDateChoiceDetail", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("CreatedBy");
+
+                    b.Property<DateTime>("CreatedDate");
+
+                    b.Property<DateTime>("Date");
+
+                    b.Property<bool>("IsOrderSet");
+
+                    b.Property<string>("LastModifiedBy");
+
+                    b.Property<DateTime>("LastModifiedDate");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate();
+
+                    b.Property<long?>("UserDateChoiceMasterId");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserDateChoiceMasterId");
+
+                    b.ToTable("UserDateChoiceDetail");
+                });
+
+            modelBuilder.Entity("Mess_Management_System_Alpha_V2.Models.MessModels.UserDateChoiceMaster", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("CreatedBy");
+
+                    b.Property<DateTime>("CreatedDate");
+
+                    b.Property<string>("LastModifiedBy");
+
+                    b.Property<DateTime>("LastModifiedDate");
+
+                    b.Property<long>("MealTypeId");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate();
+
+                    b.Property<string>("UserId");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MealTypeId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("UserDateChoiceMaster");
+                });
+
             modelBuilder.Entity("Mess_Management_System_Alpha_V2.Models.MessModels.WarehouseStorage", b =>
                 {
                     b.Property<long>("Id")
@@ -1158,37 +1774,17 @@ namespace Mess_Management_System_Alpha_V2.Data.Migrations
 
                     b.Property<long>("StoreInItemId");
 
+                    b.Property<long?>("StoreOutItemId");
+
                     b.Property<double>("TotalPurchasePrice");
 
                     b.HasKey("Id");
 
                     b.HasIndex("StoreInItemId");
 
+                    b.HasIndex("StoreOutItemId");
+
                     b.ToTable("WarehouseStorage");
-                });
-
-            modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
-                {
-                    b.Property<string>("Id")
-                        .ValueGeneratedOnAdd();
-
-                    b.Property<string>("ConcurrencyStamp")
-                        .IsConcurrencyToken();
-
-                    b.Property<string>("Name")
-                        .HasMaxLength(256);
-
-                    b.Property<string>("NormalizedName")
-                        .HasMaxLength(256);
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("NormalizedName")
-                        .IsUnique()
-                        .HasName("RoleNameIndex")
-                        .HasFilter("[NormalizedName] IS NOT NULL");
-
-                    b.ToTable("AspNetRoles");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -1285,11 +1881,89 @@ namespace Mess_Management_System_Alpha_V2.Data.Migrations
                         .OnDelete(DeleteBehavior.Restrict);
                 });
 
+            modelBuilder.Entity("Mess_Management_System_Alpha_V2.Models.MessModels.ConsumerBillHistory", b =>
+                {
+                    b.HasOne("Mess_Management_System_Alpha_V2.Models.MessModels.ConsumerBillParent", "ConsumerBillParent")
+                        .WithMany("ConsumerBillHistoryList")
+                        .HasForeignKey("ConsumerBillParentId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("Mess_Management_System_Alpha_V2.Models.MessModels.ConsumerPaymentInfo", "ConsumerPaymentInfo")
+                        .WithMany("ConsumerBillHistoryList")
+                        .HasForeignKey("ConsumerPaymentInfoId")
+                        .OnDelete(DeleteBehavior.Restrict);
+                });
+
+            modelBuilder.Entity("Mess_Management_System_Alpha_V2.Models.MessModels.ConsumerBillParent", b =>
+                {
+                    b.HasOne("Mess_Management_System_Alpha_V2.Data.ApplicationUser", "ApplicationUser")
+                        .WithMany("ConsumerBillParentList")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+                });
+
+            modelBuilder.Entity("Mess_Management_System_Alpha_V2.Models.MessModels.ConsumerMealWiseExtraChitParent", b =>
+                {
+                    b.HasOne("Mess_Management_System_Alpha_V2.Models.MessModels.MealType", "MealType")
+                        .WithMany("ConsumerMealWiseExtraChitParentList")
+                        .HasForeignKey("MealTypeId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("Mess_Management_System_Alpha_V2.Models.MessModels.OrderType", "OrderType")
+                        .WithMany("ConsumerMealWiseExtraChitParentList")
+                        .HasForeignKey("OrderTypeId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("Mess_Management_System_Alpha_V2.Data.ApplicationUser", "ApplicationUser")
+                        .WithMany("ConsumerMealWiseExtraChitParentList")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+                });
+
+            modelBuilder.Entity("Mess_Management_System_Alpha_V2.Models.MessModels.ConsumerMealWiseExtrachit", b =>
+                {
+                    b.HasOne("Mess_Management_System_Alpha_V2.Models.MessModels.ConsumerMealWiseExtraChitParent", "ConsumerMealWiseExtraChitParent")
+                        .WithMany("ConsumerMealWiseExtrachitList")
+                        .HasForeignKey("ConsumerMealWiseExtraChitParentId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("Mess_Management_System_Alpha_V2.Models.MessModels.StoreOutItem", "StoreOutItem")
+                        .WithMany("ConsumerMealWiseExtrachitList")
+                        .HasForeignKey("StoreOutItemId")
+                        .OnDelete(DeleteBehavior.Restrict);
+                });
+
             modelBuilder.Entity("Mess_Management_System_Alpha_V2.Models.MessModels.ConsumerMonthlyBillRecord", b =>
                 {
                     b.HasOne("Mess_Management_System_Alpha_V2.Data.ApplicationUser", "ApplicationUser")
                         .WithMany("ConsumerMonthlyBillRecordList")
                         .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+                });
+
+            modelBuilder.Entity("Mess_Management_System_Alpha_V2.Models.MessModels.ConsumerPaymentAttachment", b =>
+                {
+                    b.HasOne("Mess_Management_System_Alpha_V2.Models.MessModels.ConsumerBillParent", "ConsumerBillParent")
+                        .WithMany("ConsumerPaymentAttachmentList")
+                        .HasForeignKey("ConsumerBillParentId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("Mess_Management_System_Alpha_V2.Models.MessModels.ConsumerPaymentInfo", "ConsumerPaymentInfo")
+                        .WithMany("ConsumerPaymentAttachmentList")
+                        .HasForeignKey("ConsumerPaymentInfoId")
+                        .OnDelete(DeleteBehavior.Restrict);
+                });
+
+            modelBuilder.Entity("Mess_Management_System_Alpha_V2.Models.MessModels.ConsumerPaymentInfo", b =>
+                {
+                    b.HasOne("Mess_Management_System_Alpha_V2.Models.MessModels.ConsumerBillParent", "ConsumerBillParent")
+                        .WithMany("ConsumerPaymentInfoList")
+                        .HasForeignKey("ConsumerBillParentId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("Mess_Management_System_Alpha_V2.Models.MessModels.PaymentMethod", "PaymentMethod")
+                        .WithMany("ConsumerPaymentInfoList")
+                        .HasForeignKey("PaymentMethodId")
                         .OnDelete(DeleteBehavior.Restrict);
                 });
 
@@ -1323,6 +1997,11 @@ namespace Mess_Management_System_Alpha_V2.Data.Migrations
 
             modelBuilder.Entity("Mess_Management_System_Alpha_V2.Models.MessModels.CustomerChoiceV2", b =>
                 {
+                    b.HasOne("Mess_Management_System_Alpha_V2.Models.MessModels.ExtraChitParent", "ExtraChitParent")
+                        .WithMany("CustomerChoiceV2List")
+                        .HasForeignKey("ExtraChitParentId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("Mess_Management_System_Alpha_V2.Models.MessModels.ExtraItem", "ExtraItem")
                         .WithMany("CustomerChoiceV2List")
                         .HasForeignKey("ExtraItemId")
@@ -1331,6 +2010,11 @@ namespace Mess_Management_System_Alpha_V2.Data.Migrations
                     b.HasOne("Mess_Management_System_Alpha_V2.Models.MessModels.MealType", "MealType")
                         .WithMany("CustomerChoiceV2List")
                         .HasForeignKey("MealTypeId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("Mess_Management_System_Alpha_V2.Models.MessModels.OnSpotParent", "OnSpotParent")
+                        .WithMany("CustomerChoiceV2List")
+                        .HasForeignKey("OnSpotParentId")
                         .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("Mess_Management_System_Alpha_V2.Models.MessModels.OrderType", "OrderType")
@@ -1343,9 +2027,45 @@ namespace Mess_Management_System_Alpha_V2.Data.Migrations
                         .HasForeignKey("SetMenuId")
                         .OnDelete(DeleteBehavior.Restrict);
 
+                    b.HasOne("Mess_Management_System_Alpha_V2.Models.MessModels.StoreOutItem", "StoreOutItem")
+                        .WithMany("CustomerChoiceV2List")
+                        .HasForeignKey("StoreOutItemId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("Mess_Management_System_Alpha_V2.Data.ApplicationUser", "ApplicationUser")
                         .WithMany("CustomerChoiceV2List")
                         .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+                });
+
+            modelBuilder.Entity("Mess_Management_System_Alpha_V2.Models.MessModels.CustomerDailyMenuChoice", b =>
+                {
+                    b.HasOne("Mess_Management_System_Alpha_V2.Models.MessModels.ExtraItem", "ExtraItem")
+                        .WithMany("CustomerDailyMenuChoiceList")
+                        .HasForeignKey("ExtraItemId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("Mess_Management_System_Alpha_V2.Models.MessModels.MealType", "MealType")
+                        .WithMany("CustomerDailyMenuChoiceList")
+                        .HasForeignKey("MealTypeId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("Mess_Management_System_Alpha_V2.Models.MessModels.OrderType", "OrderType")
+                        .WithMany("CustomerDailyMenuChoiceList")
+                        .HasForeignKey("OrderTypeId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("Mess_Management_System_Alpha_V2.Data.ApplicationUser", "ApplicationUser")
+                        .WithMany("CustomerDailyMenuChoiceList")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+                });
+
+            modelBuilder.Entity("Mess_Management_System_Alpha_V2.Models.MessModels.DailyOfferItem", b =>
+                {
+                    b.HasOne("Mess_Management_System_Alpha_V2.Models.MessModels.StoreOutItem", "StoreOutItem")
+                        .WithMany("DailyOfferItemList")
+                        .HasForeignKey("StoreOutItemId")
                         .OnDelete(DeleteBehavior.Restrict);
                 });
 
@@ -1398,6 +2118,24 @@ namespace Mess_Management_System_Alpha_V2.Data.Migrations
                     b.HasOne("Mess_Management_System_Alpha_V2.Models.MessModels.MealType", "MealType")
                         .WithMany("MenuItemList")
                         .HasForeignKey("MealTypeId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("Mess_Management_System_Alpha_V2.Models.MessModels.StoreOutItem", "StoreOutItem")
+                        .WithMany("MenuItemList")
+                        .HasForeignKey("StoreOutItemId")
+                        .OnDelete(DeleteBehavior.Restrict);
+                });
+
+            modelBuilder.Entity("Mess_Management_System_Alpha_V2.Models.MessModels.OnSpotParent", b =>
+                {
+                    b.HasOne("Mess_Management_System_Alpha_V2.Models.MessModels.Office", "Office")
+                        .WithMany("OnSpotParentList")
+                        .HasForeignKey("OfficeId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("Mess_Management_System_Alpha_V2.Data.ApplicationUser", "ApplicationUser")
+                        .WithMany("OnSpotParentList")
+                        .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Restrict);
                 });
 
@@ -1488,6 +2226,19 @@ namespace Mess_Management_System_Alpha_V2.Data.Migrations
                     b.HasOne("Mess_Management_System_Alpha_V2.Models.MessModels.StoreInItem", "StoreInItem")
                         .WithMany("RemainingBalanceAndWeightedPriceCalculationList")
                         .HasForeignKey("StoreInItemId")
+                        .OnDelete(DeleteBehavior.Restrict);
+                });
+
+            modelBuilder.Entity("Mess_Management_System_Alpha_V2.Models.MessModels.RoleMenu", b =>
+                {
+                    b.HasOne("Mess_Management_System_Alpha_V2.Models.MessModels.NavigationMenu", "NavigationMenu")
+                        .WithMany("RoleMenuList")
+                        .HasForeignKey("NavigationMenuId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("Mess_Management_System_Alpha_V2.Data.UserIdentityRole", "UserIdentityRole")
+                        .WithMany("RoleMenuList")
+                        .HasForeignKey("UserIdentityRoleId")
                         .OnDelete(DeleteBehavior.Restrict);
                 });
 
@@ -1587,17 +2338,43 @@ namespace Mess_Management_System_Alpha_V2.Data.Migrations
                         .OnDelete(DeleteBehavior.Restrict);
                 });
 
+            modelBuilder.Entity("Mess_Management_System_Alpha_V2.Models.MessModels.UserDateChoiceDetail", b =>
+                {
+                    b.HasOne("Mess_Management_System_Alpha_V2.Models.MessModels.UserDateChoiceMaster", "UserDateChoiceMaster")
+                        .WithMany("UserDateChoiceDetailList")
+                        .HasForeignKey("UserDateChoiceMasterId")
+                        .OnDelete(DeleteBehavior.Restrict);
+                });
+
+            modelBuilder.Entity("Mess_Management_System_Alpha_V2.Models.MessModels.UserDateChoiceMaster", b =>
+                {
+                    b.HasOne("Mess_Management_System_Alpha_V2.Models.MessModels.MealType", "MealType")
+                        .WithMany("UserDateChoiceMasterList")
+                        .HasForeignKey("MealTypeId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("Mess_Management_System_Alpha_V2.Data.ApplicationUser", "ApplicationUser")
+                        .WithMany("UserDateChoiceMasterList")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+                });
+
             modelBuilder.Entity("Mess_Management_System_Alpha_V2.Models.MessModels.WarehouseStorage", b =>
                 {
                     b.HasOne("Mess_Management_System_Alpha_V2.Models.MessModels.StoreInItem", "StoreInItem")
                         .WithMany("WarehouseStorageList")
                         .HasForeignKey("StoreInItemId")
                         .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("Mess_Management_System_Alpha_V2.Models.MessModels.StoreOutItem", "StoreOutItem")
+                        .WithMany("WarehouseStorageList")
+                        .HasForeignKey("StoreOutItemId")
+                        .OnDelete(DeleteBehavior.Restrict);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
-                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole")
+                    b.HasOne("Mess_Management_System_Alpha_V2.Data.UserIdentityRole")
                         .WithMany()
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade);
@@ -1621,7 +2398,7 @@ namespace Mess_Management_System_Alpha_V2.Data.Migrations
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserRole<string>", b =>
                 {
-                    b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole")
+                    b.HasOne("Mess_Management_System_Alpha_V2.Data.UserIdentityRole")
                         .WithMany()
                         .HasForeignKey("RoleId")
                         .OnDelete(DeleteBehavior.Cascade);

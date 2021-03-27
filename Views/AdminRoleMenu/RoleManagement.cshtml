@@ -1,0 +1,429 @@
+﻿@inject ApplicationDbContext _context
+@inject Microsoft.AspNetCore.Identity.UserManager<ApplicationUser> _userManager
+@inject IDDLHelper _ddlHelper
+
+@{
+    ViewData["Title"] = "RoleManagement";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+<head>
+    <link href="~/assets/css/material-dashboard.css?v=2.1.1" rel="stylesheet" />
+    <link href="~/assets/demo/demo.css" rel="stylesheet" />
+</head>
+<style>
+
+    #ui-datepicker-div {
+        display: none;
+        background-color: #fff;
+        box-shadow: 0 0.125rem 0.5rem rgba(0,0,0,0.1);
+        margin-top: 0.25rem;
+        border-radius: 0.5rem;
+        padding: 0.5rem;
+    }
+
+    table {
+        border-collapse: collapse;
+        border-spacing: 0;
+    }
+
+    .ui-datepicker-calendar thead th {
+        padding: 0.25rem 0;
+        text-align: center;
+        font-size: 0.75rem;
+        font-weight: 400;
+        color: #78909C;
+    }
+
+    .ui-datepicker-calendar tbody td {
+        width: 2.5rem;
+        text-align: center;
+        padding: 0;
+    }
+
+        .ui-datepicker-calendar tbody td a {
+            display: block;
+            border-radius: 0.25rem;
+            line-height: 2rem;
+            transition: 0.3s all;
+            color: #546E7A;
+            font-size: 0.875rem;
+            text-decoration: none;
+        }
+
+            .ui-datepicker-calendar tbody td a:hover {
+                background-color: #E0F2F1;
+            }
+
+            .ui-datepicker-calendar tbody td a.ui-state-active {
+                background-color: #009688;
+                color: white;
+            }
+
+    .ui-datepicker-header a.ui-corner-all {
+        cursor: pointer;
+        position: absolute;
+        top: 0;
+        width: 2rem;
+        height: 2rem;
+        margin: 0.5rem;
+        border-radius: 0.25rem;
+        transition: 0.3s all;
+    }
+
+        .ui-datepicker-header a.ui-corner-all:hover {
+            background-color: #ECEFF1;
+        }
+
+    .ui-datepicker-header a.ui-datepicker-prev {
+        left: 0;
+        background: url("~/assets/img/prev.png");
+        background-repeat: no-repeat;
+        background-size: 0.5rem;
+        background-position: 50%;
+        transform: rotate(180deg);
+    }
+
+    .ui-datepicker-header a.ui-datepicker-next {
+        right: 0;
+        background: url("~/assets/img/prev.png");
+        background-repeat: no-repeat;
+        background-size: 10px;
+        background-position: 50%;
+    }
+
+    .ui-datepicker-header a > span {
+        display: none;
+    }
+
+    .ui-datepicker-title {
+        text-align: center;
+        line-height: 2rem;
+        margin-bottom: 0.25rem;
+        font-size: 0.875rem;
+        font-weight: 500;
+        padding-bottom: 0.25rem;
+    }
+
+    .ui-datepicker-week-col {
+        color: #78909C;
+        font-weight: 400;
+        font-size: 0.75rem;
+    }
+
+    .modal {
+        display: none; /* Hidden by default */
+        position: fixed; /* Stay in place */
+        /*z-index: 1;*/ /* Sit on top */
+        padding-top: 100px; /* Location of the box */
+        left: 0;
+        top: 0;
+        width: 100%; /* Full width */
+        height: 100%; /* Full height */
+        overflow: auto; /* Enable scroll if needed */
+        background-color: rgb(0,0,0); /* Fallback color */
+        background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+        padding-left: 100px;
+    }
+
+    /* Modal Content */
+    .modal-content {
+        background-color: #fefefe;
+        margin: auto;
+        padding: 20px;
+        border: 1px solid #888;
+        width: 40%;
+    }
+
+    /* The Close Button */
+    .close {
+        color: #aaaaaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+    }
+
+        .close:hover,
+        .close:focus {
+            color: #000;
+            text-decoration: none;
+            cursor: pointer;
+        }
+</style>
+
+<div class="content">
+    <div class="container-fluid">
+        <div id="addRole" class="modal">
+            <div class="modal-content">
+                <div class="row">
+                    <div class="col-sm-4">
+                        <label class="bmd-label-floating">Role</label>
+
+                    </div>
+                    <div class="col-sm-4">
+                        <input type="text" id="roleName" class="form-control" maxlength="11" placeholder="role" />
+
+                    </div>
+
+                    <div class="col-sm-4">
+
+                    </div>
+                </div>
+                <div class="row" style="padding-top:20px;">
+                    <div class="col-sm-6">
+
+                    </div>
+
+                    <div class="col-sm-3">
+                        <button class="btn" onclick="SaveRole()" style="padding:3px;"> Save</button>
+                    </div>
+                    <div class="col-sm-3">
+                        <button class="btn" onclick="CloseModal()" style="padding:3px;"> Close</button>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        <div class="row" style="padding-top:100px;">
+            <div class="col-sm-6">
+                <div class="card">
+                    <div class="card-header card-header-success">
+                        Roles
+                    </div>
+                    <div class="card-body">
+                        @{
+                            var roleList = _context.Roles.Where(x => x.Id.Count() > 0).ToList();
+                            var a = 0;
+                            var sl = 0;
+                        }
+                        <div class="row">
+                            <div class="col-sm-2"></div>
+                            <div class="col-sm-8">
+                                <table class="table table-striped table-bordered table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Role Name</th>
+
+
+
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var i in roleList)
+                                        {
+                                            sl++;
+                                            <tr>
+                                                <td>
+                                                    @sl
+                                                </td>
+                                                <td>
+                                                    @i.Name
+                                                </td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="col-sm-2"></div>
+
+                        </div>
+                        <div class="row">
+                            <div class="col-sm-4">
+
+                            </div>
+                            <div class="col-sm-4">
+                                <button onclick="AddRole()" class="btn btn-success" style="padding:3px;">
+                                    Add More
+                                </button>
+                            </div>
+                            <div class="col-sm-4">
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <div class="col-sm-6">
+                <div class="card">
+                    <div class="card-header card-header-success">
+                        User Role Mapping
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-sm-4">
+                                @*<label class="bmd-label-floating">Person</label>*@
+
+                            </div>
+                            <div class="col-sm-4">
+                                <input type="text" id="rolePerson" class="form-control" placeholder="Search Person" />
+                                <div id="suggesstion-box"></div>
+
+                            </div>
+
+                            <div class="col-sm-4">
+
+                            </div>
+                        </div>
+                        @foreach (var r in roleList)
+                        {
+                    <div class="row">
+                        <div class="col-sm-4">
+
+                        </div>
+                        <div class="col-sm-2">
+                            <input class="form-check-input" name="roleCheck" type="checkbox" value="@r.Id" unchecked>
+
+                        </div>
+                        <div class="col-sm-4">
+                            @r.Name
+                        </div>
+                    </div>
+                        }
+                    <div class="row">
+                        <div class="col-sm-8">
+
+                        </div>
+                        <div class="col-sm-4">
+                            <button class="btn btn-success" style="padding:3px;" onclick="SetRole()"> Submit </button>
+                        </div>
+                    </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        </div>
+    </div>
+
+            <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.0/themes/smoothness/jquery-ui.css" />
+            <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+            <script src="https://code.jquery.com/ui/1.12.0/jquery-ui.min.js"></script>
+
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.js"></script>
+
+            <script>
+
+                function AddRole() {
+                    var model = document.getElementById("addRole");
+                    model.style.display = "block";
+                }
+                function CloseModal() {
+                    var model = document.getElementById("addRole");
+                    model.style.display = "none";
+                }
+                function SaveRole() {
+                    var role = document.getElementById("roleName").value;
+                    $.ajax({
+                        url: '/AdminRoleMenu/SaveRole',
+                        type: "POST",
+
+                        dataType: "json",
+                        data: {
+                            Role: role
+                        },
+                        success: function (response) {
+                            if (response.success) {
+
+                                alert(response.responseText);
+                                window.location.reload(true);
+
+
+                            } else {
+                                // DoSomethingElse()
+                                if (response.responseText == "Expire") {
+                                    window.location.href = "https://ucam.bup.edu.bd/Security/LogOut.aspx";
+                                }
+                                else {
+                                    alert(response.responseText);
+                                    window.location.reload(true);
+
+                                }
+
+                            }
+                        },
+                        error: function (xhr, status, error) {
+                            alert(error);
+                        }
+                    });
+
+                }
+                $("#rolePerson").autocomplete({
+                    source: function (request, response) {
+                        $.ajax({
+                            url: '/AdminRoleMenu/GetSearchPerson',
+                            dataType: "json",
+                            data: { search: $("#rolePerson").val() },
+                            success: function (data) {
+                                console.log(data);
+                                var a = [];
+                                for (var i = 0; i < data.length; i++) {
+
+                                    a.push(data[i].bupFullName);
+                                }
+                                console.log(a);
+
+                                response(a);
+                                $("#suggesstion-box").show();
+
+                            },
+                            error: function (xhr, status, error) {
+                                alert("Error");
+                            }
+                        });
+                    }
+                });
+
+                function SetRole() {
+                    var checkBoxAdded;
+                    var checkBoxLengthAdded;
+                    var user = document.getElementById("rolePerson").value;
+                    var itemList = [];
+                    checkBoxAdded = document.getElementsByName("roleCheck");
+                    checkBoxLengthAdded = checkBoxAdded.length;
+                    for (var i = 0; i < checkBoxLengthAdded; i++) {
+                        if (checkBoxAdded[i].checked == true) {
+                            var obj = { Person: user, Role: checkBoxAdded[i].value };
+                            itemList.push(obj);
+                        }
+                    }
+                    console.log(itemList);
+
+                    $.ajax({
+                        url: '/AdminRoleMenu/SetRole',
+                        type: "POST",
+
+                        dataType: "json",
+                        data: {
+                            ItemList: JSON.stringify(itemList)
+                        },
+                        success: function (response) {
+                            if (response.success) {
+
+                                alert(response.responseText);
+                                window.location.reload(true);
+
+
+                            } else {
+                                // DoSomethingElse()
+                                if (response.responseText == "Expire") {
+                                    window.location.href = "https://ucam.bup.edu.bd/Security/LogOut.aspx";
+                                }
+                                else {
+                                    alert(response.responseText);
+                                    window.location.reload(true);
+
+                                }
+
+                            }
+                        },
+                        error: function (xhr, status, error) {
+                            alert(error);
+                        }
+                    });
+
+                }
+            </script>

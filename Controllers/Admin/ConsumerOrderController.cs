@@ -218,7 +218,7 @@ namespace BupMessManagement.Controllers.Admin
             {
                 pos.IsPreOrderSet = preorderset;
                 pos.LastModifiedBy = UserId;
-                //pos.LastModifiedDate = 
+                pos.LastModifiedDate = DateTime.Now;
                 //_context.PreOrderSchedule.Remove(pos);
                 _context.PreOrderSchedule.Update(pos);
                 rowCount =  _context.SaveChanges();

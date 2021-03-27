@@ -106,13 +106,31 @@
                     <li>
                         <a asp-action="Index" asp-controller="Consumer">
                             <i class="material-icons">home</i>
-                            <span>Home</span>
+                            <span>Meal Settings</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a asp-action="OnSpotOrder" asp-controller="Consumer">
+                            <i class="material-icons">credit_card</i>
+                            <span>On Spot Order</span>
                         </a>
                     </li>
                     <li class="active">
                         <a asp-action="PaymentHistory" asp-controller="Consumer">
                             <i class="material-icons">credit_card</i>
-                            <span>Paymen history</span>
+                            <span>Bill history</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a asp-action="PaymentSlipUpload" asp-controller="Consumer">
+                            <i class="material-icons">credit_card</i>
+                            <span>Payment Slip Upload</span>
+                        </a>
+                    </li>
+                    <li>
+                        <a asp-action="HomePage" asp-controller="AdminShowOrder">
+                            <i class="material-icons">home</i>
+                            <span>Home</span>
                         </a>
                     </li>
                 </ul>

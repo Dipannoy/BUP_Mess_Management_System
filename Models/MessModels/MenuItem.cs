@@ -27,12 +27,16 @@ namespace Mess_Management_System_Alpha_V2.Models.MessModels
         public long? ExtraItemId { get; set; }
         public virtual ExtraItem ExtraItem { get; set; }
 
+        [ForeignKey("StoreOutItem")]
+        public long? StoreOutItemId { get; set; }
+        public virtual StoreOutItem StoreOutItem { get; set; }
+
 
         //[ForeignKey("StoreOutItem")]
         //public long StoreOutItemId { get; set; }
         //public virtual StoreOutItem StoreOutItem { get; set; }
 
-        //public virtual ICollection<CustomerChoice> CustomerChoiceList { get; set; }
+
         //public virtual ICollection<SetMenuDetails> SetMenuDetailList { get; set; }
 
 

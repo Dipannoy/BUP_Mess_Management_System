@@ -31,7 +31,15 @@ namespace Mess_Management_System_Alpha_V2.Models.MessModels
         public virtual ICollection<OrderHistoryVr2> OrderHistoryVr2List { get; set; }
 
         public virtual ICollection<ExtraItem> ExtraItemList { get; set; }
+        public virtual ICollection<MenuItem> MenuItemList { get; set; }
+
         public virtual ICollection<SpecialMenuOrder> SpecialMenuOrderList { get; set; }
+        public virtual ICollection<ConsumerMealWiseExtrachit> ConsumerMealWiseExtrachitList { get; set; }
+
+        public virtual ICollection<DailyOfferItem> DailyOfferItemList { get; set; }
+        public virtual ICollection<CustomerChoiceV2> CustomerChoiceV2List { get; set; }
+        public virtual ICollection<WarehouseStorage> WarehouseStorageList { get; set; }
+
 
     }
 }

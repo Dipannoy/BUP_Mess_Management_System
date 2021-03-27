@@ -20,6 +20,9 @@ namespace Mess_Management_System_Alpha_V2.Data
         public string BUPLogInID { get; set; }
         public string BUPPassword { get; set; }
         public string BUPRoleName { get; set; }
+        public int? EmployeeRank { get; set; }
+        public string  BUPNumber { get; set; }
+        public string OfficeName { get; set; }
 
         public virtual ICollection<PreOrderSchedule> PreOrderScheduleList { get; set; }
         public virtual ICollection<MaintenanceBillHistory> MaintenanceBillHistoryList { get; set; }
@@ -36,7 +39,16 @@ namespace Mess_Management_System_Alpha_V2.Data
         public virtual ICollection<ConsumerMonthlyBillRecord> ConsumerMonthlyBillRecordList { get; set; }
 
         public virtual ICollection<SpecialMenuParent> SpecialMenuParentList { get; set; }
+        public virtual ICollection<CustomerDailyMenuChoice> CustomerDailyMenuChoiceList { get; set; }
 
+        public virtual ICollection<UserDateChoiceMaster> UserDateChoiceMasterList { get; set; }
+        //public virtual ICollection<ExtraChitParent> ExtraChitParentList { get; set; }
+
+        public virtual ICollection<OnSpotParent> OnSpotParentList { get; set; }
+        //public virtual ICollection<ConsumerMealWiseExtrachit> ConsumerMealWiseExtrachitList { get; set; }
+        public virtual ICollection<ConsumerMealWiseExtraChitParent> ConsumerMealWiseExtraChitParentList { get; set; }
+
+        public virtual ICollection<ConsumerBillParent> ConsumerBillParentList { get; set; }
 
     }
 }

@@ -21,6 +21,9 @@ namespace Mess_Management_System_Alpha_V2.Models.MessModels
         public long? ExtraItemId { get; set; }
         public virtual ExtraItem ExtraItem { get; set; }
 
+        [ForeignKey("StoreOutItem")]
+        public long? StoreOutItemId { get; set; }
+        public virtual StoreOutItem StoreOutItem { get; set; }
 
         [ForeignKey("OrederType")]
         public long OrderTypeId { get; set; }
@@ -37,6 +40,17 @@ namespace Mess_Management_System_Alpha_V2.Models.MessModels
         [ForeignKey("MealType")]
         public long MealTypeId { get; set; }
         public virtual MealType MealType { get; set; }
+
+        [ForeignKey("OnSpotParent")]
+        public long OnSpotParentId { get; set; }
+        public virtual OnSpotParent OnSpotParent { get; set; }
+
+        [ForeignKey("ExtraChitParent")]
+        public long ExtraChitParentId { get; set; }
+        public virtual ExtraChitParent ExtraChitParent { get; set; }
+
+
+
 
         public double quantity { get; set; }
 

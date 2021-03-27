@@ -1,0 +1,32 @@
+﻿@inject ApplicationDbContext _context
+@inject Microsoft.AspNetCore.Identity.UserManager<ApplicationUser> _userManager
+@inject ApplicationDbContext _db
+@inject IDDLHelper _ddlHelper
+
+@{
+    ViewData["Title"] = "HomePage";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+}
+
+
+
+    <div class="content">
+        <div class="container-fluid">
+            <div class="row" style="padding-top:150px;">
+                <div class="col-sm-2">
+
+                </div>
+
+                <div class="col-sm-8">
+                    <h2 style="color:green;font-weight:bold;">Welcome to BUP Mess Management</h2>
+
+                </div>
+
+                <div class="col-sm-2">
+
+                </div>
+            </div>
+
+            </div>
+
+    </div>

@@ -1,0 +1,764 @@
+﻿@inject ApplicationDbContext _context
+@inject Microsoft.AspNetCore.Identity.UserManager<ApplicationUser> _userManager
+@inject ApplicationDbContext _db
+@inject IDDLHelper _ddlHelper
+
+@{
+    ViewData["Title"] = "BillPayment";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+
+    var ConsumerBillList = _db.ConsumerMonthlyBillRecord.Where(x => x.TotalAmount > 0).ToList();
+    var groupConsumerBillList = ConsumerBillList.GroupBy(a => a.UserId)
+                      .Select(a => new { Amount = a.Sum(b => b.TotalAmount), UserID = a.Key })
+                      .ToList();
+    var paymentDictionay = new Dictionary<string, string>();
+
+    var paymentMethodList = _db.PaymentMethod.Where(x => x.Id > 0).ToList();
+    foreach (var i in paymentMethodList)
+    {
+        paymentDictionay.Add(i.Id.ToString(), i.MethodName);
+    }
+}
+<head>
+    @*<link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Roboto+Slab:400,700|Material+Icons" />
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/latest/css/font-awesome.min.css">*@
+    <link href="~/assets/css/material-dashboard.css?v=2.1.1" rel="stylesheet" />
+    <link href="~/assets/demo/demo.css" rel="stylesheet" />
+</head>
+
+<style>
+
+    #ui-datepicker-div {
+        display: none;
+        background-color: #fff;
+        box-shadow: 0 0.125rem 0.5rem rgba(0,0,0,0.1);
+        margin-top: 0.25rem;
+        border-radius: 0.5rem;
+        padding: 0.5rem;
+    }
+
+    table {
+        border-collapse: collapse;
+        border-spacing: 0;
+    }
+
+    .ui-datepicker-calendar thead th {
+        padding: 0.25rem 0;
+        text-align: center;
+        font-size: 0.75rem;
+        font-weight: 400;
+        color: #78909C;
+    }
+
+    .ui-datepicker-calendar tbody td {
+        width: 2.5rem;
+        text-align: center;
+        padding: 0;
+    }
+
+        .ui-datepicker-calendar tbody td a {
+            display: block;
+            border-radius: 0.25rem;
+            line-height: 2rem;
+            transition: 0.3s all;
+            color: #546E7A;
+            font-size: 0.875rem;
+            text-decoration: none;
+        }
+
+            .ui-datepicker-calendar tbody td a:hover {
+                background-color: #E0F2F1;
+            }
+
+            .ui-datepicker-calendar tbody td a.ui-state-active {
+                background-color: #009688;
+                color: white;
+            }
+
+    .ui-datepicker-header a.ui-corner-all {
+        cursor: pointer;
+        position: absolute;
+        top: 0;
+        width: 2rem;
+        height: 2rem;
+        margin: 0.5rem;
+        border-radius: 0.25rem;
+        transition: 0.3s all;
+    }
+
+        .ui-datepicker-header a.ui-corner-all:hover {
+            background-color: #ECEFF1;
+        }
+
+    .ui-datepicker-header a.ui-datepicker-prev {
+        left: 0;
+        background: url("~/assets/img/prev.png");
+        background-repeat: no-repeat;
+        background-size: 0.5rem;
+        background-position: 50%;
+        transform: rotate(180deg);
+    }
+
+    .ui-datepicker-header a.ui-datepicker-next {
+        right: 0;
+        background: url("~/assets/img/prev.png");
+        background-repeat: no-repeat;
+        background-size: 10px;
+        background-position: 50%;
+    }
+
+    .ui-datepicker-header a > span {
+        display: none;
+    }
+
+    .ui-datepicker-title {
+        text-align: center;
+        line-height: 2rem;
+        margin-bottom: 0.25rem;
+        font-size: 0.875rem;
+        font-weight: 500;
+        padding-bottom: 0.25rem;
+    }
+
+    .ui-datepicker-week-col {
+        color: #78909C;
+        font-weight: 400;
+        font-size: 0.75rem;
+    }
+
+    .modal {
+        display: none; /* Hidden by default */
+        position: fixed; /* Stay in place */
+        /*z-index: 1;*/ /* Sit on top */
+        padding-top: 100px; /* Location of the box */
+        left: 0;
+        top: 0;
+        width: 100%; /* Full width */
+        height: 100%; /* Full height */
+        overflow: auto; /* Enable scroll if needed */
+        background-color: rgb(0,0,0); /* Fallback color */
+        background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+        padding-left: 100px;
+    }
+
+    /* Modal Content */
+    .modal-content {
+        background-color: #fefefe;
+        margin: auto;
+        padding: 20px;
+        border: 1px solid #888;
+        width: 40%;
+    }
+
+    /* The Close Button */
+    .close {
+        color: #aaaaaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+    }
+
+        .close:hover,
+        .close:focus {
+            color: #000;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+    /*        Pagination Style
+    */
+    /* Table styles. */
+    td,
+    th {
+        text-align: left;
+        padding: .5rem 1rem;
+    }
+
+    tbody tr:nth-child(odd) {
+        background-color: #ccc;
+    }
+
+    th {
+        background: #444;
+        color: #fff;
+    }
+
+    /* Pagination. */
+    .pagination {
+        background: #333;
+        padding: 1rem;
+        margin-bottom: 1rem;
+        text-align: center;
+        display: flex;
+        justify-content: center;
+    }
+
+    #numbers {
+        padding: 0;
+        margin: 0 2rem;
+        list-style-type: none;
+        display: flex;
+    }
+
+        #numbers li a {
+            color: #fff;
+            padding: .5rem 1rem;
+            text-decoration: none;
+            opacity: .7;
+        }
+
+            #numbers li a:hover {
+                opacity: 1;
+            }
+
+            #numbers li a.active {
+                opacity: 1;
+                background: #fff;
+                color: #333;
+            }
+</style>
+
+<div class="content">
+    <div class="container-fluid" style="padding-top:50px;">
+
+        <div id="paymentEdit" class="modal">
+            <div class="modal-content">
+                <div id="bkashField" style="display:none;">
+                    <div class="row">
+                        <div class="col-sm-4">
+                            <label class="bmd-label-floating">Client Mobile Number</label>
+
+                        </div>
+                        <div class="col-sm-4">
+                            <input type="text" id="moblNum" class="form-control" maxlength="11" placeholder="01800555999" />
+
+                        </div>
+
+                        <div class="col-sm-4">
+
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-4">
+                            <label class="bmd-label-floating">Transaction Id</label>
+
+                        </div>
+                        <div class="col-sm-4">
+                            <input type="text" id="tranId" class="form-control" maxlength="10" placeholder="8XC5RWE59M" />
+
+                        </div>
+
+                        <div class="col-sm-4">
+
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-4">
+                            <label class="bmd-label-floating">Amount</label>
+
+                        </div>
+                        <div class="col-sm-4">
+                            <input type="text" id="bkashAmnt" class="form-control" placeholder="" />
+
+                        </div>
+
+                        <div class="col-sm-4">
+
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-4">
+                            <label class="bmd-label-floating">Payment Date</label>
+
+                        </div>
+                        <div class="col-sm-4">
+                            <input type="text" id="bkashDate" class="form-control" placeholder="" />
+
+                        </div>
+
+                        <div class="col-sm-4">
+
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-4">
+                            <label class="bmd-label-floating">Attachment</label>
+
+                        </div>
+                        <div class="col-sm-4">
+                            <input id="inputFileBkash" style="height: 40px;" class="form-control" type="file" />
+
+                        </div>
+
+                        <div class="col-sm-4">
+
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-sm-4">
+                            <label class="bmd-label-floating">Received By</label>
+
+                        </div>
+                        <div class="col-sm-4">
+                            <input type="text" id="bkashReceiver" class="form-control" placeholder="" />
+
+                        </div>
+                    </div>
+
+                </div>
+
+                <div id="checkField" style="display:none;">
+                    <div class="row">
+                        <div class="col-sm-4">
+                            <label class="bmd-label-floating">Bank Name</label>
+
+                        </div>
+                        <div class="col-sm-8">
+                            <input type="text" id="bankName" class="form-control" placeholder="" />
+
+                        </div>
+
+                        @*<div class="col-sm-1">
+
+                            </div>*@
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-4">
+                            <label class="bmd-label-floating">Account Number</label>
+
+                        </div>
+                        <div class="col-sm-8">
+                            <input type="text" id="ACNo" class="form-control" placeholder="" />
+
+                        </div>
+
+
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-4">
+                            <label class="bmd-label-floating">Amount</label>
+
+                        </div>
+                        <div class="col-sm-8">
+                            <input type="text" id="checkAmount" class="form-control" placeholder="" />
+
+                        </div>
+
+
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-4">
+                            <label class="bmd-label-floating">Payment Date</label>
+
+                        </div>
+                        <div class="col-sm-4">
+                            <input type="text" id="checkDate" class="form-control" placeholder="" />
+
+                        </div>
+
+                        <div class="col-sm-4">
+
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-4">
+                            <label class="bmd-label-floating">Attachment</label>
+
+                        </div>
+                        <div class="col-sm-4">
+                            <input id="inputFileCheck" style="height: 40px;" class="form-control" type="file" />
+
+                        </div>
+
+                        <div class="col-sm-4">
+
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-4">
+                            <label class="bmd-label-floating">Received By</label>
+
+                        </div>
+                        <div class="col-sm-8">
+                            <input type="text" id="checkReceiver" class="form-control" placeholder="" />
+
+                        </div>
+                    </div>
+                </div>
+
+                <div id="cashField" style="display:none;">
+
+                    <div class="row">
+                        <div class="col-sm-4">
+                            <label class="bmd-label-floating">Amount</label>
+
+                        </div>
+                        <div class="col-sm-8">
+                            <input type="text" id="cashAmount" class="form-control" placeholder="" />
+
+                        </div>
+
+
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-4">
+                            <label class="bmd-label-floating">Payment Date</label>
+
+                        </div>
+                        <div class="col-sm-8">
+                            <input type="text" id="cashDate" class="form-control" placeholder="" />
+
+                        </div>
+
+
+                    </div>
+                 
+                    <div class="row">
+                        <div class="col-sm-4">
+                            <label class="bmd-label-floating">Received By</label>
+
+                        </div>
+                        <div class="col-sm-8">
+                            <input type="text" id="cashReceiver" class="form-control" placeholder="" />
+
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row" style="padding-top:20px;">
+                    <div class="col-sm-6">
+
+                    </div>
+
+                    <div class="col-sm-3">
+                        <button class="btn" onclick="ConfirmEdit()" style="padding:3px;"> Save</button>
+                    </div>
+                    <div class="col-sm-3">
+                        <button class="btn" onclick="CloseModal()" style="padding:3px;"> Close</button>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        <div class="pagination">
+            <ol id="numbers"></ol>
+        </div>
+
+        <table id="my-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Name</th>
+                    <th>Payment Method</th>
+                    <th>Payment Date</th>
+                    <th>Moblie Number</th>
+                    <th>Trans Id</th>
+                    <th>Bank Name</th>
+                    <th>Account Number</th>
+                    <th>Amount</th>
+                    <th></th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var i in _context.ConsumerBillParent.Where(x => x.Id > 0).ToList())
+                {
+                    var userName = _userManager.Users.Where(x => x.Id == i.UserId).FirstOrDefault().BUPFullName;
+                    @foreach (var o in _context.ConsumerBillHistory.Where(x => x.ConsumerBillParentId == i.Id).ToList())
+                    {
+                        var paymentObj = _context.ConsumerPaymentInfo.Where(x => x.Id == o.ConsumerPaymentInfoId).FirstOrDefault();
+                        var paymentMethod = _context.PaymentMethod.Where(x => x.Id == paymentObj.PaymentMethodId).FirstOrDefault();
+                        <tr>
+                            <td>
+                            </td>
+                            <td>
+                                @userName
+                            </td>
+                            <td>
+                                @paymentMethod.MethodName
+                            </td>
+                            <td>
+                                @o.PaymentDate.ToShortDateString()
+                            </td>
+                            <td>
+                                @{ var mobl = "-";
+                                    if (paymentMethod.Id == 1)
+                                    {
+                                        mobl = paymentObj.MobileNumber;
+                                    }
+                                }
+                                @mobl
+                            </td>
+                            <td>
+                                @{ var trans = "-";
+                                    if (paymentMethod.Id == 1)
+                                    {
+                                        trans = paymentObj.TransactionID;
+                                    }
+                                }
+                                @trans
+                            </td>
+                            <td>
+                                @{ var bank = "-";
+                                    if (paymentMethod.Id == 2)
+                                    {
+                                        bank = paymentObj.BankName;
+                                    }
+                                }
+                                @bank
+                            </td>
+                            <td>
+                                @{ var account = "-";
+                                    if (paymentMethod.Id == 2)
+                                    {
+                                        account = paymentObj.AccountNumber;
+                                    }
+                                }
+                                @account
+                            </td>
+                            <td>
+                                @o.PaymentAmount
+                            </td>
+                            <td>
+                                <button onclick="EditPayment(@i.Id, @o.Id)" class="btn"
+                                        style="padding:3px;">
+                                    Edit
+                                </button>
+                            </td>
+                            <td>
+                                <button onclick="DeletePayment(@i.Id, @o.Id)" class="btn"
+                                        style="padding:3px;">
+                                    Delete
+                                </button>
+                            </td>
+                        </tr>
+
+                    }
+
+                }
+            </tbody>
+
+        </table>
+
+    </div>
+
+</div>
+
+@*<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.0/jquery.min.js"></script>*@
+
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.12.0/themes/smoothness/jquery-ui.css" />
+<script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+<script src="https://code.jquery.com/ui/1.12.0/jquery-ui.min.js"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.js"></script>
+
+@*<script src="~/lib/jquery/dist/jquery.js"></script>*@
+
+
+<script>
+
+
+    $("#bkashDate").datepicker({
+        dateFormat: "dd-mm-yy"
+        , duration: "fast"
+    });
+
+    $("#checkDate").datepicker({
+        dateFormat: "dd-mm-yy"
+        , duration: "fast"
+    });
+    $("#cashDate").datepicker({
+        dateFormat: "dd-mm-yy"
+        , duration: "fast"
+    });
+    var methodId = 0;
+    var historyId = 0;
+    function EditPayment(parntId, childId) {
+        $.ajax({
+            url: '/AdminBillGenerate/GetPaymentInfoEdit',
+            dataType: "json",
+            data: { ParentId: parntId, ChildId: childId },
+            //data: { PersonName: "bb", Month: childId, Year:parntId },
+
+            success: function (data) {
+                console.log(data);
+                var modal = document.getElementById("paymentEdit");
+                console.log(data[1][0].PaymentDate.toString());
+                var dateArray = data[1][0].PaymentDate.toString().split("T");
+                console.log(dateArray);
+                var dateArray2 = dateArray[0].split("-");
+                var date = dateArray2[2] + "-" + dateArray2[1] + "-" + dateArray2[0];
+                //var span = document.getElementsByClassName("close")[0];
+                modal.style.display = "block";
+                var paymentMethod = data[3][0].Id;
+                methodId = paymentMethod;
+                historyId = data[1][0].Id;
+                if (data[3][0].Id == 1) {
+                    $("#bkashField").show();
+                    //$("#moblNum").val(data[2].MobileNumber);
+                    document.getElementById("moblNum").value = data[2][0].MobileNumber;
+
+                    document.getElementById("tranId").value = data[2][0].TransactionID;
+                    document.getElementById("bkashAmnt").value = data[1][0].PaymentAmount;
+                    document.getElementById("bkashDate").value = date;
+                    document.getElementById("bkashReceiver").value = data[1][0].ReceivedBy;
+
+                }
+                else if (data[3][0].Id == 2) {
+                    $("#checkField").show();
+                    //$("#moblNum").val(data[2].MobileNumber);
+                    document.getElementById("bankName").value = data[2][0].BankName;
+
+                    document.getElementById("ACNo").value = data[2][0].AccountNumber;
+                    document.getElementById("checkAmount").value = data[1][0].PaymentAmount;
+                    document.getElementById("checkDate").value = date;
+                    document.getElementById("checkReceiver").value = data[1][0].ReceivedBy;
+
+                }
+                else {
+                    $("#cashField").show();
+                    //$("#moblNum").val(data[2].MobileNumber);
+            
+                    document.getElementById("cashAmount").value = data[1][0].PaymentAmount;
+                    document.getElementById("cashDate").value = date;
+                    document.getElementById("cashReceiver").value = data[1][0].ReceivedBy;
+                }
+            }
+
+
+        })
+
+    }
+
+    function ConfirmEdit() {
+        var moblNum = null;
+        var transId = null;
+        var amount = null;
+        var bankName = null;
+        var accountNum = null;
+        var receiver = null;
+        var selectedFile = null;
+        var date = null;
+
+        if (methodId == 1) {
+            //$("#moblNum").val(data[2].MobileNumber);
+            moblNum =  document.getElementById("moblNum").value;
+
+            transId = document.getElementById("tranId").value ;
+            amount = document.getElementById("bkashAmnt").value ;
+            date = document.getElementById("bkashDate").value;
+            receiver =  document.getElementById("bkashReceiver").value;
+
+        }
+        else if (methodId == 2) {
+            //$("#moblNum").val(data[2].MobileNumber);
+            bankName = document.getElementById("bankName").value;
+
+            accountNum = document.getElementById("ACNo").value;
+            amount = document.getElementById("checkAmount").value;
+            date = document.getElementById("checkDate").value;
+            receiver = document.getElementById("checkReceiver").value ;
+
+        }
+        else {
+            //$("#moblNum").val(data[2].MobileNumber);
+
+            amount = document.getElementById("cashAmount").value ;
+            date = document.getElementById("cashDate").value ;
+            receiver = document.getElementById("cashReceiver").value ;
+        }
+
+        $.ajax({
+            url: '/AdminBillGenerate/ConfirmEdit',
+            type: "POST",
+
+            dataType: "json",
+            data: {
+                BillHistory: historyId, Method: methodId,
+                Mobile: moblNum, TransId: transId, Bank: bankName, Account: accountNum,
+                Receiver: receiver, Amount: amount,
+             
+                PaymentDate: date
+            },
+            success: function (response) {
+                if (response.success) {
+
+                    alert(response.responseText);
+                    window.location.reload(true);
+
+
+                } else {
+                    // DoSomethingElse()
+                    if (response.responseText == "Expire") {
+                        window.location.href = "https://ucam.bup.edu.bd/Security/LogOut.aspx";
+                    }
+                    else {
+                        alert(response.responseText);
+                        window.location.reload(true);
+
+                    }
+
+                }
+            },
+            error: function (xhr, status, error) {
+                alert(error);
+            }
+        });
+
+    }
+
+    function CloseModal() {
+        var modal = document.getElementById("paymentEdit");
+        modal.style.display = "none";
+
+    }
+
+    $(function () {
+        const rowsPerPage = 3;
+        const rows = $('#my-table tbody tr');
+        const rowsCount = rows.length;
+        const pageCount = Math.ceil(rowsCount / rowsPerPage); // avoid decimals
+        const numbers = $('#numbers');
+
+        // Generate the pagination.
+        for (var i = 0; i < pageCount; i++) {
+            numbers.append('<li><a href="#">' + (i + 1) + '</a></li>');
+        }
+
+        // Mark the first page link as active.
+        $('#numbers li:first-child a').addClass('active');
+
+        // Display the first set of rows.
+        displayRows(1);
+
+        // On pagination click.
+        $('#numbers li a').click(function (e) {
+            var $this = $(this);
+
+            e.preventDefault();
+
+            // Remove the active class from the links.
+            $('#numbers li a').removeClass('active');
+
+            // Add the active class to the current link.
+            $this.addClass('active');
+
+            // Show the rows corresponding to the clicked page ID.
+            displayRows($this.text());
+        });
+
+        // Function that displays rows for a specific page.
+        function displayRows(index) {
+            var start = (index - 1) * rowsPerPage;
+            var end = start + rowsPerPage;
+
+            // Hide all rows.
+            rows.hide();
+
+            // Show the proper rows for this page.
+            rows.slice(start, end).show();
+        }
+    });
+</script>

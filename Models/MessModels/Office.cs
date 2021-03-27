@@ -14,18 +14,14 @@ namespace Mess_Management_System_Alpha_V2.Models.MessModels
         // add link to user
        
 
-            public string Name { get; set; }
+        public string Name { get; set; }
+        public int? PIMSOfficeId { get; set; }
+
 
 
         public virtual ICollection<SpecialMenuParent> SpecialMenuParentList { get; set; }
-
-
-
-
-
-
-
-
+        //public virtual ICollection<ExtraChitParent> ExtraChitParentList { get; set; }
+        public virtual ICollection<OnSpotParent> OnSpotParentList { get; set; }
 
 
     }

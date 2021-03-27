@@ -1,0 +1,479 @@
+﻿@inject ApplicationDbContext _context
+@inject Microsoft.AspNetCore.Identity.UserManager<ApplicationUser> _userManager
+@inject ApplicationDbContext _db
+@inject IDDLHelper _ddlHelper
+
+@{
+    ViewData["Title"] = "BillPayment";
+    Layout = "~/Views/Shared/_AdminLayout.cshtml";
+
+    var ConsumerBillList = _db.ConsumerMonthlyBillRecord.Where(x => x.TotalAmount > 0).ToList();
+    var groupConsumerBillList = ConsumerBillList.GroupBy(a => a.UserId)
+                      .Select(a => new { Amount = a.Sum(b => b.TotalAmount), UserID = a.Key })
+                      .ToList();
+    var paymentDictionay = new Dictionary<string, string>();
+
+    var paymentMethodList = _db.PaymentMethod.Where(x => x.Id > 0).ToList();
+    foreach (var i in paymentMethodList)
+    {
+        paymentDictionay.Add(i.Id.ToString(), i.MethodName);
+    }
+}
+
+<head>
+    @*<link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Roboto+Slab:400,700|Material+Icons" />
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/latest/css/font-awesome.min.css">*@
+    <link href="~/assets/css/material-dashboard.css?v=2.1.1" rel="stylesheet" />
+    <link href="~/assets/demo/demo.css" rel="stylesheet" />
+</head>
+
+<style>
+
+    #ui-datepicker-div {
+        display: none;
+        background-color: #fff;
+        box-shadow: 0 0.125rem 0.5rem rgba(0,0,0,0.1);
+        margin-top: 0.25rem;
+        border-radius: 0.5rem;
+        padding: 0.5rem;
+    }
+
+    table {
+        border-collapse: collapse;
+        border-spacing: 0;
+    }
+
+    .ui-datepicker-calendar thead th {
+        padding: 0.25rem 0;
+        text-align: center;
+        font-size: 0.75rem;
+        font-weight: 400;
+        color: #78909C;
+    }
+
+    .ui-datepicker-calendar tbody td {
+        width: 2.5rem;
+        text-align: center;
+        padding: 0;
+    }
+
+        .ui-datepicker-calendar tbody td a {
+            display: block;
+            border-radius: 0.25rem;
+            line-height: 2rem;
+            transition: 0.3s all;
+            color: #546E7A;
+            font-size: 0.875rem;
+            text-decoration: none;
+        }
+
+            .ui-datepicker-calendar tbody td a:hover {
+                background-color: #E0F2F1;
+            }
+
+            .ui-datepicker-calendar tbody td a.ui-state-active {
+                background-color: #009688;
+                color: white;
+            }
+
+    .ui-datepicker-header a.ui-corner-all {
+        cursor: pointer;
+        position: absolute;
+        top: 0;
+        width: 2rem;
+        height: 2rem;
+        margin: 0.5rem;
+        border-radius: 0.25rem;
+        transition: 0.3s all;
+    }
+
+        .ui-datepicker-header a.ui-corner-all:hover {
+            background-color: #ECEFF1;
+        }
+
+    .ui-datepicker-header a.ui-datepicker-prev {
+        left: 0;
+        background: url("~/assets/img/prev.png");
+        background-repeat: no-repeat;
+        background-size: 0.5rem;
+        background-position: 50%;
+        transform: rotate(180deg);
+    }
+
+    .ui-datepicker-header a.ui-datepicker-next {
+        right: 0;
+        background: url("~/assets/img/prev.png");
+        background-repeat: no-repeat;
+        background-size: 10px;
+        background-position: 50%;
+    }
+
+    .ui-datepicker-header a > span {
+        display: none;
+    }
+
+    .ui-datepicker-title {
+        text-align: center;
+        line-height: 2rem;
+        margin-bottom: 0.25rem;
+        font-size: 0.875rem;
+        font-weight: 500;
+        padding-bottom: 0.25rem;
+    }
+
+    .ui-datepicker-week-col {
+        color: #78909C;
+        font-weight: 400;
+        font-size: 0.75rem;
+    }
+
+    .modal {
+        display: none; /* Hidden by default */
+        position: fixed; /* Stay in place */
+        /*z-index: 1;*/ /* Sit on top */
+        padding-top: 100px; /* Location of the box */
+        left: 0;
+        top: 0;
+        width: 100%; /* Full width */
+        height: 100%; /* Full height */
+        overflow: auto; /* Enable scroll if needed */
+        background-color: rgb(0,0,0); /* Fallback color */
+        background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
+        padding-left: 100px;
+    }
+
+    /* Modal Content */
+    .modal-content {
+        background-color: #fefefe;
+        margin: auto;
+        padding: 20px;
+        border: 1px solid #888;
+        width: 40%;
+    }
+
+    /* The Close Button */
+    .close {
+        color: #aaaaaa;
+        float: right;
+        font-size: 28px;
+        font-weight: bold;
+    }
+
+        .close:hover,
+        .close:focus {
+            color: #000;
+            text-decoration: none;
+            cursor: pointer;
+        }
+</style>
+
+<div class="content">
+    <div class="container-fluid">
+
+        <div id="billPayment" class="modal">
+            <div class="modal-content">
+                <div class="row">
+                    <div class="col-sm-4">
+                        <label class="bmd-label-floating">Payment Method</label>
+
+                    </div>
+
+                    <div class="col-sm-4">
+                        @*<i class="material-icons" style="padding-top:6px;">local_dining</i>*@
+                        <select id="paymentMethod" name="paymentMethod" onchange="loadPaymentInfo()" class="form-control border-radius-none" asp-items="@(new SelectList(paymentDictionay.Prepend(new KeyValuePair<string, string>("0", "Select Payment Method")), "Key", "Value", ""))"></select>
+
+                    </div>
+                    <div class="col-sm-4">
+
+                    </div>
+
+
+
+                </div>
+
+                <div id="bkashField" style="display:none;">
+                    <div class="row">
+                        <div class="col-sm-4">
+                            <label class="bmd-label-floating">Client Mobile Number</label>
+
+                        </div>
+                        <div class="col-sm-4">
+                            <input type="text" id="moblNum" class="form-control" maxlength="11" placeholder="01800555999" />
+
+                        </div>
+
+                        <div class="col-sm-4">
+
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-4">
+                            <label class="bmd-label-floating">Transaction Id</label>
+
+                        </div>
+                        <div class="col-sm-4">
+                            <input type="text" id="tranId" class="form-control" maxlength="10" placeholder="8XC5RWE59M" />
+
+                        </div>
+
+                        <div class="col-sm-4">
+
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-4">
+                            <label class="bmd-label-floating">Amount</label>
+
+                        </div>
+                        <div class="col-sm-4">
+                            <input type="text" id="bkashAmnt" class="form-control" placeholder="" />
+
+                        </div>
+
+                        <div class="col-sm-4">
+
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-4">
+                            <label class="bmd-label-floating">Payment Date</label>
+
+                        </div>
+                        <div class="col-sm-4">
+                            <input type="text" id="bkashDate" class="form-control" placeholder="" />
+
+                        </div>
+
+                        <div class="col-sm-4">
+
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-4">
+                            <label class="bmd-label-floating">Attachment</label>
+
+                        </div>
+                        <div class="col-sm-4">
+                            <input id="inputFileBkash" style="height: 40px;" class="form-control" type="file" />
+
+                        </div>
+
+                        <div class="col-sm-4">
+
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-sm-4">
+                            <label class="bmd-label-floating">Received By</label>
+
+                        </div>
+                        <div class="col-sm-4">
+                            <input type="text" id="bkashReceiver" class="form-control" placeholder="" />
+
+                        </div>
+                    </div>
+
+                </div>
+
+                <div id="checkField" style="display:none;">
+                    <div class="row">
+                        <div class="col-sm-4">
+                            <label class="bmd-label-floating">Bank Name</label>
+
+                        </div>
+                        <div class="col-sm-8">
+                            <input type="text" id="bankName" class="form-control" placeholder="" />
+
+                        </div>
+
+                        @*<div class="col-sm-1">
+
+            </div>*@
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-4">
+                            <label class="bmd-label-floating">Account Number</label>
+
+                        </div>
+                        <div class="col-sm-8">
+                            <input type="text" id="ACNo" class="form-control" placeholder="" />
+
+                        </div>
+
+
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-4">
+                            <label class="bmd-label-floating">Amount</label>
+
+                        </div>
+                        <div class="col-sm-8">
+                            <input type="text" id="checkAmount" class="form-control" placeholder="" />
+
+                        </div>
+
+
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-4">
+                            <label class="bmd-label-floating">Payment Date</label>
+
+                        </div>
+                        <div class="col-sm-4">
+                            <input type="text" id="checkDate" class="form-control" placeholder="" />
+
+                        </div>
+
+                        <div class="col-sm-4">
+
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-4">
+                            <label class="bmd-label-floating">Attachment</label>
+
+                        </div>
+                        <div class="col-sm-4">
+                            <input id="inputFileCheck" style="height: 40px;" class="form-control" type="file" />
+
+                        </div>
+
+                        <div class="col-sm-4">
+
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-4">
+                            <label class="bmd-label-floating">Received By</label>
+
+                        </div>
+                        <div class="col-sm-8">
+                            <input type="text" id="checkReceiver" class="form-control" placeholder="" />
+
+                        </div>
+                    </div>
+                </div>
+
+                <div id="cashField" style="display:none;">
+
+                    <div class="row">
+                        <div class="col-sm-4">
+                            <label class="bmd-label-floating">Amount</label>
+
+                        </div>
+                        <div class="col-sm-8">
+                            <input type="text" id="cashAmount" class="form-control" placeholder="" />
+
+                        </div>
+
+
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-4">
+                            <label class="bmd-label-floating">Received By</label>
+
+                        </div>
+                        <div class="col-sm-8">
+                            <input type="text" id="cashReceiver" class="form-control" placeholder="" />
+
+                        </div>
+                    </div>
+                </div>
+                <div class="row" style="padding-top:20px;">
+                    <div class="col-sm-6">
+
+                    </div>
+
+                    <div class="col-sm-3">
+                        <button class="btn" onclick="ConfirmPayment()" style="padding:3px;"> Save</button>
+                    </div>
+                    <div class="col-sm-3">
+                        <button class="btn" onclick="CloseModal()" style="padding:3px;"> Close</button>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="row" style="padding-top:50px;">
+
+            <div class="col-sm-1">
+
+            </div>
+            <div class="col-sm-10">
+                <table class="table table-striped table-bordered table-hover">
+                    <thead>
+                        <tr>
+
+                            <th>Name</th>
+
+                            <th>Due Bill</th>
+                            <th>Action</th>
+
+
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var user in groupConsumerBillList)
+                        {
+                            var name = _userManager.Users.Where(x => x.Id == user.UserID).FirstOrDefault().BUPFullName;
+                            <tr>
+                                <td> @name</td>
+
+                                @{
+                                    var billParentObj = _context.ConsumerBillParent.Where(x => x.UserId == user.UserID).FirstOrDefault();
+                                    double dueBill = 0;
+                                    if (billParentObj != null)
+                                    {
+                                        var billHistoryObj = _context.ConsumerBillHistory.Where(x => x.ConsumerBillParentId == billParentObj.Id).LastOrDefault();
+                                        if (billHistoryObj != null)
+                                        {
+                                            dueBill = billHistoryObj.Due;
+                                        }
+                                        else
+                                        {
+                                            dueBill = user.Amount;
+                                        }
+                                    }
+                                    else
+                                    {
+                                        dueBill = user.Amount;
+                                    }
+                                }
+                                <td> @dueBill </td>
+                                <td>
+                                    <button onclick="MakePayment(@billParentObj.Id,@dueBill)" style="padding:3px;" class="btn btn-success"> Payment </button>
+                                </td>
+                            </tr>
+                        }
+
+                    </tbody>
+                </table>
+            </div>
+            <div class="col-sm-1">
+
+            </div>
+        </div>
+
+
+
+
+    </div>
+</div>
+
+@*<script src="~/lib/jquery/dist/jquery.js"></script>*@
+
+<link rel="stylesheet" href="https://code.jquery.com/ui/1.12.0/themes/smoothness/jquery-ui.css" />
+<script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+<script src="https://code.jquery.com/ui/1.12.0/jquery-ui.min.js"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.js"></script>
+
+<script src="~/js/BillPaymentController.js"></script>
+
+
+
+
+
