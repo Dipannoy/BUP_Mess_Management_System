@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "Cq6HUlO34K1PJlJgEsfboEUtkZx68tH1UjyvrTc2o3s0skKnMUkQgoMWA5pF08M1mZzp+dtfthbgBWsoA+m1mQ==",
+  "dgSpecHash": "+NR+R8rd+M2u4kK+4kYT1WL/6cx0P0UuQ/pB+OKpcfStYkGbBjS0YIK4RpZ/WkZPHL6Gq1rp7sdgAfYoV2XgeA==",
   "success": true,
-  "projectFilePath": "D:\\AllSolution\\BUP_Mess\\Mess_All_Versions\\BUP_Mess_20.2.20\\BupMessManagement.csproj",
+  "projectFilePath": "D:\\AllSolution\\BUP_Mess\\Mess_All_Versions\\BUP_Mess_Management_System.git\\branches\\master\\BupMessManagement.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\Asus\\.nuget\\packages\\mailkit\\2.10.1\\mailkit.2.10.1.nupkg.sha512",
     "C:\\Users\\Asus\\.nuget\\packages\\microsoft.aspnet.webapi.client\\5.2.7\\microsoft.aspnet.webapi.client.5.2.7.nupkg.sha512",

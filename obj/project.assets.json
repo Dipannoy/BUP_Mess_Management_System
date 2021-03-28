@@ -13572,11 +13572,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "D:\\AllSolution\\BUP_Mess\\Mess_All_Versions\\BUP_Mess_20.2.20\\BupMessManagement.csproj",
+      "projectUniqueName": "D:\\AllSolution\\BUP_Mess\\Mess_All_Versions\\BUP_Mess_Management_System.git\\branches\\master\\BupMessManagement.csproj",
       "projectName": "BupMessManagement",
-      "projectPath": "D:\\AllSolution\\BUP_Mess\\Mess_All_Versions\\BUP_Mess_20.2.20\\BupMessManagement.csproj",
+      "projectPath": "D:\\AllSolution\\BUP_Mess\\Mess_All_Versions\\BUP_Mess_Management_System.git\\branches\\master\\BupMessManagement.csproj",
       "packagesPath": "C:\\Users\\Asus\\.nuget\\packages\\",
-      "outputPath": "D:\\AllSolution\\BUP_Mess\\Mess_All_Versions\\BUP_Mess_20.2.20\\obj\\",
+      "outputPath": "D:\\AllSolution\\BUP_Mess\\Mess_All_Versions\\BUP_Mess_Management_System.git\\branches\\master\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder"

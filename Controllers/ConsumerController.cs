@@ -1539,20 +1539,23 @@ namespace Mess_Management_System_Alpha_V2.Controllers
                 _context.PreOrderSchedule.Update(pos);
                 _context.SaveChanges();
             }
-            _context.PreOrderSchedule.Add(new Models.MessModels.PreOrderSchedule
+            else
             {
-                UserId = UserId,
-                IsPreOrderSet = preorderset,
-                MealTypeId = mealId,
-                LastConfigurationUpdateDate = DateTime.Now,
-                CreatedDate = DateTime.Now,
-                LastModifiedDate = DateTime.Now,
-                CreatedBy = UserId,
-                LastModifiedBy = UserId,
-                //SetMenuId = setMenuTomorrow.FirstOrDefault().Id
+                _context.PreOrderSchedule.Add(new Models.MessModels.PreOrderSchedule
+                {
+                    UserId = UserId,
+                    IsPreOrderSet = preorderset,
+                    MealTypeId = mealId,
+                    LastConfigurationUpdateDate = DateTime.Now,
+                    CreatedDate = DateTime.Now,
+                    LastModifiedDate = DateTime.Now,
+                    CreatedBy = UserId,
+                    LastModifiedBy = UserId,
+                    //SetMenuId = setMenuTomorrow.FirstOrDefault().Id
 
-            });
-            _context.SaveChanges();
+                });
+                _context.SaveChanges();
+            }
 
             //PreOrderSchedule po = new PreOrderSchedule();
             //po.LastModifiedDate = DateTime.Now;
