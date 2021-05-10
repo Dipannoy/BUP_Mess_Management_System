@@ -1021,7 +1021,7 @@ namespace Mess_Management_System_Alpha_V2.Controllers.Admin
                         }
                         else
                         {
-                            storeoutItemList = _context.StoreOutItem.Where(x => x.Name.Contains(stomaterial)).ToList();
+                            storeoutItemList = _context.StoreOutItem.Where(x => x.Name.Contains(stomaterial) && x.IsOpen == true).ToList();
                         }
                         // var 
                         foreach (var item in storeoutItemList)
@@ -1090,57 +1090,306 @@ namespace Mess_Management_System_Alpha_V2.Controllers.Admin
 
 
 
+        //[HttpPost]
+        //[AutoValidateAntiforgeryToken]
+        //public async Task<IActionResult> SaveUpdateWarehouseStorageOut(string submit,string StoreOutDate,double avgPrice,long itemId,double quantity,double chkquantity, string rawmat)
+        //{
+        //    var date = DateTime.Parse(StoreOutDate);
+        //    var errorList = new Dictionary<string, string>();
+        //    var userGivenAmount = new Dictionary<string, string>();
+
+        //    var StoreoutReceipe = _context.StoreOutItemRecipe.Where(x => x.StoreOutItemId == itemId).ToList();
+        //    //double UpdtQnt = quantity;
+        //    //if(chkquantity != 0)
+        //    //{
+        //    //    UpdtQnt = chkquantity;
+
+        //    //}
+        //    if (SessionExist())
+        //    {
+        //        if (await UserExistMess())
+        //        {
+        //            //if (UpdtQnt == 0 && _context.StoreOutItem.Where(x=>x.Id == itemId).FirstOrDefault().Name != "Waste Material" )
+        //            //{
+
+        //            //    ViewBag.ErrorMsg = "No order is found for " + _context.StoreOutItem.Where(x => x.Id == itemId).FirstOrDefault().Name;
+        //            //    ViewBag.StoreId = 2;
+        //            //    ViewBag.chkmat2 = rawmat;
+        //            //    ViewBag.FullName = await GetUserName();
+        //            //    var role = await GetLogInUserRoleObjectAsync();
+        //            //    var roleMenuList = _context.RoleMenu.Where(x => x.UserIdentityRoleId == role.Id).ToList();
+        //            //    var nevMenuList = _context.NavigationMenu.Where(x => x.Id > 0).ToList();
+        //            //    var pr = from r in roleMenuList
+        //            //             join n in nevMenuList
+        //            //             on r.NavigationMenuId equals n.Id
+        //            //             // where o.LastModifiedDate.ToShortDateString() == OD.AddDays(-1).ToShortDateString() && o.MealTypeId == 1
+        //            //             select n;
+        //            //    var filterMenuList = pr.ToList();
+
+        //            //    ViewBag.FilterMenuList = filterMenuList;
+
+
+        //            //    return View("WarehouseStorageIn");
+        //            //}
+        //            // List<StoreInItem> itemList = new List<StoreInItem>();
+        //            var itemList = _context.StoreInItem.Where(x => x.Name.Contains(rawmat)).Include(a => a.RemainingBalanceAndWeightedPriceCalculationList).ToList();
+
+        //            double UpdatedStoreOutItemPrice = 0;
+        //            double chkPrc = 0;
+        //            if (itemList.Count == 0)
+        //            {
+        //                itemList = _context.StoreInItem.Include(a => a.RemainingBalanceAndWeightedPriceCalculationList).ToList();
+
+        //            }
+        //            //if (StoreoutReceipe.Count > 0)
+        //            //{
+        //            //    foreach (var i in StoreoutReceipe)
+        //            //    {
+        //            //        itemList.Add(_context.StoreInItem.Where(x => x.Id == i.StoreInItemId).Include(a => a.RemainingBalanceAndWeightedPriceCalculationList).FirstOrDefault());
+        //            //    }
+        //            //}
+        //            //else
+        //            //{
+        //            //     itemList = _context.StoreInItem.Include(a=>a.RemainingBalanceAndWeightedPriceCalculationList).ToList();
+
+        //            //}
+        //            string usrName = SessionExtensions.GetString(HttpContext.Session, "user");
+        //            var user = await _userManager.FindByNameAsync(usrName);
+        //            //var user = await _userManager.GetUserAsync(User);
+        //            var userID = user.Id;
+        //            bool isstoreout = true;
+        //            var tempPriceList = new Dictionary<string, double>();
+        //            var tempQuantityList = new Dictionary<string, double>();
+
+        //            var storeOutSuccessMsg = new Dictionary<string, string>();
+        //            var RemBalInputList = new List<RemainingBalanceAndWeightedPriceCalculation>();
+        //            var RemBalUpdateList = new List<RemainingBalanceAndWeightedPriceCalculation>();
+        //            var ListofPriceOfTheDay = new List<RemainingBalanceAndWeightedPriceCalculation>();
+        //            var StorageItemInputList = new List<WarehouseStorage>();
+
+        //            try
+        //            {
+        //                if (itemList.Count > 0)
+        //                {
+        //                    foreach (var i in itemList)
+        //                    {
+        //                        Double amount = 0;
+        //                        if (Request.Form[i.Id.ToString()][0] != null)
+        //                        {
+        //                            Double.TryParse(Request.Form[i.Id.ToString()][0], out amount);
+        //                            if (amount > 0) userGivenAmount.Add(i.Id.ToString(), amount.ToString());
+        //                            if (amount > 0 && errorList.Count() == 0)
+        //                            {
+        //                                if (i.RemainingBalanceAndWeightedPriceCalculationList.LastOrDefault() != null)
+        //                                {
+        //                                    double availableamount = i.RemainingBalanceAndWeightedPriceCalculationList.LastOrDefault().TotalAvailableAmount;
+        //                                    double amountT = availableamount - Convert.ToDouble(amount);
+        //                                    if (amountT < 0)
+        //                                    {
+        //                                        errorList.Add(i.Id.ToString(), " Your amount is Exceeded " + "Remaining amount is : " + availableamount.ToString());
+
+        //                                    }
+        //                                    else
+        //                                    {
+        //                                        var otu = i.RemainingBalanceAndWeightedPriceCalculationList.LastOrDefault();
+        //                                        var temp = i.RemainingBalanceAndWeightedPriceCalculationList.LastOrDefault();
+        //                                        tempPriceList.Add(i.Id.ToString(), temp.WeightedPrice);
+        //                                        tempQuantityList.Add(i.Id.ToString(), amount);
+        //                                        UpdatedStoreOutItemPrice += amount * temp.WeightedPrice;
+
+        //                                        if (submit == "StoreOut")
+        //                                        {
+
+        //                                            otu.TotalAvailableAmount = Convert.ToDouble(amountT);
+        //                                            //otu.WeightedPrice = 1;
+        //                                            otu.LastModifiedBy = userID;
+        //                                            otu.LastModifiedDate = DateTime.Now;
+
+        //                                            RemBalUpdateList.Add(otu);
+
+        //                                            StorageItemInputList.Add(new WarehouseStorage
+        //                                            {
+        //                                                IsStoreOut = isstoreout,
+        //                                                Amount = Convert.ToDouble(amount),
+        //                                                Date = date,
+        //                                                StoreOutItemId = itemId,
+        //                                                StoreInItemId = i.Id,
+        //                                                CreatedBy = userID,
+        //                                                CreatedDate = DateTime.Now,
+        //                                                LastModifiedDate = DateTime.Now
+        //                                            }) ;
+        //                                        }
+        //                                    }
+        //                                }
+        //                                else
+        //                                {
+        //                                    errorList.Add(i.Id.ToString(), "No Remaining Balance Found");
+        //                                    if (submit == "StoreOut")
+        //                                    {
+        //                                        RemBalInputList.Add(new RemainingBalanceAndWeightedPriceCalculation
+        //                                        {
+        //                                            CreatedBy = userID,
+        //                                            CreatedDate = DateTime.Now,
+        //                                            StoreInItemId = i.Id,
+        //                                            WeightedPrice = 0,
+        //                                            TotalAvailableAmount = 0,
+        //                                            LastModifiedDate = DateTime.Now
+
+        //                                        });
+        //                                    }
+        //                                }
+
+        //                            }
+        //                        }
+        //                    }
+
+        //                    chkPrc = UpdatedStoreOutItemPrice;
+        //                    if (errorList.Count() == 0)
+        //                    {
+        //                        ViewBag.PriceListForStorageOut = ListofPriceOfTheDay;
+
+        //                        if (submit == "StoreOut")
+        //                        {
+        //                            //StoreOutItem storeOutItem = _context.StoreOutItem.Where(x => x.Id == itemId).FirstOrDefault();
+        //                            //double StOPrc = chkPrc / UpdtQnt;
+        //                            //decimal stop = Math.Round(Convert.ToDecimal(StOPrc), 2);
+
+        //                            //if (storeOutItem.Price != Convert.ToDouble(stop))
+        //                            //{
+        //                            //    storeOutItem.Price = Convert.ToDouble(stop);
+        //                            //    _context.StoreOutItem.Update(storeOutItem);
+
+        //                            //}
+        //                            RemBalInputList.ForEach(a => _context.RemainingBalanceAndWeightedPriceCalculation.Add(a));
+        //                            StorageItemInputList.ForEach(a => _context.WarehouseStorage.Add(a));
+        //                            RemBalUpdateList.ForEach(a => _context.RemainingBalanceAndWeightedPriceCalculation.Update(a));
+        //                            _context.SaveChanges();
+        //                        }
+        //                        ViewBag.StoreOutSuccessMsg = storeOutSuccessMsg;
+        //                        ViewBag.TempPriceList = tempPriceList;
+        //                        ViewBag.TempQuantityList = tempQuantityList;
+        //                        ViewBag.ItemId = itemId;
+        //                        ViewBag.quantity = quantity;
+        //                        ViewBag.chkquantity = chkquantity;
+        //                        ViewBag.chkmat2 = rawmat;
+        //                        ViewBag.FullName = await GetUserName();
+
+        //                        var role = await GetLogInUserRoleObjectAsync();
+        //                        var roleMenuList = _context.RoleMenu.Where(x => x.UserIdentityRoleId == role.Id).ToList();
+        //                        var nevMenuList = _context.NavigationMenu.Where(x => x.Id > 0).ToList();
+        //                        var pr = from r in roleMenuList
+        //                                 join n in nevMenuList
+        //                                 on r.NavigationMenuId equals n.Id
+        //                                 // where o.LastModifiedDate.ToShortDateString() == OD.AddDays(-1).ToShortDateString() && o.MealTypeId == 1
+        //                                 select n;
+        //                        var filterMenuList = pr.ToList();
+
+        //                        ViewBag.FilterMenuList = filterMenuList;
+
+
+        //                        ViewBag.StoreId = 2;
+
+        //                        return View("WarehouseStorageIn");
+        //                    }
+
+        //                }
+        //            }
+        //            catch (Exception ex)
+        //            {
+        //                errorList.Add("msg", ex.Message);
+        //            }
+        //        }
+        //        else
+        //        {
+        //            return LocalRedirect("~/AccessCheck/Index");
+
+        //        }
+        //    }
+        //    else
+        //    {
+        //        return LocalRedirect("~/AccessCheck/Index");
+
+        //    }
+
+        //    ViewBag.ErrorList = errorList;
+        //    ViewBag.UserGivenAmount = userGivenAmount;
+        //    ViewBag.StoreId = 2;
+        //    ViewBag.chkmat2 = rawmat;
+        //    ViewBag.FullName = await GetUserName();
+        //    var role2 = await GetLogInUserRoleObjectAsync();
+        //    var roleMenuList2 = _context.RoleMenu.Where(x => x.UserIdentityRoleId == role2.Id).ToList();
+        //    var nevMenuList2 = _context.NavigationMenu.Where(x => x.Id > 0).ToList();
+        //    var pr2 = from r in roleMenuList2
+        //             join n in nevMenuList2
+        //             on r.NavigationMenuId equals n.Id
+        //             // where o.LastModifiedDate.ToShortDateString() == OD.AddDays(-1).ToShortDateString() && o.MealTypeId == 1
+        //             select n;
+        //    var filterMenuList2 = pr2.ToList();
+
+        //    ViewBag.FilterMenuList = filterMenuList2;
+
+
+        //    return View("WarehouseStorageIn");
+        //}
+
         [HttpPost]
         [AutoValidateAntiforgeryToken]
-        public async Task<IActionResult> SaveUpdateWarehouseStorageOut(string submit,string StoreOutDate,double avgPrice,long itemId,double quantity,double chkquantity, string rawmat)
+        public async Task<IActionResult> SaveUpdateWarehouseStorageOut(string submit, string StoreOutDate, string rawmat)
         {
             var date = DateTime.Parse(StoreOutDate);
             var errorList = new Dictionary<string, string>();
             var userGivenAmount = new Dictionary<string, string>();
 
-            var StoreoutReceipe = _context.StoreOutItemRecipe.Where(x => x.StoreOutItemId == itemId).ToList();
-            double UpdtQnt = quantity;
-            if(chkquantity != 0)
-            {
-                UpdtQnt = chkquantity;
+            //var StoreoutReceipe = _context.StoreOutItemRecipe.Where(x => x.StoreOutItemId == itemId).ToList();
+            //double UpdtQnt = quantity;
+            //if(chkquantity != 0)
+            //{
+            //    UpdtQnt = chkquantity;
 
-            }
+            //}
             if (SessionExist())
             {
                 if (await UserExistMess())
                 {
-                    if (UpdtQnt == 0 && _context.StoreOutItem.Where(x=>x.Id == itemId).FirstOrDefault().Name != "Waste Material" )
-                    {
+                    //if (UpdtQnt == 0 && _context.StoreOutItem.Where(x=>x.Id == itemId).FirstOrDefault().Name != "Waste Material" )
+                    //{
 
-                        ViewBag.ErrorMsg = "No order is found for" + _context.StoreOutItem.Where(x => x.Id == itemId).FirstOrDefault().Name;
-                        ViewBag.StoreId = 2;
-                        ViewBag.chkmat2 = rawmat;
-                        ViewBag.FullName = await GetUserName();
-                        var role = await GetLogInUserRoleObjectAsync();
-                        var roleMenuList = _context.RoleMenu.Where(x => x.UserIdentityRoleId == role.Id).ToList();
-                        var nevMenuList = _context.NavigationMenu.Where(x => x.Id > 0).ToList();
-                        var pr = from r in roleMenuList
-                                 join n in nevMenuList
-                                 on r.NavigationMenuId equals n.Id
-                                 // where o.LastModifiedDate.ToShortDateString() == OD.AddDays(-1).ToShortDateString() && o.MealTypeId == 1
-                                 select n;
-                        var filterMenuList = pr.ToList();
+                    //    ViewBag.ErrorMsg = "No order is found for " + _context.StoreOutItem.Where(x => x.Id == itemId).FirstOrDefault().Name;
+                    //    ViewBag.StoreId = 2;
+                    //    ViewBag.chkmat2 = rawmat;
+                    //    ViewBag.FullName = await GetUserName();
+                    //    var role = await GetLogInUserRoleObjectAsync();
+                    //    var roleMenuList = _context.RoleMenu.Where(x => x.UserIdentityRoleId == role.Id).ToList();
+                    //    var nevMenuList = _context.NavigationMenu.Where(x => x.Id > 0).ToList();
+                    //    var pr = from r in roleMenuList
+                    //             join n in nevMenuList
+                    //             on r.NavigationMenuId equals n.Id
+                    //             // where o.LastModifiedDate.ToShortDateString() == OD.AddDays(-1).ToShortDateString() && o.MealTypeId == 1
+                    //             select n;
+                    //    var filterMenuList = pr.ToList();
 
-                        ViewBag.FilterMenuList = filterMenuList;
+                    //    ViewBag.FilterMenuList = filterMenuList;
 
 
-                        return View("WarehouseStorageIn");
-                    }
+                    //    return View("WarehouseStorageIn");
+                    //}
                     // List<StoreInItem> itemList = new List<StoreInItem>();
+                    //var itemList = _context.StoreInItem.Where(x => x.Name.Contains(rawmat)).Include(a => a.RemainingBalanceAndWeightedPriceCalculationList).ToList();
+
+                    //double UpdatedStoreOutItemPrice = 0;
+                    //double chkPrc = 0;
+                    //if (itemList.Count == 0)
+                    //{
                     var itemList = _context.StoreInItem.Where(x => x.Name.Contains(rawmat)).Include(a => a.RemainingBalanceAndWeightedPriceCalculationList).ToList();
 
-                    double UpdatedStoreOutItemPrice = 0;
-                    double chkPrc = 0;
+                    //            double UpdatedStoreOutItemPrice = 0;
+                    //            double chkPrc = 0;
                     if (itemList.Count == 0)
                     {
                         itemList = _context.StoreInItem.Include(a => a.RemainingBalanceAndWeightedPriceCalculationList).ToList();
 
                     }
+                    //}
                     //if (StoreoutReceipe.Count > 0)
                     //{
                     //    foreach (var i in StoreoutReceipe)
@@ -1174,15 +1423,16 @@ namespace Mess_Management_System_Alpha_V2.Controllers.Admin
                             foreach (var i in itemList)
                             {
                                 Double amount = 0;
+                                var remBal = _context.RemainingBalanceAndWeightedPriceCalculation.Where(x => x.StoreInItemId == i.Id).LastOrDefault();
                                 if (Request.Form[i.Id.ToString()][0] != null)
                                 {
                                     Double.TryParse(Request.Form[i.Id.ToString()][0], out amount);
                                     if (amount > 0) userGivenAmount.Add(i.Id.ToString(), amount.ToString());
                                     if (amount > 0 && errorList.Count() == 0)
                                     {
-                                        if (i.RemainingBalanceAndWeightedPriceCalculationList.LastOrDefault() != null)
+                                        if (remBal != null)
                                         {
-                                            double availableamount = i.RemainingBalanceAndWeightedPriceCalculationList.LastOrDefault().TotalAvailableAmount;
+                                            double availableamount = remBal.TotalAvailableAmount;
                                             double amountT = availableamount - Convert.ToDouble(amount);
                                             if (amountT < 0)
                                             {
@@ -1191,11 +1441,11 @@ namespace Mess_Management_System_Alpha_V2.Controllers.Admin
                                             }
                                             else
                                             {
-                                                var otu = i.RemainingBalanceAndWeightedPriceCalculationList.LastOrDefault();
-                                                var temp = i.RemainingBalanceAndWeightedPriceCalculationList.LastOrDefault();
+                                                var otu = remBal;
+                                                var temp = remBal;
                                                 tempPriceList.Add(i.Id.ToString(), temp.WeightedPrice);
                                                 tempQuantityList.Add(i.Id.ToString(), amount);
-                                                UpdatedStoreOutItemPrice += amount * temp.WeightedPrice;
+                                                //UpdatedStoreOutItemPrice += amount * temp.WeightedPrice;
 
                                                 if (submit == "StoreOut")
                                                 {
@@ -1212,12 +1462,12 @@ namespace Mess_Management_System_Alpha_V2.Controllers.Admin
                                                         IsStoreOut = isstoreout,
                                                         Amount = Convert.ToDouble(amount),
                                                         Date = date,
-                                                        StoreOutItemId = itemId,
+                                                        //StoreOutItemId = itemId,
                                                         StoreInItemId = i.Id,
                                                         CreatedBy = userID,
                                                         CreatedDate = DateTime.Now,
                                                         LastModifiedDate = DateTime.Now
-                                                    }) ;
+                                                    });
                                                 }
                                             }
                                         }
@@ -1243,7 +1493,7 @@ namespace Mess_Management_System_Alpha_V2.Controllers.Admin
                                 }
                             }
 
-                            chkPrc = UpdatedStoreOutItemPrice;
+                            //chkPrc = UpdatedStoreOutItemPrice;
                             if (errorList.Count() == 0)
                             {
                                 ViewBag.PriceListForStorageOut = ListofPriceOfTheDay;
@@ -1268,9 +1518,9 @@ namespace Mess_Management_System_Alpha_V2.Controllers.Admin
                                 ViewBag.StoreOutSuccessMsg = storeOutSuccessMsg;
                                 ViewBag.TempPriceList = tempPriceList;
                                 ViewBag.TempQuantityList = tempQuantityList;
-                                ViewBag.ItemId = itemId;
-                                ViewBag.quantity = quantity;
-                                ViewBag.chkquantity = chkquantity;
+                                //ViewBag.ItemId = itemId;
+                                //ViewBag.quantity = quantity;
+                                //ViewBag.chkquantity = chkquantity;
                                 ViewBag.chkmat2 = rawmat;
                                 ViewBag.FullName = await GetUserName();
 
@@ -1286,7 +1536,7 @@ namespace Mess_Management_System_Alpha_V2.Controllers.Admin
 
                                 ViewBag.FilterMenuList = filterMenuList;
 
-
+                                ViewBag.ItemId = -1;
                                 ViewBag.StoreId = 2;
 
                                 return View("WarehouseStorageIn");
@@ -1314,16 +1564,16 @@ namespace Mess_Management_System_Alpha_V2.Controllers.Admin
             ViewBag.ErrorList = errorList;
             ViewBag.UserGivenAmount = userGivenAmount;
             ViewBag.StoreId = 2;
-            ViewBag.chkmat2 = rawmat;
+            //ViewBag.chkmat2 = rawmat;
             ViewBag.FullName = await GetUserName();
             var role2 = await GetLogInUserRoleObjectAsync();
             var roleMenuList2 = _context.RoleMenu.Where(x => x.UserIdentityRoleId == role2.Id).ToList();
             var nevMenuList2 = _context.NavigationMenu.Where(x => x.Id > 0).ToList();
             var pr2 = from r in roleMenuList2
-                     join n in nevMenuList2
-                     on r.NavigationMenuId equals n.Id
-                     // where o.LastModifiedDate.ToShortDateString() == OD.AddDays(-1).ToShortDateString() && o.MealTypeId == 1
-                     select n;
+                      join n in nevMenuList2
+                      on r.NavigationMenuId equals n.Id
+                      // where o.LastModifiedDate.ToShortDateString() == OD.AddDays(-1).ToShortDateString() && o.MealTypeId == 1
+                      select n;
             var filterMenuList2 = pr2.ToList();
 
             ViewBag.FilterMenuList = filterMenuList2;
@@ -1391,7 +1641,7 @@ namespace Mess_Management_System_Alpha_V2.Controllers.Admin
                     ViewBag.StoreId = 2;
                     ViewBag.viewSTOUpdate = 1;
                     ViewBag.FullName = await GetUserName();
-                    ViewBag.FilterMenuList = getMenuUserAsync();
+                    //ViewBag.FilterMenuList = await getMenuUserAsync();
                     var role = await GetLogInUserRoleObjectAsync();
                     var roleMenuList = _context.RoleMenu.Where(x => x.UserIdentityRoleId == role.Id).ToList();
                     var nevMenuList = _context.NavigationMenu.Where(x => x.Id > 0).ToList();
@@ -1581,9 +1831,11 @@ namespace Mess_Management_System_Alpha_V2.Controllers.Admin
                 if (await UserExistMess())
                 {
                     var name = Request.Form["stoNameEd"][0];
+                    var price  = Request.Form["stoPriceEd"][0];
 
                     StoreOutItem soi = _context.StoreOutItem.Where(x => x.Id == id).FirstOrDefault();
                     soi.Name = name;
+                    soi.Price = double.Parse(price);
                     _context.StoreOutItem.Update(soi);
                     _context.SaveChanges();
                     ViewBag.StoreId = 2;
@@ -1591,7 +1843,7 @@ namespace Mess_Management_System_Alpha_V2.Controllers.Admin
 
                     ViewBag.viewSTOUpdate = 1;
 
-                    ViewBag.STOUpdateMsg = "Name has been updated successfully";
+                    ViewBag.STOUpdateMsg = "Name and price has been updated successfully";
                     ViewBag.FullName = await GetUserName();
                     var role = await GetLogInUserRoleObjectAsync();
                     var roleMenuList = _context.RoleMenu.Where(x => x.UserIdentityRoleId == role.Id).ToList();
@@ -1823,6 +2075,26 @@ namespace Mess_Management_System_Alpha_V2.Controllers.Admin
 
                     _context.SaveChanges();
 
+                    foreach(var i in _context.MenuItem.Where(x=>x.Id > 0))
+                    {
+                        var exObj = _context.ExtraItem.Where(x => x.Id == i.ExtraItemId).FirstOrDefault();
+                        if(exObj.StoreOutItemId == id)
+                        {
+                            _context.MenuItem.Remove(i);
+                            _context.SaveChanges();
+                        }
+                    }
+
+                    foreach (var i in _context.CustomerDailyMenuChoice.Where(x => x.Id > 0))
+                    {
+                        var exObj = _context.ExtraItem.Where(x => x.Id == i.ExtraItemId).FirstOrDefault();
+                        if (exObj.StoreOutItemId == id)
+                        {
+                            _context.CustomerDailyMenuChoice.Remove(i);
+                            _context.SaveChanges();
+                        }
+                    }
+
                     //if (storeOutItemRecipe == null)
                     //{
                     //    return NotFound();
@@ -2010,35 +2282,37 @@ namespace Mess_Management_System_Alpha_V2.Controllers.Admin
                         string datesv = DateFormatarray[1] + '/' + DateFormatarray[0] + '/' + DateFormatarray[2];
                         DateTime orderdate = DateTime.ParseExact(datesv, "M/d/yyyy", CultureInfo.InvariantCulture);
 
-                        if (Item == "-1")
+                        //if (Item == "-1")
+                        //{
+                        //    ViewBag.OrderDate = orderdate;
+
+                        //    //ViewBag.quantity = quantity;
+                        //    ViewBag.StoreId = 2;
+                        //    ViewBag.ErrorMsg = "Empty field is not allowed";
+                        //    ViewBag.FullName = await GetUserName();
+                        //    var role = await GetLogInUserRoleObjectAsync();
+                        //    var roleMenuList = _context.RoleMenu.Where(x => x.UserIdentityRoleId == role.Id).ToList();
+                        //    var nevMenuList = _context.NavigationMenu.Where(x => x.Id > 0).ToList();
+                        //    var pr = from r in roleMenuList
+                        //             join n in nevMenuList
+                        //             on r.NavigationMenuId equals n.Id
+                        //             // where o.LastModifiedDate.ToShortDateString() == OD.AddDays(-1).ToShortDateString() && o.MealTypeId == 1
+                        //             select n;
+                        //    var filterMenuList = pr.ToList();
+
+                        //    ViewBag.FilterMenuList = filterMenuList;
+
+                        //    return View("WarehouseStorageIn");
+                        //}
+                        if (orderdate > DateTime.Now.Date)
                         {
                             ViewBag.OrderDate = orderdate;
 
                             //ViewBag.quantity = quantity;
                             ViewBag.StoreId = 2;
-                            ViewBag.ErrorMsg = "Empty field is not allowed";
-                            ViewBag.FullName = await GetUserName();
-                            var role = await GetLogInUserRoleObjectAsync();
-                            var roleMenuList = _context.RoleMenu.Where(x => x.UserIdentityRoleId == role.Id).ToList();
-                            var nevMenuList = _context.NavigationMenu.Where(x => x.Id > 0).ToList();
-                            var pr = from r in roleMenuList
-                                     join n in nevMenuList
-                                     on r.NavigationMenuId equals n.Id
-                                     // where o.LastModifiedDate.ToShortDateString() == OD.AddDays(-1).ToShortDateString() && o.MealTypeId == 1
-                                     select n;
-                            var filterMenuList = pr.ToList();
+                            ViewBag.ItemId = 0;
 
-                            ViewBag.FilterMenuList = filterMenuList;
-
-                            return View("WarehouseStorageIn");
-                        }
-                        else if (orderdate > DateTime.Now.Date || orderdate < DateTime.Now.Date)
-                        {
-                            ViewBag.OrderDate = orderdate;
-
-                            //ViewBag.quantity = quantity;
-                            ViewBag.StoreId = 2;
-                            ViewBag.ErrorMsg = "Only today's date is allowed";
+                            ViewBag.ErrorMsg = "Only today's and previous date is allowed";
                             ViewBag.FullName = await GetUserName();
                             var role2 = await GetLogInUserRoleObjectAsync();
                             var roleMenuList2 = _context.RoleMenu.Where(x => x.UserIdentityRoleId == role2.Id).ToList();
@@ -2056,24 +2330,25 @@ namespace Mess_Management_System_Alpha_V2.Controllers.Admin
                         }
                         else
                         {
-                            var storeOutObj = _context.StoreOutItem.Where(x => x.Id == long.Parse(Item)).FirstOrDefault();
-                            long strId = 0;
-                            if(storeOutObj.Name == "Waste Material")
-                            {
-                                strId = storeOutObj.Id;
-                            }
-                            else
-                            {
-                                 strId = _context.ExtraItem.Where(x => x.Id == long.Parse(Item)).FirstOrDefault().StoreOutItemId;
+                            
+                            //var storeOutObj = _context.StoreOutItem.Where(x => x.Id == long.Parse(Item)).FirstOrDefault();
+                            //long strId = 0;
+                            //if(storeOutObj != null && storeOutObj.Name == "Waste Material")
+                            //{                                
+                            //    strId = storeOutObj.Id;
+                            //}
+                            //else
+                            //{
+                            //     strId = _context.ExtraItem.Where(x => x.Id == long.Parse(Item)).FirstOrDefault().StoreOutItemId;
 
-                            }
-                            var RawMaterialForReciepe = _context.StoreOutItemRecipe.Where(x => x.StoreOutItemId == strId).ToList();
-                            long itemid = long.Parse(Item);
+                            //}
+                            //var RawMaterialForReciepe = _context.StoreOutItemRecipe.Where(x => x.StoreOutItemId == strId).ToList();
+                            //long itemid = long.Parse(Item);
                             double quantity = 0;
                             //var itmqnt = _context.OrderHistory.Where(x => x.StoreOutItemId != null && x.StoreOutItemId == itemid && x.OrderDate.ToShortDateString() == orderdate.ToShortDateString()).Select(x => x.UnitOrdered).Sum();
-                            var itmqnt = _context.CustomerChoiceV2.Where(x => x.ExtraItemId == long.Parse(Item) && x.Date.ToShortDateString() == orderdate.ToShortDateString()).Select(x => x.quantity).Sum();
+                            //var itmqnt = _context.CustomerChoiceV2.Where(x => x.ExtraItemId == long.Parse(Item) && x.Date.ToShortDateString() == orderdate.ToShortDateString()).Select(x => x.quantity).Sum();
 
-                            quantity += itmqnt;
+                            //quantity += itmqnt;
                             var list = new Dictionary<string, string>();
                             var map = new Dictionary<long?, string>();
                             var setmenuItemmap = new Dictionary<long?, double>();
@@ -2092,20 +2367,20 @@ namespace Mess_Management_System_Alpha_V2.Controllers.Admin
 
                             //    }
                             //}
-                            var StoreoutReceipe = _context.StoreOutItemRecipe.Where(x => x.StoreOutItemId == strId).ToList();
+                            //var StoreoutReceipe = _context.StoreOutItemRecipe.Where(x => x.StoreOutItemId == strId).ToList();
                             List<StoreInItem> itemList = new List<StoreInItem>();
-                            if (StoreoutReceipe.Count > 0)
-                            {
-                                foreach (var i in StoreoutReceipe)
-                                {
-                                    itemList.Add(_context.StoreInItem.Where(x => x.Id == i.StoreInItemId).Include(a => a.RemainingBalanceAndWeightedPriceCalculationList).FirstOrDefault());
-                                }
-                            }
-                            else
-                            {
+                            //if (StoreoutReceipe.Count > 0)
+                            //{
+                            //    foreach (var i in StoreoutReceipe)
+                            //    {
+                            //        itemList.Add(_context.StoreInItem.Where(x => x.Id == i.StoreInItemId).Include(a => a.RemainingBalanceAndWeightedPriceCalculationList).FirstOrDefault());
+                            //    }
+                            //}
+                            //else
+                            //{
                                 itemList = _context.StoreInItem.Include(a => a.RemainingBalanceAndWeightedPriceCalculationList).ToList();
 
-                            }
+                            //}
                             var errorList = new Dictionary<string, string>();
                             var tempPriceList = new Dictionary<string, double>();
                             var tempQuantityList = new Dictionary<string, double>();
@@ -2113,110 +2388,111 @@ namespace Mess_Management_System_Alpha_V2.Controllers.Admin
                             {
                                 if (itemList.Count > 0)
                                 {
-                                    foreach (var i in itemList)
-                                    {
-                                        Double amount = 0;
-                                        if (StoreoutReceipe.Count == 0)
-                                        {
-                                            amount = 0;
-                                        }
-                                        else
-                                        {
-                                            var str = _context.StoreOutItemRecipe.Where(x => x.StoreOutItemId == strId && x.StoreInItemId == i.Id).FirstOrDefault();
-                                            amount = str.RequiredStoreInUnit;
-                                        }
+                                    //foreach (var i in itemList)
+                                    //{
+                                    //    Double amount = 0;
+                                    //    //if (StoreoutReceipe.Count == 0)
+                                    //    //{
+                                    //    //    amount = 0;
+                                    //    //}
+                                    //    //else
+                                    //    //{
+                                    //    //    var str = _context.StoreOutItemRecipe.Where(x => x.StoreOutItemId == strId && x.StoreInItemId == i.Id).FirstOrDefault();
+                                    //    //    amount = str.RequiredStoreInUnit;
+                                    //    //}
+                                    //    if (errorList.Count() == 0)
 
-                                        if (amount > 0 && errorList.Count() == 0)
-                                        {
-                                            if (i.RemainingBalanceAndWeightedPriceCalculationList.LastOrDefault() != null)
-                                            {
-                                                double availableamount = i.RemainingBalanceAndWeightedPriceCalculationList.LastOrDefault().TotalAvailableAmount;
-                                                double amountT = availableamount - Convert.ToDouble(amount);
-                                                if (amountT < 0)
-                                                {
-                                                    errorList.Add(i.Id.ToString(), " Your amount is Exceeded " + "Remaining amount is : " + availableamount.ToString());
+                                    //        //if (amount > 0 && errorList.Count() == 0)
+                                    //    {
+                                    //        if (i.RemainingBalanceAndWeightedPriceCalculationList.LastOrDefault() != null)
+                                    //        {
+                                    //            double availableamount = i.RemainingBalanceAndWeightedPriceCalculationList.LastOrDefault().TotalAvailableAmount;
+                                    //            double amountT = availableamount - Convert.ToDouble(amount);
+                                    //            if (amountT < 0)
+                                    //            {
+                                    //                errorList.Add(i.Id.ToString(), " Your amount is Exceeded " + "Remaining amount is : " + availableamount.ToString());
 
-                                                }
-                                                else
-                                                {
-                                                    var otu = i.RemainingBalanceAndWeightedPriceCalculationList.LastOrDefault();
-                                                    var temp = i.RemainingBalanceAndWeightedPriceCalculationList.LastOrDefault();
-                                                    double minProduction = _context.StoreOutItem.Where(x => x.Id == strId).FirstOrDefault().MinimumProductionUnit;
-                                                    double minRawUnit = amount;
-                                                    double suggestedUnit = (minRawUnit * quantity) / minProduction;
-                                                    tempPriceList.Add(i.Id.ToString(), temp.WeightedPrice);
-                                                    tempQuantityList.Add(i.Id.ToString(), suggestedUnit);
-
-
-                                                }
-                                            }
-                                            else
-                                            {
-                                                errorList.Add(i.Id.ToString(), "No Remaining Balance Found");
-
-                                            }
-
-                                        }
-
-                                    }
-
-                                    if (errorList.Count() == 0)
-                                    {
+                                    //            }
+                                    //            else
+                                    //            {
+                                    //                //var otu = i.RemainingBalanceAndWeightedPriceCalculationList.LastOrDefault();
+                                    //                //var temp = i.RemainingBalanceAndWeightedPriceCalculationList.LastOrDefault();
+                                    //                //double minProduction = _context.StoreOutItem.Where(x => x.Id == strId).FirstOrDefault().MinimumProductionUnit;
+                                    //                //double minRawUnit = amount;
+                                    //                //double suggestedUnit = (minRawUnit * quantity) / minProduction;
+                                    //                //tempPriceList.Add(i.Id.ToString(), temp.WeightedPrice);
+                                    //                //tempQuantityList.Add(i.Id.ToString(), suggestedUnit);
 
 
-                                        ViewBag.TempPriceList = tempPriceList;
-                                        ViewBag.TempQuantityList = tempQuantityList;
-                                        ViewBag.ItemId = strId;
-                                        ViewBag.OrderDate = orderdate;
+                                    //            }
+                                    //        }
+                                    //        else
+                                    //        {
+                                    //            errorList.Add(i.Id.ToString(), "No Remaining Balance Found");
 
-                                        ViewBag.quantity = quantity;
-                                        ViewBag.StoreId = 2;
-                                        ViewBag.FullName = await GetUserName();
+                                    //        }
 
-                                        //ViewBag.chkquantity = chkquantity;
+                                    //    }
 
+                                    //}
 
-                                        var role3 = await GetLogInUserRoleObjectAsync();
-                                        var roleMenuList3 = _context.RoleMenu.Where(x => x.UserIdentityRoleId == role3.Id).ToList();
-                                        var nevMenuList3 = _context.NavigationMenu.Where(x => x.Id > 0).ToList();
-                                        var pr3 = from r in roleMenuList3
-                                                 join n in nevMenuList3
-                                                 on r.NavigationMenuId equals n.Id
-                                                 // where o.LastModifiedDate.ToShortDateString() == OD.AddDays(-1).ToShortDateString() && o.MealTypeId == 1
-                                                 select n;
-                                        var filterMenuList3 = pr3.ToList();
-
-                                        ViewBag.FilterMenuList = filterMenuList3;
+                                    //if (errorList.Count() == 0)
+                                    //{
 
 
-                                        //return View("WarehouseStorageOut");
-                                        return View("WarehouseStorageIn");
+                                    //    ViewBag.TempPriceList = tempPriceList;
+                                    //    ViewBag.TempQuantityList = tempQuantityList;
+                                    //    ViewBag.ItemId = 0;
+                                    //    ViewBag.OrderDate = orderdate;
 
-                                    }
+                                    //    ViewBag.quantity = quantity;
+                                    //    ViewBag.StoreId = 2;
+                                    //    ViewBag.FullName = await GetUserName();
 
-                                    else
-                                    {
-                                        ViewBag.ItemId = strId;
-                                        ViewBag.OrderDate = orderdate;
+                                    //    //ViewBag.chkquantity = chkquantity;
 
-                                        ViewBag.quantity = quantity;
-                                        ViewBag.StoreId = 2;
-                                        ViewBag.ErrorMsg = "No sufficient raw item for this menu";
-                                        ViewBag.FullName = await GetUserName();
-                                        var role4 = await GetLogInUserRoleObjectAsync();
-                                        var roleMenuList4 = _context.RoleMenu.Where(x => x.UserIdentityRoleId == role4.Id).ToList();
-                                        var nevMenuList4 = _context.NavigationMenu.Where(x => x.Id > 0).ToList();
-                                        var pr4 = from r in roleMenuList4
-                                                 join n in nevMenuList4
-                                                 on r.NavigationMenuId equals n.Id
-                                                 // where o.LastModifiedDate.ToShortDateString() == OD.AddDays(-1).ToShortDateString() && o.MealTypeId == 1
-                                                 select n;
-                                        var filterMenuList4 = pr4.ToList();
 
-                                        ViewBag.FilterMenuList = filterMenuList4;
+                                    //    var role3 = await GetLogInUserRoleObjectAsync();
+                                    //    var roleMenuList3 = _context.RoleMenu.Where(x => x.UserIdentityRoleId == role3.Id).ToList();
+                                    //    var nevMenuList3 = _context.NavigationMenu.Where(x => x.Id > 0).ToList();
+                                    //    var pr3 = from r in roleMenuList3
+                                    //             join n in nevMenuList3
+                                    //             on r.NavigationMenuId equals n.Id
+                                    //             // where o.LastModifiedDate.ToShortDateString() == OD.AddDays(-1).ToShortDateString() && o.MealTypeId == 1
+                                    //             select n;
+                                    //    var filterMenuList3 = pr3.ToList();
 
-                                        return View("WarehouseStorageIn");
-                                    }
+                                    //    ViewBag.FilterMenuList = filterMenuList3;
+
+
+                                    //    //return View("WarehouseStorageOut");
+                                    //    return View("WarehouseStorageIn");
+
+                                    //}
+
+                                    //else
+                                    //{
+                                    //    ViewBag.ItemId = 0;
+                                    //    ViewBag.OrderDate = orderdate;
+
+                                    //    ViewBag.quantity = quantity;
+                                    //    ViewBag.StoreId = 2;
+                                    //    ViewBag.ErrorMsg = "No sufficient raw item for this menu";
+                                    //    ViewBag.FullName = await GetUserName();
+                                    //    var role4 = await GetLogInUserRoleObjectAsync();
+                                    //    var roleMenuList4 = _context.RoleMenu.Where(x => x.UserIdentityRoleId == role4.Id).ToList();
+                                    //    var nevMenuList4 = _context.NavigationMenu.Where(x => x.Id > 0).ToList();
+                                    //    var pr4 = from r in roleMenuList4
+                                    //             join n in nevMenuList4
+                                    //             on r.NavigationMenuId equals n.Id
+                                    //             // where o.LastModifiedDate.ToShortDateString() == OD.AddDays(-1).ToShortDateString() && o.MealTypeId == 1
+                                    //             select n;
+                                    //    var filterMenuList4 = pr4.ToList();
+
+                                    //    ViewBag.FilterMenuList = filterMenuList4;
+
+                                    //    return View("WarehouseStorageIn");
+                                    //}
 
                                 }
                             }
@@ -2225,7 +2501,8 @@ namespace Mess_Management_System_Alpha_V2.Controllers.Admin
                                 errorList.Add("msg", ex.Message);
                             }
             ;
-                            ViewBag.ItemId = strId;
+                            ViewBag.ItemId = -1;
+                            ViewBag.StoreId = 2;
                             ViewBag.quantity = quantity;
                             ViewBag.OrderDate = orderdate;
                             var role = await GetLogInUserRoleObjectAsync();
@@ -2243,7 +2520,7 @@ namespace Mess_Management_System_Alpha_V2.Controllers.Admin
                             //var mealtype = _context.MealType.Where(x => x.Id == Int32.Parse(meal)).FirstOrDefault();
                             //ViewBag.OrderDate = from;
                             //ViewBag.mealId = mealtype.Id;
-                            return View("WarehouseStorageOut");
+                            return View("WarehouseStorageIn");
                         }
 
 
@@ -2255,6 +2532,8 @@ namespace Mess_Management_System_Alpha_V2.Controllers.Admin
 
                         //ViewBag.quantity = quantity;
                         ViewBag.StoreId = 2;
+                        ViewBag.ItemId = 0;
+
                         ViewBag.ErrorMsg = "Date field is invalid";
                         ViewBag.FullName = await GetUserName();
                         var role = await GetLogInUserRoleObjectAsync();

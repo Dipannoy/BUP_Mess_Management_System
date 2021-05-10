@@ -379,6 +379,20 @@
 
                         </div>
                     </div>
+                    <div class="row">
+                        <div class="col-sm-4">
+                            <label class="bmd-label-floating">Payment Date</label>
+
+                        </div>
+                        <div class="col-sm-4">
+                            <input type="text" id="cashDate" class="form-control" placeholder="" />
+
+                        </div>
+
+                        <div class="col-sm-4">
+
+                        </div>
+                    </div>
                 </div>
                 <div class="row" style="padding-top:20px;">
                     <div class="col-sm-6">
@@ -397,15 +411,27 @@
             </div>
         </div>
 
+
         <div class="row" style="padding-top:50px;">
+            <div class="col-sm-9">
+
+            </div>
+            <div class="col-sm-3">
+                <button rel="tooltip" style="padding-left:15px;padding-right:15px;padding-top:10px;padding-bottom:10px;" onclick="printBalanceSheet()" class="btn"> Print Due Bill </button>
+
+            </div>
+        </div>
+
+        <div class="row" style="padding-top:10px;">
 
             <div class="col-sm-1">
 
             </div>
             <div class="col-sm-10">
-                <table class="table table-striped table-bordered table-hover">
+                <table id="dueTable" class="table table-striped table-bordered table-hover">
                     <thead>
                         <tr>
+                            <th> #</th>
 
                             <th>Name</th>
 
@@ -416,11 +442,17 @@
                         </tr>
                     </thead>
                     <tbody>
+                        @{ 
+                            var sl = 0;
+                            double totalBill = 0;
+                        }
                         @foreach (var user in groupConsumerBillList)
                         {
-                            var name = _userManager.Users.Where(x => x.Id == user.UserID).FirstOrDefault().BUPFullName;
+                            sl++;
+                            var name = _userManager.Users.Where(x => x.Id == user.UserID).FirstOrDefault();
                             <tr>
-                                <td> @name</td>
+                                <td>@sl</td>
+                                <td> @name.BUPNumber-@name.BUPFullName</td>
 
                                 @{
                                     var billParentObj = _context.ConsumerBillParent.Where(x => x.UserId == user.UserID).FirstOrDefault();
@@ -435,12 +467,15 @@
                                         else
                                         {
                                             dueBill = user.Amount;
+
                                         }
                                     }
+
                                     else
                                     {
                                         dueBill = user.Amount;
                                     }
+                                    totalBill += dueBill;
                                 }
                                 <td> @dueBill </td>
                                 <td>
@@ -449,6 +484,12 @@
                             </tr>
                         }
 
+
+                        <tr>
+                        <td colspan="2">Total</td>
+                            <td>@totalBill</td>
+                            <td></td>
+                        </tr>
                     </tbody>
                 </table>
             </div>
@@ -472,6 +513,131 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-modal/0.9.1/jquery.modal.min.js"></script>
 
 <script src="~/js/BillPaymentController.js"></script>
+
+<script>
+
+    function printBalanceSheet() {
+        var storeInTable = document.getElementById('dueTable');
+        var tr = storeInTable.getElementsByTagName("tr");
+        var index = [3];
+        var txtValue = '';
+        var printTable = '<table id="customers"><thead>'
+        for (var i = 0; i < tr.length - 1; i++) {
+            printTable += '<tr>';
+            if (i == 0) {
+                var th = tr[i].getElementsByTagName("th");
+                for (var j = 0; j < th.length; j++) {
+                    if (!index.includes(j)) {
+                        txtValue = th[j].textContent || th[j].innerText;
+                        printTable += '<th>' + txtValue + '</th>';
+                    }
+
+                }
+                printTable += '</tr></thead><tbody>';
+            }
+            else {
+                var td = tr[i].getElementsByTagName("td");
+                for (var j = 0; j < td.length; j++) {
+                    if (!index.includes(j)) {
+                        txtValue = td[j].textContent || td[j].innerText;
+                        printTable += '<td>' + txtValue + '</td>';
+                    }
+
+                }
+            }
+        }
+        td = tr[tr.length - 1].getElementsByTagName("td");
+        //console.log(td);
+        txtValue = td[1].textContent || td[1].innerText;
+        printTable += '<tr><td colspan="2">' + "Total" + '</td>';
+        printTable += '<td colspan="2">' + txtValue + '</td></td>';
+
+        printTable += '</tbody></table>';
+
+        var currentDate = new Date();
+        cd = currentDate.toString();
+        curDate = cd.split(' ');
+
+        //var mywindow = window.open('', 'PRINT', 'height=' + height + ',width=' + width);
+        var mywindow = window.open();
+
+        mywindow.document.write('<html>    ');
+        mywindow.document.write('<head> <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css"></head><style>');
+        @* mywindow.document.write("@page { size: auto;  margin: 5mm; }");*@
+        //=============================================
+
+        mywindow.document.write('.box{ width: 300px;  height: 100px;  border: 1px solid black;margin-top:40px;}');
+
+        mywindow.document.write('.circle {width: 20px; height: 20px;border: 2px solid rgb(0,0,0);margin:0 auto;');
+        //mywindow.document.write('.circle {width: 25px; height: 25px;border: 2px solid rgb(0,0,0);');
+
+        mywindow.document.write('border-radius: 50%; font-size: 12px;color: black; line-height: 20px;text-align:center;}');
+        mywindow.document.write('.diamond-shape { background: #fff;height: 15px;border: 2px solid rgb(0,0,0);');
+        mywindow.document.write(' transform:rotate(45deg);width:15px;margin-left:20px;}');
+        mywindow.document.write('.item-count { color: #333; transform: rotate(-45deg);');
+        mywindow.document.write(' text-align:center;font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;font-size:10px;}');
+        mywindow.document.write('.dottedBox { width: 50px; height: 20px;');
+        mywindow.document.write(' border: 3px solid rgb(0,0,0);font-size: 12px;  color: black;');
+        mywindow.document.write('line-height: 20px;text-align: center;} .samefont{font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;font-size:13px;}');
+
+        //===================================================
+        mywindow.document.write('div.header {display:s block;position:fixed;}  #newPage{page-break-before: always;} .npPad{padding-top:5in;} #customers{font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;font-size:13px;border-collapse: collapse;');
+        mywindow.document.write('width:100%;}#customers thead{}#customers td{border: 1px solid rgb(0,0,0);padding: 2px; } #customers th {border: 1px solid rgb(0,0,0);');
+        mywindow.document.write('padding:4px; text-align: center; background-color: grey;} #customers td.t{text-align:center;} #customers td.crcl{width: 20px; height: 20px;border: 2px solid rgb(0,0,0);margin-left:20px;border-radius: 50%; font-size: 12px;color: black; line-height: 20px;text-align:center;} #customers tr:nth-child(even) {  background-color: white;}');
+        mywindow.document.write('#customers tr:hover {backgrosund-color: white;}');
+
+
+        mywindow.document.write('#customers th {');
+        mywindow.document.write('.downU{padding-top:.3in;}')
+        mywindow.document.write('p.c{text-align: center;} p.aL{float: left;text-align:left;margin-bottom: 0px; font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;font-size:12px;}');
+        mywindow.document.write('p.aC{float:left;text-align:center;}')
+        mywindow.document.write('p.d{ margin-top: 0px; font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;font-size:13px;}');
+        mywindow.document.write('background-color: white; color: black;} p.a {font:  bold 30px arial, sans-serif;} p.b{   margin-bottom: 0px; font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;font-size:13px;}</style>');
+
+
+        mywindow.document.write('<body>');
+        mywindow.document.write('<div class="row">');
+        mywindow.document.write('<div class="col-sm-5"></div>');
+        mywindow.document.write('<div class="col-sm-4" style="font-size:18px;font-weight:bold;padding-left:50px;">BUP Officers Mess</div>');
+        mywindow.document.write('<div class="col-sm-3"></div></div>');
+
+
+        mywindow.document.write('<div class="row">');
+        mywindow.document.write('<div class="col-sm-5"></div>');
+        mywindow.document.write('<div class="col-sm-3" style="font-size:18px;font-weight:bold;padding-left:50px;">Due Bill List</div>');
+        mywindow.document.write('<div class="col-sm-4"></div></div>');
+
+        mywindow.document.write('<div class="row">');
+        mywindow.document.write('<div class="col-sm-5"></div>');
+        mywindow.document.write('<div class="col-sm-3" style="font-size:18px;font-weight:bold;padding-left:50px;">' + curDate[1] + ' ' + curDate[2] + ', ' + curDate[3] + '</div>');
+        mywindow.document.write('<div class="col-sm-4"></div></div>');
+        //mywindow.document.write('<div class="row" style="padding-left:50px;">Name : ' + person + '</div>');
+        //mywindow.document.write('<div class="row" style="padding-left:50px;"> Month : ' + monthName + '</div>');
+
+        //mywindow.document.write('<div class="row" style="padding-left:50px;">Year : ' + year + '</div>');
+
+        mywindow.document.write('<div class="row">');
+        mywindow.document.write('<div class="col-sm-2"></div>');
+        mywindow.document.write('<div class="col-sm-8">');
+
+        mywindow.document.write(printTable);
+        mywindow.document.write('</div><div class="col-sm-2"></div>');
+
+        mywindow.document.write('</div>');
+
+        mywindow.document.write('</body ></html > ');
+
+        mywindow.document.close();
+        mywindow.focus();
+        mywindow.print();
+
+
+
+    }
+
+
+
+</script>
 
 
 

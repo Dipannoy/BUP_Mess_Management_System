@@ -121,7 +121,7 @@ namespace Mess_Management_System_Alpha_V2.Controllers.Admin
 
             
 
-            var OnSpotItemList = _context.StoreOutItem.Where(x => x.IsOpen == true).ToList();
+            var OnSpotItemList = _context.StoreOutItem.Where(x => x.IsOpen == true).OrderBy(x=>x.Name).ToList();
             List<ExtraChitObject> exChtList = new List<ExtraChitObject>();
 
 
@@ -189,7 +189,7 @@ namespace Mess_Management_System_Alpha_V2.Controllers.Admin
             var stoList = _context.StoreOutItem.Where(x => x.IsOpen == true).ToList();
 
 
-            var OnSpotItemList = _context.DailyOfferItem.Where(x => x.Date.Date == DateTime.Now.Date).ToList();
+            var OnSpotItemList = _context.DailyOfferItem.Where(x => x.Date.Date == DateTime.Now.Date || x.IsActive == true).ToList();
 
             foreach (var i in OnSpotItemList)
             {

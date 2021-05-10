@@ -1138,6 +1138,9 @@ namespace Mess_Management_System_Alpha_V2.Controllers
                         osp.OfficeId = officeId;
                         osp.UserId = consumerId;
                         osp.BearerId = bearerId;
+                        osp.IsMessageSeen = false;
+                        osp.IsMessageSent = false;
+                        
                         osp.IsOfficeOrder = isOffice;
                         osp.Date = DateTime.Now;
                         osp.CreatedDate = DateTime.Now;
@@ -1151,6 +1154,8 @@ namespace Mess_Management_System_Alpha_V2.Controllers
                         OnSpotParent osp = new OnSpotParent();
                         osp.UserId = consumerId;
                         osp.BearerId = bearerId;
+                        osp.IsMessageSeen = false;
+                        osp.IsMessageSent = false;
                         osp.IsOfficeOrder = isOffice;
                         osp.Date = DateTime.Now;
                         osp.CreatedDate = DateTime.Now;
@@ -1166,6 +1171,12 @@ namespace Mess_Management_System_Alpha_V2.Controllers
                 //    onSpotParentId = onSpotObj.Id;
                 //}
                 List<OnSpotItemObject> tempItemList = (List<OnSpotItemObject>)JsonConvert.DeserializeObject(ItemList, typeof(List<OnSpotItemObject>));
+                if (tempItemList.Count == 0)
+                {
+                    return Json(new { success = true, responseText = "No item is found." });
+
+                }
+
                 //var user = await _userManager.FindByNameAsync(usrName);
                 //string UserId = user.Id;
                 foreach (var it in tempItemList)
@@ -1215,6 +1226,8 @@ namespace Mess_Management_System_Alpha_V2.Controllers
                 return Json(new { success = false, responseText = ex.Message });
 
             }
+
+           
             return Json(new { success = true, responseText = "Items have been added successfully.." });
 
         }
@@ -1237,7 +1250,7 @@ namespace Mess_Management_System_Alpha_V2.Controllers
                 var user = await _userManager.FindByNameAsync(usrName);
                 string UserId = user.Id;
                 ordList = _context.OrderHistoryVr2.Where(x => x.UserId == UserId && x.OrderDate.Date == ordDate.Date && x.MealTypeId == Int32.Parse(Type)).ToList();
-                var storeOutItemList = _context.StoreOutItem.Where(x => x.IsOpen == true).ToList();
+                var storeOutItemList = _context.StoreOutItem.Where(x => x.Id > 0).ToList();
                 full.Add(ordList);
                 full.Add(storeOutItemList);
             }
@@ -1401,6 +1414,18 @@ namespace Mess_Management_System_Alpha_V2.Controllers
             }
             var user = await _userManager.FindByNameAsync(usrName);
             string UserId = user.Id;
+
+            var lastTime = _context.Constants.Where(x => x.Name == "Last Time").FirstOrDefault();
+            DateTime dateTime = DateTime.ParseExact(lastTime.Value, "HH:mm",
+                                        CultureInfo.InvariantCulture);
+            string currTime = DateTime.Now.ToShortTimeString();
+
+            if (DateTime.Now.TimeOfDay >= dateTime.TimeOfDay)
+            {
+
+
+                return Json(new { success = false, responseText = "Time up. Last order time " + dateTime.TimeOfDay.ToString() });
+            }
             List<ItemObject> tempItemList = (List<ItemObject>)JsonConvert.DeserializeObject(ItemList, typeof(List<ItemObject>));
             var orderItemList = _context.CustomerDailyMenuChoice.Where(x => x.UserId == UserId).ToList();
 
@@ -1524,6 +1549,19 @@ namespace Mess_Management_System_Alpha_V2.Controllers
             int mealId = Int32.Parse(MealId);
             string UserId = user.Id;
             bool preorderset = false;
+
+            var lastTime = _context.Constants.Where(x => x.Name == "Last Time").FirstOrDefault();
+            DateTime dateTime = DateTime.ParseExact(lastTime.Value, "HH:mm",
+                                        CultureInfo.InvariantCulture);
+            string currTime = DateTime.Now.ToShortTimeString();
+          
+            if (DateTime.Now.TimeOfDay >= dateTime.TimeOfDay)
+            {
+               
+
+                return Json(new { success = false, responseText = "Time up. Last order time " + dateTime.TimeOfDay.ToString() });
+            }
+        
             if (Checked == "false")
             {
                 preorderset = false;

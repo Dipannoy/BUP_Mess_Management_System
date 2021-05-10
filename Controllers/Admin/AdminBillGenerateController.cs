@@ -215,7 +215,7 @@ namespace Mess_Management_System_Alpha_V2.Controllers.Admin
                 DateTime pmntDate = DateTime.Now;
 
              
-                if(method == 1 || method == 2)
+                if(method == 1 || method == 2 || method == 3)
                 {
                     string[] DateFormatarray = PaymentDate.Split("-");
 
@@ -228,7 +228,10 @@ namespace Mess_Management_System_Alpha_V2.Controllers.Admin
                 string dateString = DateTime.Now.Month.ToString() +"_"+ DateTime.Now.Year.ToString();
                 string fileName = billParentObj.Id.ToString()+ "_" + dateString + "." + FileExtension;
 
-                UploadFile("~/Uploads/", fileName, File);
+                if (File != null)
+                {
+                    UploadFile("~/Uploads/", fileName, File);
+                }
 
                 if (method == 1)
                 {
@@ -299,18 +302,18 @@ namespace Mess_Management_System_Alpha_V2.Controllers.Admin
                 var consm = _userManager.Users.Where(x => x.Id == billParentObj.UserId).FirstOrDefault();
 
                 //}
-                EmailAddress From = new EmailAddress();
-                From.Name = "DIPANNOY DAS GUPTA";
-                From.Address = "dipannoydip@gmail.com";
-                EmailAddress To = new EmailAddress();
-                To.Name = consm.BUPFullName;
-                To.Address = "tuhin@bup.edu.bd";
-                EmailMessage em = new EmailMessage();
-                em.FromAddresses.Add(From);
-                em.ToAddresses.Add(To);
-                em.Subject = "Mess Payment";
-                em.Content = "You have paid " + Amount + " Tk. Current Due-" + (double.Parse(Due) - double.Parse(Amount)).ToString() + " Tk";
-                _Mailer.Send(em);
+                //EmailAddress From = new EmailAddress();
+                //From.Name = "DIPANNOY DAS GUPTA";
+                //From.Address = "dipannoydip@gmail.com";
+                //EmailAddress To = new EmailAddress();
+                //To.Name = consm.BUPFullName;
+                //To.Address = "tuhin@bup.edu.bd";
+                //EmailMessage em = new EmailMessage();
+                //em.FromAddresses.Add(From);
+                //em.ToAddresses.Add(To);
+                //em.Subject = "Mess Payment";
+                //em.Content = "You have paid " + Amount + " Tk. Current Due-" + (double.Parse(Due) - double.Parse(Amount)).ToString() + " Tk";
+                //_Mailer.Send(em);
 
             }
             catch(Exception ex)
@@ -511,11 +514,15 @@ namespace Mess_Management_System_Alpha_V2.Controllers.Admin
 
 
 
-        public JsonResult GetPersonBill(string PersonName,string Month,string Year)
+        public string GetPersonBill(string PersonName,string Month,string Year)
         {
             List<IList> BillList = new List<IList>();
             List<AccessoryBill> ACBill = new List<AccessoryBill>();
             List<Double> ArrearBill = new List<Double>();
+            List<int> ttlBill = new List<int>();
+            List<int> otBill = new List<int>();
+
+            List<ConsumerOthersBill> othersBillList = new List<ConsumerOthersBill>();
             var personArray = PersonName.Split("-");
             var prsndtl = _userManager.Users.Where(x => x.BUPNumber == personArray[1]).FirstOrDefault();
             //var prsndtl = _userManager.Users.Where(x => x.BUPFullName == PersonName).FirstOrDefault();
@@ -531,10 +538,22 @@ namespace Mess_Management_System_Alpha_V2.Controllers.Admin
 
 
             double maintenanceBill = 0;
+            double othersBill = 0;
             var AccsBillList = _context.AccessoryBill.Where(x => x.Id > 0).ToList();
             ACBill = AccsBillList;
 
             maintenanceBill = _context.AccessoryBill.Where(x => x.Id > 0).Sum(x => x.DefaultCost);
+
+            var othersPrnt = _context.ConsumerOthersBillParent.Where(x => x.UserId == prsndtl.Id).FirstOrDefault();
+            if (othersPrnt != null)
+            {
+                othersBillList = _context.ConsumerOthersBill.Where(x => x.ConsumerOthersBillParentId == othersPrnt.Id && x.BillDate.Month == Int32.Parse(Month)).ToList();
+                
+                if (othersBillList.Count > 0)
+                {
+                    othersBill = othersBillList.Sum(x => x.Amount);
+                }
+            }
 
             //foreach(var abl in AccsBillList )
             //{
@@ -545,13 +564,8 @@ namespace Mess_Management_System_Alpha_V2.Controllers.Admin
 
             var PersonBillMonth = _context.OrderHistoryVr2.Where(x => x.OrderDate.Month == Int32.Parse(Month) && x.OrderDate.Year == Int32.Parse(Year) && x.UserId==prsndtl.Id).ToList();
 
-            double PrsnTtlMnthBill = PersonBillMonth.Sum(x => x.OrderAmount) + maintenanceBill;
+            double PrsnTtlMnthBill = PersonBillMonth.Sum(x => x.OrderAmount) + maintenanceBill + othersBill;
 
-
-
-            //var cMont = _context.ConsumerMonthlyBillRecord.Where(x=> x.Month == Month && x.UserId == prsndtl.Id).F
-            double duebill = _context.ConsumerMonthlyBillRecord.Where(x => x.IsPaid == false && x.UserId == prsndtl.Id ).Sum(x => x.TotalAmount);
-            ArrearBill.Add(duebill);
 
             ConsumerMonthlyBillRecord cmbr = new ConsumerMonthlyBillRecord();
             cmbr.CreatedDate = DateTime.Now;
@@ -563,23 +577,78 @@ namespace Mess_Management_System_Alpha_V2.Controllers.Admin
             _context.ConsumerMonthlyBillRecord.Add(cmbr);
             _context.SaveChanges();
 
+            var billParent = _context.ConsumerBillParent.Where(x => x.UserId == prsndtl.Id).FirstOrDefault();
+            var lastBill = _context.ConsumerBillHistory.Where(x => x.ConsumerBillParentId == billParent.Id).LastOrDefault();
+            double duebill = 0;
+
+            var billParentObj = _context.ConsumerBillParent.Where(x => x.UserId == prsndtl.Id).FirstOrDefault();
+            if (billParentObj != null)
+            {
+                var billHistoryObj = _context.ConsumerBillHistory.Where(x => x.ConsumerBillParentId == billParentObj.Id).LastOrDefault();
+                if (billHistoryObj != null)
+                {
+                    duebill = billHistoryObj.Due + PrsnTtlMnthBill;
+                    billHistoryObj.Due = billHistoryObj.Due + PrsnTtlMnthBill;
+                    _context.ConsumerBillHistory.Update(billHistoryObj);
+                    _context.SaveChanges();
+                }
+                else
+                {
+                    duebill =  _context.ConsumerMonthlyBillRecord.Where(x => (x.UserId == prsndtl.Id && x.Month < Int32.Parse(Month) && x.Year == Int32.Parse(Year)) || (x.Year < Int32.Parse(Year) && x.UserId == prsndtl.Id)).Sum(x=>x.TotalAmount);
+
+                }
+
+            }
+
+
+            ArrearBill.Add(duebill);
+            //ArrearBill.Add(othersBill);
+
+       
+
             PersonBillMonth.OrderBy(x => x.OrderDate);
 
             var TotalBillOnDateMeal =
-    from person in PersonBillMonth
-    group person by new { person.MealTypeId,person.OrderDate.Date }  into PersonGroup
-    select new
-    {
-        Team = PersonGroup.Key,
-        TotalBill = PersonGroup.Sum(x => x.OrderAmount),
-    };
+                            from person in PersonBillMonth
+                            group person by new { person.MealTypeId,person.OrderDate.Date }  into PersonGroup
+                            select new
+                            {
+                                Team = PersonGroup.Key,
+                                TotalBill = PersonGroup.Sum(x => x.OrderAmount),
+                            };
+
+      
+
             var TB = TotalBillOnDateMeal.ToList();
+            ttlBill.Add(0);
+            double noBill = 0;
+         
 
             BillList.Add(ACBill);
-            BillList.Add(TB);
+            if (TB.Count == 0)
+            {
+                BillList.Add(ttlBill);
+            }
+            else
+            {
+                BillList.Add(TB);
+            }
             BillList.Add(ArrearBill);
-         
-            return Json(BillList);
+            if (othersBillList.Count == 0)
+            {
+                BillList.Add(otBill);
+            }
+            else
+            {
+                BillList.Add(othersBillList);
+            }
+
+            string json = JsonConvert.SerializeObject(BillList, Formatting.Indented, new JsonSerializerSettings
+            {
+                ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+            });
+            return json;
+            //return Json(BillList);
 
             //var PersonBillData = _userManager.Users.Where(x => x.BUPFullName.Contains(search)).ToList();
 
@@ -718,17 +787,18 @@ namespace Mess_Management_System_Alpha_V2.Controllers.Admin
                         Todate = DateTime.ParseExact(dateto, "M/d/yyyy", CultureInfo.InvariantCulture);
                     }
                     //var user = Request.Form["person2"].ToString();
-
-                    string usr = Request.Form["person2"];
-                    var personArray = usr.Split("-");
-                    var prsndtl = _userManager.Users.Where(x => x.BUPNumber == personArray[1]).FirstOrDefault();
-                    //var prsndtl = _userManager.Users.Where(x => x.BUPFullName == usr).FirstOrDefault();
-
                     string user = "-1";
-                    if (prsndtl != null)
+                    string usr = Request.Form["person2"];
+                    if( usr != "" )
                     {
+                        var personArray = usr.Split("-");
+                        var prsndtl = _userManager.Users.Where(x => x.BUPNumber == personArray[1]).FirstOrDefault();
                         user = prsndtl.Id;
                     }
+
+                    //var prsndtl = _userManager.Users.Where(x => x.BUPFullName == usr).FirstOrDefault();
+
+
 
                     if (from != "" && to != "" && user != "-1")
                     {
@@ -814,7 +884,7 @@ namespace Mess_Management_System_Alpha_V2.Controllers.Admin
                 string UserId = user.Id;
                 var consumer = _userManager.Users.Where(x => x.BUPNumber == BUPNo).FirstOrDefault();
                 ordList = _context.OrderHistoryVr2.Where(x => x.UserId == consumer.Id && x.OrderDate.Date == ordDate.Date && x.MealTypeId == Int32.Parse(Type)).ToList();
-                var storeOutItemList = _context.StoreOutItem.Where(x => x.IsOpen == true).ToList();
+                var storeOutItemList = _context.StoreOutItem.Where(x => x.Id > 0).ToList();
                 full.Add(ordList);
                 full.Add(storeOutItemList);
             }
@@ -865,9 +935,26 @@ namespace Mess_Management_System_Alpha_V2.Controllers.Admin
 
             ViewBag.ACBill = 1;
             ViewBag.FullName = await GetUserName();
+            var role = await GetLogInUserRoleObjectAsync();
+            var roleMenuList = _context.RoleMenu.Where(x => x.UserIdentityRoleId == role.Id).ToList();
+            var nevMenuList = _context.NavigationMenu.Where(x => x.Id > 0).ToList();
+            var pr = from r in roleMenuList
+                     join n in nevMenuList
+                     on r.NavigationMenuId equals n.Id
+                     // where o.LastModifiedDate.ToShortDateString() == OD.AddDays(-1).ToShortDateString() && o.MealTypeId == 1
+                     select n;
+            var filterMenuList = pr.ToList();
+            ViewBag.FilterMenuList = filterMenuList;
 
             return View("Index");
 
+        }
+
+        public JsonResult GetSearchPerson(string search)
+        {
+            var PersonList = _userManager.Users.Where(x => x.BUPFullName.Contains(search) || x.OfficeName.Contains(search) || x.BUPNumber.Contains(search)).ToList();
+
+            return Json(PersonList);
         }
         [HttpPost]
 
@@ -876,7 +963,17 @@ namespace Mess_Management_System_Alpha_V2.Controllers.Admin
             ViewBag.ACBill = 1;
             ViewBag.ACId = Id;
             ViewBag.FullName = await GetUserName();
-
+           
+            var role = await GetLogInUserRoleObjectAsync();
+            var roleMenuList = _context.RoleMenu.Where(x => x.UserIdentityRoleId == role.Id).ToList();
+            var nevMenuList = _context.NavigationMenu.Where(x => x.Id > 0).ToList();
+            var pr = from r in roleMenuList
+                     join n in nevMenuList
+                     on r.NavigationMenuId equals n.Id
+                     // where o.LastModifiedDate.ToShortDateString() == OD.AddDays(-1).ToShortDateString() && o.MealTypeId == 1
+                     select n;
+            var filterMenuList = pr.ToList();
+            ViewBag.FilterMenuList = filterMenuList;
             return View("Index");
         }
 
@@ -889,8 +986,206 @@ namespace Mess_Management_System_Alpha_V2.Controllers.Admin
             _context.SaveChanges();
             ViewBag.ACBill = 1;
             ViewBag.FullName = await GetUserName();
+            
+            var role = await GetLogInUserRoleObjectAsync();
+            var roleMenuList = _context.RoleMenu.Where(x => x.UserIdentityRoleId == role.Id).ToList();
+            var nevMenuList = _context.NavigationMenu.Where(x => x.Id > 0).ToList();
+            var pr = from r in roleMenuList
+                     join n in nevMenuList
+                     on r.NavigationMenuId equals n.Id
+                     // where o.LastModifiedDate.ToShortDateString() == OD.AddDays(-1).ToShortDateString() && o.MealTypeId == 1
+                     select n;
+            var filterMenuList = pr.ToList();
+            ViewBag.FilterMenuList = filterMenuList;
 
             return View("Index");
+        }
+        
+        [HttpPost]
+        public async Task<JsonResult> SaveOthersBill(string ItemList, string Remarks, string Date)
+        {
+            string usrName = SessionExtensions.GetString(HttpContext.Session, "user");
+            var admin = await _userManager.FindByNameAsync(usrName);
+            string[] DateFormatarray = Date.Split("-");
+
+            string datesv = DateFormatarray[1] + '/' + DateFormatarray[0] + '/' + DateFormatarray[2];
+            DateTime billDate = DateTime.ParseExact(datesv, "M/d/yyyy", CultureInfo.InvariantCulture);
+
+
+            if (usrName == null)
+            {
+                return Json(new { success = false, responseText = "Expire" });
+
+            }
+            else
+            {
+                try
+                {
+                    List<OtherBillObject> tempItemList = (List<OtherBillObject>)JsonConvert.DeserializeObject(ItemList, typeof(List<OtherBillObject>));
+                    long prntId = 0;
+                    foreach (var obj in tempItemList)
+                    {
+                        var user = _context.Users.Where(x => x.BUPNumber == obj.BupNo).FirstOrDefault();
+
+                        var parentObj = _context.ConsumerOthersBillParent.Where(x => x.UserId == user.Id).FirstOrDefault();
+                        if (parentObj == null)
+                        {
+                            ConsumerOthersBillParent cop = new ConsumerOthersBillParent();
+                            cop.UserId = user.Id;
+                            cop.CreatedBy = admin.Id;
+                            cop.LastModifiedBy = admin.Id;
+                            cop.CreatedDate = DateTime.Now;
+                            cop.LastModifiedDate = DateTime.Now;
+                            _context.ConsumerOthersBillParent.Add(cop);
+                            _context.SaveChanges();
+
+                            prntId = cop.Id;
+
+                        }
+                        else
+                        {
+                            prntId = parentObj.Id;
+                        }
+                        ConsumerOthersBill cob = new ConsumerOthersBill();
+                        cob.ConsumerOthersBillParentId = prntId;
+                        cob.Remarks = Remarks;
+                        cob.BillDate = billDate;
+                        cob.CreatedBy = admin.Id;
+                        cob.LastModifiedBy = admin.Id;
+                        cob.CreatedDate = DateTime.Now;
+                        cob.LastModifiedDate = DateTime.Now;
+                        cob.Amount = double.Parse(obj.Amount);
+                        _context.ConsumerOthersBill.Add(cob);
+                        _context.SaveChanges();
+
+
+                    }
+                    return Json(new { success = true, responseText = "Others bill is successfully added." });
+
+                }
+                catch (Exception ex)
+                {
+                    return Json(new { success = false, responseText = ex.Message });
+                }
+
+                
+
+            }
+        }
+
+
+        [HttpPost]
+        public async Task<JsonResult> SaveEditedOthersBill(string Person, string Date, string Remarks, string Amount, string DetailId)
+        {
+            string usrName = SessionExtensions.GetString(HttpContext.Session, "user");
+            var admin = await _userManager.FindByNameAsync(usrName);
+            string[] DateFormatarray = Date.Split("-");
+
+            string datesv = DateFormatarray[1] + '/' + DateFormatarray[0] + '/' + DateFormatarray[2];
+            DateTime billDate = DateTime.ParseExact(datesv, "M/d/yyyy", CultureInfo.InvariantCulture);
+
+
+            if (usrName == null)
+            {
+                return Json(new { success = false, responseText = "Expire" });
+
+            }
+            else
+            {
+                try
+                {
+                    var detailObj = _context.ConsumerOthersBill.Where(x => x.Id == long.Parse(DetailId)).FirstOrDefault();
+                    var parentObj = _context.ConsumerOthersBillParent.Where(x => x.Id == detailObj.ConsumerOthersBillParentId).FirstOrDefault();
+                    var person = Person.Split("-");
+                    var userObj = _context.Users.Where(x => x.BUPNumber == person[1]).FirstOrDefault();
+                    if(parentObj.UserId == userObj.Id)
+                    {
+                        detailObj.BillDate = billDate;
+                        detailObj.Remarks = Remarks;
+                        detailObj.Amount = double.Parse(Amount);
+
+                        _context.ConsumerOthersBill.Update(detailObj);
+                        _context.SaveChanges();
+                    }
+                    else
+                    {
+                        var modPrntObj = _context.ConsumerOthersBillParent.Where(x => x.UserId == userObj.Id).FirstOrDefault();
+                        long prntId = 0;
+                        if (modPrntObj == null)
+                        {
+                            ConsumerOthersBillParent cop = new ConsumerOthersBillParent();
+                            cop.UserId = userObj.Id;
+                            cop.CreatedBy = admin.Id;
+                            cop.LastModifiedBy = admin.Id;
+                            cop.CreatedDate = DateTime.Now;
+                            cop.LastModifiedDate = DateTime.Now;
+                            _context.ConsumerOthersBillParent.Add(cop);
+                            _context.SaveChanges();
+
+                            prntId = cop.Id;
+                        }
+                        else
+                        {
+                            prntId = modPrntObj.Id;
+                        }
+                        detailObj.BillDate = billDate;
+                        detailObj.Remarks = Remarks;
+                        detailObj.Amount = double.Parse(Amount);
+                        detailObj.ConsumerOthersBillParentId = prntId;
+
+                        _context.ConsumerOthersBill.Update(detailObj);
+                        _context.SaveChanges();
+
+                    }
+                    return Json(new { success = true, responseText = "Others bill is successfully added." });
+
+                }
+                catch (Exception ex)
+                {
+                    return Json(new { success = false, responseText = ex.Message });
+                }
+
+
+
+            }
+        }
+
+
+        public async Task<string> GetBillDetails(string DetailId)
+        {
+            long detailId = long.Parse(DetailId);
+            List<IList> TtlList = new List<IList>();
+            List<String> action = new List<string>();
+
+            string usrName = SessionExtensions.GetString(HttpContext.Session, "user");
+            var admin = await _userManager.FindByNameAsync(usrName);
+            //  var admin = await _userManager.GetUserAsync(userr);
+
+            var detailList = _context.ConsumerOthersBill.Where(x => x.Id == detailId).ToList();
+
+            var parentId = detailList.ElementAt(0).ConsumerOthersBillParentId;
+
+            var parentObj = _context.ConsumerOthersBillParent.Where(x => x.Id == parentId).FirstOrDefault();
+
+            var userObj = _context.Users.Where(x => x.Id == parentObj.UserId).ToList();
+
+            
+
+
+            TtlList.Add(detailList);
+            TtlList.Add(userObj);
+
+          
+
+
+            string json = JsonConvert.SerializeObject(TtlList, Formatting.Indented, new JsonSerializerSettings
+            {
+                ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+            });
+
+
+            return json;
+
         }
 
         [HttpPost]
@@ -931,6 +1226,17 @@ namespace Mess_Management_System_Alpha_V2.Controllers.Admin
 
             ViewBag.ACBill = 1;
             ViewBag.FullName = await GetUserName();
+
+            var role = await GetLogInUserRoleObjectAsync();
+            var roleMenuList = _context.RoleMenu.Where(x => x.UserIdentityRoleId == role.Id).ToList();
+            var nevMenuList = _context.NavigationMenu.Where(x => x.Id > 0).ToList();
+            var pr = from r in roleMenuList
+                     join n in nevMenuList
+                     on r.NavigationMenuId equals n.Id
+                     // where o.LastModifiedDate.ToShortDateString() == OD.AddDays(-1).ToShortDateString() && o.MealTypeId == 1
+                     select n;
+            var filterMenuList = pr.ToList();
+            ViewBag.FilterMenuList = filterMenuList;
 
             return View("Index");
            
@@ -1059,13 +1365,39 @@ namespace Mess_Management_System_Alpha_V2.Controllers.Admin
 
         }
 
-
-        public JsonResult GetSearchPerson(string search)
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CreateOthersBill()
         {
-            var PersonList = _userManager.Users.Where(x => x.BUPFullName.Contains(search) || x.OfficeName.Contains(search) || x.BUPNumber.Contains(search)).ToList();
+            StoreOutItemRecipe storeOutItemRecipe = new StoreOutItemRecipe();
+            storeOutItemRecipe.CreatedDate = DateTime.Now;
 
-            return Json(PersonList);
+            string usrName = SessionExtensions.GetString(HttpContext.Session, "user");
+            var user = await _userManager.FindByNameAsync(usrName);
+            // var user = await _userManager.GetUserAsync(User);
+            var userID = user.Id;
+            storeOutItemRecipe.CreatedBy = userID;
+            storeOutItemRecipe.LastModifiedDate = DateTime.Now;
+            storeOutItemRecipe.MinimumStoreOutUnit = 5;
+            storeOutItemRecipe.RequiredStoreInUnit = double.Parse(Request.Form["q"]);
+            storeOutItemRecipe.StoreInItemId = Int32.Parse(Request.Form["si"]);
+            storeOutItemRecipe.StoreOutItemId = Int32.Parse(Request.Form["so"]);
+            _context.Add(storeOutItemRecipe);
+            _context.SaveChanges();
+
+
+            ViewBag.StoreId = 3;
+            ViewBag.FullName = await GetUserName();
+
+            return View("WarehouseStorageIn");
+
         }
+        //public JsonResult GetSearchPerson(string search)
+        //{
+        //    var PersonList = _userManager.Users.Where(x => x.BUPFullName.Contains(search) || x.OfficeName.Contains(search) || x.BUPNumber.Contains(search)).ToList();
+
+        //    return Json(PersonList);
+        //}
 
 
         [HttpPost]
@@ -1267,6 +1599,13 @@ namespace Mess_Management_System_Alpha_V2.Controllers.Admin
             var role = await _roleManager.FindByIdAsync(userrole.RoleId);
 
             return role;
+        }
+
+        public class OtherBillObject
+        {
+            public string BupNo;
+            public string Amount;
+          
         }
     }
 }

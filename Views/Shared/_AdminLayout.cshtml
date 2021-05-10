@@ -60,7 +60,6 @@
 
 
 
-
     <environment include="Development">
 
         @*<link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Roboto+Slab:400,700|Material+Icons" />
@@ -135,6 +134,16 @@
         text-align: left;
         cursor: pointer;
         outline: none;
+    }
+
+    .footer {
+        position: fixed;
+        left: 0;
+        bottom: 0;
+        width: 100%;
+        /*  background-color: red;
+            color: white;*/
+        text-align: center;
     }
 </style>
 <body style="padding-top: 0px;">
@@ -270,176 +279,176 @@
                             var childMenu = List.Where(x => x.ParentId == parent.Id).ToList();
                             if (childMenu.Count == 0)
                             {
-                                <li class="nav-item">
-                                    <a class="nav-link" style="font-size:15px;font-weight:bold;" asp-controller="@parent.Controller" asp-action="@parent.Action">
-                                        <i class="material-icons">dashboard</i>
-                                        <p>@parent.Name</p>
-                                    </a>
-                                </li>
+                        <li class="nav-item">
+                            <a class="nav-link" style="font-size:15px;font-weight:bold;" asp-controller="@parent.Controller" asp-action="@parent.Action">
+                                <i class="material-icons">dashboard</i>
+                                <p>@parent.Name</p>
+                            </a>
+                        </li>
                             }
                             else
                             {
                                 var reff = "#" + @parent.Name;
                                 var idd = @parent.Name;
-                                <li class="nav-item ">
-                                    <a href="@reff" + style="font-size:15px;font-weight:bold;" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle nav-link">
-                                        &nbsp;<i class="fas fa-database"></i>
-                                        @parent.Name
+                        <li class="nav-item ">
+                            <a href="@reff" + style="font-size:15px;font-weight:bold;" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle nav-link">
+                                &nbsp;<i class="fas fa-database"></i>
+                                @parent.Name
 
-                                    </a>
-                                    <ul class="collapse list-unstyled" id="@idd" style="padding-left:40px;padding-top:10px;">
-                                        @foreach (var child in childMenu)
+                            </a>
+                            <ul class="collapse list-unstyled" id="@idd" style="padding-left:40px;padding-top:10px;">
+                                @foreach (var child in childMenu)
                                         {
-                                            <li>
-                                                <a asp-controller="@child.Controller" asp-action="@child.Action" style="font-weight:bold;font-size:14px;color:black;">@child.Name</a>
-                                            </li>
+                                <li>
+                                    <a asp-controller="@child.Controller" asp-action="@child.Action" style="font-weight:bold;font-size:14px;color:black;">@child.Name</a>
+                                </li>
                                         }
 
 
-                                        @*<li>
-                            <a asp-controller="StorageManagement" asp-action="WarehouseStorageNew" asp-route-storeId="3" style="font-weight:bold;font-size:14px;color:black;">Store Out Recipe</a>
-                        </li>*@
-                                    </ul>
-                                </li>
+                                @*<li>
+                                        <a asp-controller="StorageManagement" asp-action="WarehouseStorageNew" asp-route-storeId="3" style="font-weight:bold;font-size:14px;color:black;">Store Out Recipe</a>
+                                    </li>*@
+                            </ul>
+                        </li>
                             }
-                            @*<li>@person.FirstName</li>*@
+                        @*<li>@person.FirstName</li>*@
                         }
 
 
                         @*<li class="nav-item active">
-            <a href="#homeSubmenu" style="font-size:15px;font-weight:bold;" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle nav-link">
-                &nbsp;&nbsp;<i class="fas fa-database"></i> &nbsp; &nbsp;
-                Order
+                                <a href="#homeSubmenu" style="font-size:15px;font-weight:bold;" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle nav-link">
+                                    &nbsp;&nbsp;<i class="fas fa-database"></i> &nbsp; &nbsp;
+                                    Order
 
-            </a>
-            <ul class="collapse list-unstyled" id="homeSubmenu" style="padding-left:40px;padding-top:10px;">
-                <li>
-                    <a asp-controller="AdminShowOrder" asp-action="Schedule" style="font-weigSSht:bold;font-size:15px;color:darkgray;">Schedule Wise</a>
-                </li>
-                <li>
-                    <a asp-controller="AdminShowOrder" asp-action="ItemBase" style="font-weight:bold;font-size:15px;color:darkgray;">Item Wise</a>
-                </li>
-                <li>
-                    <a asp-controller="AdminShowOrder" asp-action="home" style="font-weight:bold;font-size:15px;color:darkgray;">Person Wise</a>
-                </li>
-            </ul>
-        </li>*@
+                                </a>
+                                <ul class="collapse list-unstyled" id="homeSubmenu" style="padding-left:40px;padding-top:10px;">
+                                    <li>
+                                        <a asp-controller="AdminShowOrder" asp-action="Schedule" style="font-weigSSht:bold;font-size:15px;color:darkgray;">Schedule Wise</a>
+                                    </li>
+                                    <li>
+                                        <a asp-controller="AdminShowOrder" asp-action="ItemBase" style="font-weight:bold;font-size:15px;color:darkgray;">Item Wise</a>
+                                    </li>
+                                    <li>
+                                        <a asp-controller="AdminShowOrder" asp-action="home" style="font-weight:bold;font-size:15px;color:darkgray;">Person Wise</a>
+                                    </li>
+                                </ul>
+                            </li>*@
 
 
                         @*<li class="nav-item ">
-        <a href="#homeSubmenu2" style="font-size:15px;font-weight:bold;" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle nav-link">
-            &nbsp;<i class="fas fa-database"></i>
-            Store
+                            <a href="#homeSubmenu2" style="font-size:15px;font-weight:bold;" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle nav-link">
+                                &nbsp;<i class="fas fa-database"></i>
+                                Store
 
-        </a>
-        <ul class="collapse list-unstyled" id="homeSubmenu2" style="padding-left:40px;padding-top:10px;">
-            <li>
-                <a asp-controller="StorageManagement" asp-action="WarehouseStorageNew" asp-route-storeId="1" style="font-weight:bold;font-size:14px;color:black;">Store In</a>
-            </li>
-            <li>
-                <a asp-controller="StorageManagement" asp-action="WarehouseStorageNew" asp-route-storeId="2" style="font-weight:bold;font-size:14px;color:black;">Store Out</a>
-            </li>*@
+                            </a>
+                            <ul class="collapse list-unstyled" id="homeSubmenu2" style="padding-left:40px;padding-top:10px;">
+                                <li>
+                                    <a asp-controller="StorageManagement" asp-action="WarehouseStorageNew" asp-route-storeId="1" style="font-weight:bold;font-size:14px;color:black;">Store In</a>
+                                </li>
+                                <li>
+                                    <a asp-controller="StorageManagement" asp-action="WarehouseStorageNew" asp-route-storeId="2" style="font-weight:bold;font-size:14px;color:black;">Store Out</a>
+                                </li>*@
                         @*<li>
 
-                            </ul>
-                        </li>
+                                                </ul>
+                                            </li>
 
 
-                        @*<li class="">
-            <a class="nav-link dropdown-toggle" style="font-size:15px;font-weight:bold;" data-toggle="dropdown" href="#" aria-haspopup="true" aria-expanded="false"> <i class="material-icons">dashboard</i>OrderList</a>
+                                            @*<li class="">
+                                <a class="nav-link dropdown-toggle" style="font-size:15px;font-weight:bold;" data-toggle="dropdown" href="#" aria-haspopup="true" aria-expanded="false"> <i class="material-icons">dashboard</i>OrderList</a>
 
 
-            <ul class="collapse list-unstyled">
-                <li>
-                    <a class="dropdown-item" asp-controller="AdminShowOrder" asp-action="Schedule">ScheduleBase</a>
-                </li>
-                <li>
-                    <a class="dropdown-item" asp-controller="AdminShowOrder" asp-action="ItemBase">ItemBase</a>
-                </li>
-                <li>
-                    <a class="dropdown-item" asp-controller="AdminShowOrder" asp-action="home">PersonBase</a>
-                </li>
-            </ul>
-        </li>*@
+                                <ul class="collapse list-unstyled">
+                                    <li>
+                                        <a class="dropdown-item" asp-controller="AdminShowOrder" asp-action="Schedule">ScheduleBase</a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" asp-controller="AdminShowOrder" asp-action="ItemBase">ItemBase</a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" asp-controller="AdminShowOrder" asp-action="home">PersonBase</a>
+                                    </li>
+                                </ul>
+                            </li>*@
                         @*<li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle textdrp" style="font-size:15px;font-weight:bold;" data-toggle="dropdown" href="#"> <i class="material-icons">dashboard</i>Store</a>
+                                <a class="nav-link dropdown-toggle textdrp" style="font-size:15px;font-weight:bold;" data-toggle="dropdown" href="#"> <i class="material-icons">dashboard</i>Store</a>
 
 
-            <div class="dropdown-menu collapse list-unstyled">
-                <a class="dropdown-item" asp-controller="StorageManagement" asp-action="WarehouseStorageIn">Store In</a>
-                <a class="dropdown-item" asp-controller="StorageManagement" asp-action="WarehouseStorageOut">Store out</a>
-                <a class="dropdown-item" asp-controller="StoreOutItemRecipe" asp-action="Index">Store Out Recipe</a>
+                                <div class="dropdown-menu collapse list-unstyled">
+                                    <a class="dropdown-item" asp-controller="StorageManagement" asp-action="WarehouseStorageIn">Store In</a>
+                                    <a class="dropdown-item" asp-controller="StorageManagement" asp-action="WarehouseStorageOut">Store out</a>
+                                    <a class="dropdown-item" asp-controller="StoreOutItemRecipe" asp-action="Index">Store Out Recipe</a>
 
-            </div>
-        </li>*@
+                                </div>
+                            </li>*@
                         @*<li class="nav-item ">
-            <a class="nav-link" style="font-size:18px;font-weight:bold;" asp-controller="AdminMenu" asp-action="Menu">
-                <i class="material-icons">dashboard</i>
-                <p>Food Item</p>
-            </a>
-        </li>*@
-
-                        @*<li class="nav-item ">
-            <a class="nav-link" style="font-size:18px;font-weight:bold;" asp-controller="AdminMenu" asp-action="Test">
-                <i class="material-icons">dashboard</i>
-                <p>Menu</p>
-            </a>
-        </li>*@
+                                <a class="nav-link" style="font-size:18px;font-weight:bold;" asp-controller="AdminMenu" asp-action="Menu">
+                                    <i class="material-icons">dashboard</i>
+                                    <p>Food Item</p>
+                                </a>
+                            </li>*@
 
                         @*<li class="nav-item ">
-
-
-            <a href="#billMenu" style="font-size:15px;font-weight:bold;" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle nav-link">
-                &nbsp;<i class="fas fa-database"></i>
-                Bill
-
-            </a>
-            <ul class="collapse list-unstyled" id="billMenu" style="padding-left:40px;padding-top:10px;">
-                <li>
-                    <a asp-controller="AdminBillGenerate" asp-action="Index" style="font-weight:bold;font-size:14px;color:black;">Bill Process</a>
-                </li>
-
-                <li>
-                    <a asp-controller="AdminBillGenerate" asp-action="BillPayment" style="font-weight:bold;font-size:14px;color:black;">Bill Payment</a>
-                </li>
-
-                <li>
-                    <a asp-controller="AdminBillGenerate" asp-action="ConsumerPaymentSlip" style="font-weight:bold;font-size:14px;color:black;">Consumer Pay Slip</a>
-                </li>
-                <li>
-                    <a asp-controller="AdminBillGenerate" asp-action="ConsumerPaymentHistory" style="font-weight:bold;font-size:14px;color:black;">Consumer Payment History</a>
-                </li>
-                <li>
-
-            </ul>
-        </li>*@
+                                <a class="nav-link" style="font-size:18px;font-weight:bold;" asp-controller="AdminMenu" asp-action="Test">
+                                    <i class="material-icons">dashboard</i>
+                                    <p>Menu</p>
+                                </a>
+                            </li>*@
 
                         @*<li class="nav-item ">
-            <a class="nav-link" style="font-size:18px;font-weight:bold;" asp-controller="ConsumerOrder" asp-action="Index">
-                <i class="material-icons">dashboard</i>
-                <p>Consumer Order</p>
-            </a>
-        </li>*@
+
+
+                                <a href="#billMenu" style="font-size:15px;font-weight:bold;" data-toggle="collapse" aria-expanded="false" class="dropdown-toggle nav-link">
+                                    &nbsp;<i class="fas fa-database"></i>
+                                    Bill
+
+                                </a>
+                                <ul class="collapse list-unstyled" id="billMenu" style="padding-left:40px;padding-top:10px;">
+                                    <li>
+                                        <a asp-controller="AdminBillGenerate" asp-action="Index" style="font-weight:bold;font-size:14px;color:black;">Bill Process</a>
+                                    </li>
+
+                                    <li>
+                                        <a asp-controller="AdminBillGenerate" asp-action="BillPayment" style="font-weight:bold;font-size:14px;color:black;">Bill Payment</a>
+                                    </li>
+
+                                    <li>
+                                        <a asp-controller="AdminBillGenerate" asp-action="ConsumerPaymentSlip" style="font-weight:bold;font-size:14px;color:black;">Consumer Pay Slip</a>
+                                    </li>
+                                    <li>
+                                        <a asp-controller="AdminBillGenerate" asp-action="ConsumerPaymentHistory" style="font-weight:bold;font-size:14px;color:black;">Consumer Payment History</a>
+                                    </li>
+                                    <li>
+
+                                </ul>
+                            </li>*@
 
                         @*<li class="nav-item ">
-            <a class="nav-link" style="font-size:18px;font-weight:bold;" asp-controller="AdminRoleMenu" asp-action="RoleManagement">
-                <i class="material-icons">dashboard</i>
-                <p>Role Management</p>
-            </a>
-        </li>*@
+                                <a class="nav-link" style="font-size:18px;font-weight:bold;" asp-controller="ConsumerOrder" asp-action="Index">
+                                    <i class="material-icons">dashboard</i>
+                                    <p>Consumer Order</p>
+                                </a>
+                            </li>*@
 
                         @*<li class="nav-item ">
-            <a class="nav-link" style="font-size:18px;font-weight:bold;" asp-controller="DailyOffer" asp-action="Index">
-                <i class="material-icons">dashboard</i>
-                <p>Daily Offer</p>
-            </a>
-        </li>*@
+                                <a class="nav-link" style="font-size:18px;font-weight:bold;" asp-controller="AdminRoleMenu" asp-action="RoleManagement">
+                                    <i class="material-icons">dashboard</i>
+                                    <p>Role Management</p>
+                                </a>
+                            </li>*@
+
                         @*<li class="nav-item ">
-            <a class="nav-link" style="font-size:18px;font-weight:bold;" asp-controller="AdminRoleMenu" asp-action="MenuManagement">
-                <i class="material-icons">dashboard</i>
-                <p>Menu Management</p>
-            </a>
-        </li>*@
+                                <a class="nav-link" style="font-size:18px;font-weight:bold;" asp-controller="DailyOffer" asp-action="Index">
+                                    <i class="material-icons">dashboard</i>
+                                    <p>Daily Offer</p>
+                                </a>
+                            </li>*@
+                        @*<li class="nav-item ">
+                                <a class="nav-link" style="font-size:18px;font-weight:bold;" asp-controller="AdminRoleMenu" asp-action="MenuManagement">
+                                    <i class="material-icons">dashboard</i>
+                                    <p>Menu Management</p>
+                                </a>
+                            </li>*@
 
                         <li class="nav-item ">
                             <a class="nav-link" style="font-size:18px;font-weight:bold;" asp-controller="AdminShowOrder" asp-action="GoUCAM">
@@ -457,12 +466,21 @@
         </div>
         <div class="col-sm-10" style="padding-left:30px;">
             @*<div class="row">
-                    <partial name="TopNavBar" />
-                </div>*@
+            <partial name="TopNavBar" />
+        </div>*@
 
             @*<div class="row">*@
 
             @RenderBody()
+
+        
+
+            @*<hr />
+
+            <div class="footer">
+                <p>&copy; 2020 - Mess Management</p>
+
+                </div>*@
 
             @*</div>*@
 
@@ -470,9 +488,9 @@
 
 
             @*<div ng-app="">
-                    <p>Name : <input type="text" ng-model="name"></p>
-                    <h1>Hello {{name}}</h1>
-                </div>*@
+            <p>Name : <input type="text" ng-model="name"></p>
+            <h1>Hello {{name}}</h1>
+        </div>*@
 
         </div>
         @*<div class="col-sm-1">
@@ -481,6 +499,12 @@
 
 
     </div>
+
+    @*<div class="container body-content">
+        <br />
+        @RenderBody()
+      
+    </div>*@
 
     @*<div class="container">
 

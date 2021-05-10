@@ -908,7 +908,7 @@ function tableFilter() {
       
                     var rowSpan = $(td[j]).attr('rowspan');
                     for (var k = 0; k < parseInt(rowSpan); k++) {
-                        console.log(tr[i + k]);
+                        //console.log(tr[i + k]);
                         tr[i+k].style.display = "";
                       
                     }
@@ -922,7 +922,7 @@ function tableFilter() {
    
         if (hide == true) {
             var rowSpan = $(td[1]).attr('rowspan');
-            console.log(i);
+            //console.log(i);
             for (var k = 0; k < parseInt(rowSpan); k++) {
                 console.log(tr[i + k]);
                 tr[i+k].style.display = "none";

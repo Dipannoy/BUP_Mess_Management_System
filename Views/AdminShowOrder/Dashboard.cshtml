@@ -116,6 +116,10 @@
 
     var SetMenuList = new Dictionary<string, string>();
     var OnSpotList = new Dictionary<string, string>();
+    var brkTotalItemDict = new Dictionary<string, string>();
+    var lnTotalItemDict = new Dictionary<string, string>();
+    var tbrkTotalItemDict = new Dictionary<string, string>();
+    var echitTotalItemDict = new Dictionary<string, string>();
 
     var STMBrk = _db.SetMenu.Where(x => x.SetMenuDate.ToShortDateString() == DateTime.Now.ToShortDateString() && x.MealTypeId == 1).ToList();
     var STMLnch = _db.SetMenu.Where(x => x.SetMenuDate.ToShortDateString() == DateTime.Now.ToShortDateString() && x.MealTypeId == 2).ToList();
@@ -210,41 +214,52 @@
     var dateParentList = _context.UserDateChoiceMaster.Where(x => x.Id > 0).ToList();
     var dateDetailList = _context.UserDateChoiceDetail.Where(x => x.Id > 0).ToList();
 
-    var modalList = from p in preSheduleList
-                    join o in dateParentList
-                    on new { A = p.UserId, B = p.MealTypeId } equals new { A = o.UserId, B = o.MealTypeId }
-                    into tempO
-                    from subSet in tempO.DefaultIfEmpty()
+    var dateDBList = from dtParent in dateParentList
+                     join dtDetail in dateDetailList
+                     on dtParent.Id equals dtDetail.UserDateChoiceMasterId
 
-                    select new { p.UserId,p.IsPreOrderSet,p.MealTypeId,
-                        ParentId = subSet == null ? 0 : subSet.Id };
-    modalList = modalList.ToList();
+                     where dtDetail.Date.ToShortDateString() == DateTime.Now.ToShortDateString()
+                     select new { dtParent.UserId, dtParent.MealTypeId,dtDetail.Date, dtDetail.IsOrderSet};
+    dateDBList = dateDBList.ToList();
 
-
-    var modalList2 = from p in modalList
-                     join o in dateDetailList.Where(x=>x.Date.ToShortDateString() == DateTime.Now.ToShortDateString()).ToList()
-                     on p.ParentId equals o.UserDateChoiceMasterId
+    var modalList2 = from p in preSheduleList
+                     join o in dateDBList
+                     on new { A = p.UserId, B = p.MealTypeId } equals new { A = o.UserId, B = o.MealTypeId }
                      into tempO
-
                      from subSet in tempO.DefaultIfEmpty()
 
-                     select new {p,
-                         Date = subSet == null ? DateTime.Now.Date:subSet.Date,
-                         OrderSet = subSet == null ? false: subSet.IsOrderSet,
-                         NoDate = subSet == null ? true : false};
-
+                     select new { p.UserId,p.IsPreOrderSet,p.MealTypeId,
+                         Date = subSet == null ? DateTime.Now.Date : subSet.Date,
+                         OrderSet = subSet == null ? false : subSet.IsOrderSet,
+                         NoDate = subSet == null ? true : false
+                     };
     modalList2 = modalList2.ToList();
+
+
+    //var modalList2 = from p in modalList
+    //                 join o in dateDetailList.Where(x=>x.Date.ToShortDateString() == DateTime.Now.ToShortDateString()).ToList()
+    //                 on p.ParentId equals o.UserDateChoiceMasterId
+    //                 into tempO
+
+    //                 from subSet in tempO.DefaultIfEmpty()
+
+    //                 select new {p,
+    //                     Date = subSet == null ? DateTime.Now.Date:subSet.Date,
+    //                     OrderSet = subSet == null ? false: subSet.IsOrderSet,
+    //                     NoDate = subSet == null ? true : false};
+
+    //modalList2 = modalList2.ToList();
     var brkModalList = modalList2.Where
         (x=>x.Date.Date == DateTime.Now.Date
         &&
         (x.OrderSet == true
-        || (x.OrderSet == false && x.NoDate == true && x.p.IsPreOrderSet == true))
-        && x.p.MealTypeId == 1).ToList();
-    var tbrkModalList = modalList2.Where(x => x.Date.Date == DateTime.Now.Date && (x.OrderSet == true || (x.OrderSet == false && x.NoDate == true && x.p.IsPreOrderSet == true)) && x.p.MealTypeId == 3).ToList();
-    var lnModalList = modalList2.Where(x => x.Date.Date == DateTime.Now.Date && (x.OrderSet == true || (x.OrderSet == false && x.NoDate == true && x.p.IsPreOrderSet == true)) && x.p.MealTypeId == 2).ToList();
+        || (x.OrderSet == false && x.NoDate == true && x.IsPreOrderSet == true))
+        && x.MealTypeId == 1).ToList();
+    var tbrkModalList = modalList2.Where(x => x.Date.Date == DateTime.Now.Date && (x.OrderSet == true || (x.OrderSet == false && x.NoDate == true && x.IsPreOrderSet == true)) && x.MealTypeId == 3).ToList();
+    var lnModalList = modalList2.Where(x => x.Date.Date == DateTime.Now.Date && (x.OrderSet == true || (x.OrderSet == false && x.NoDate == true && x.IsPreOrderSet == true)) && x.MealTypeId == 2).ToList();
 
 
-}
+    }
 <head>
     @*<link rel="stylesheet" type="text/css" href="~/assets2/css/bootstrap.min.css">
         <link rel="stylesheet" type="text/css" href="~/assets2/css/github.min.css">*@
@@ -1261,35 +1276,40 @@
         <div id="PreBrkList" class="modal">
             <div class="modal-content">
                 <div class="modal-body">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>
+                    <div id="PreBrkTable">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>
 
-                                </th>
-                            </tr>
+                                    </th>
+                                </tr>
 
-                        </thead>
-                        <tbody>
-                            @foreach (var bm in brkModalList)
-                            {
-                            <tr>
-                                <td style="font-weight:bold;">
-                                    @_userManager.Users.Where(x => x.Id == bm.p.UserId).FirstOrDefault().BUPFullName
-                                </td>
-                            </tr>
-                            }
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                                @foreach (var bm in brkModalList)
+                                {
+                 var usr = _userManager.Users.Where(x => x.Id == bm.UserId).FirstOrDefault();
+
+                                <tr>
+                                    <td style="font-weight:bold;">
+                                        @usr.BUPNumber-@usr.BUPFullName
+                                    </td>
+                                </tr>
+                    }
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
                 <div class="modal-footer">
-                    <div class="row">
-               
-                            <button class="btn btn-success" style="padding:3px;" onclick="closePreModal(1)">
-                                Close
-                            </button>
-                      
-                    </div>
+
+                    <button class="btn btn-success" style="padding:3px;" onclick="printPreModal('PreBrkTable')">
+                        Print
+                    </button>
+                    <button class="btn btn-success" style="padding:3px;" onclick="closePreModal(1)">
+                        Close
+                    </button>
+
                 </div>
 
             </div>
@@ -1299,6 +1319,7 @@
         <div id="PreLnList" class="modal">
             <div class="modal-content">
                 <div class="modal-body">
+                    <div id="PreLnTable">
                     <table>
                         <thead>
                             <tr>
@@ -1311,23 +1332,27 @@
                         <tbody>
                             @foreach (var bm in lnModalList)
                             {
+                                      var usr = _userManager.Users.Where(x => x.Id == bm.UserId).FirstOrDefault();
+             
                             <tr>
                                 <td style="font-weight:bold;">
-                                    @_userManager.Users.Where(x => x.Id == bm.p.UserId).FirstOrDefault().BUPFullName
+                                    @usr.BUPNumber-@usr.BUPFullName
                                 </td>
                             </tr>
                             }
                         </tbody>
                     </table>
+                        </div>
                 </div>
                 <div class="modal-footer">
-                    <div class="row">
 
+                        <button class="btn btn-success" style="padding:3px;" onclick="printPreModal('PreLnTable')">
+                            Print
+                        </button>
                         <button class="btn btn-success" style="padding:3px;" onclick="closePreModal(2)">
                             Close
                         </button>
 
-                    </div>
                 </div>
             </div>
             
@@ -1335,6 +1360,7 @@
         <div id="PreTBrkList" class="modal">
             <div class="modal-content">
                 <div class="modal-body">
+                    <div id="PreTBrkTbl">
                     <table>
                         <thead>
                             <tr>
@@ -1347,23 +1373,28 @@
                         <tbody>
                             @foreach (var bm in tbrkModalList)
                             {
-                                <tr>
-                                    <td style="font-weight:bold;">
-                                        @_userManager.Users.Where(x => x.Id == bm.p.UserId).FirstOrDefault().BUPFullName
-                                    </td>
-                                </tr>
-                            }
+                var usr = _userManager.Users.Where(x => x.Id == bm.UserId).FirstOrDefault();
+
+                            <tr>
+                                <td style="font-weight:bold;">
+                                    @usr.BUPNumber-@usr.BUPFullName
+                                </td>
+                            </tr>
+                }
                         </tbody>
                     </table>
+                    </div>
+                    
                 </div>
                 <div class="modal-footer">
-                    <div class="row">
 
-                        <button class="btn btn-success" style="padding:3px;" onclick="closePreModal(3)">
-                            Close
-                        </button>
+                    <button class="btn btn-success" style="padding:3px;" onclick="printPreModal('PreTBrkTbl')">
+                        Print
+                    </button>
+                    <button class="btn btn-success" style="padding:3px;" onclick="closePreModal(3)">
+                        Close
+                    </button>
 
-                    </div>
                 </div>
             </div>
          
@@ -1937,9 +1968,12 @@
                                     var orderType = item.IsOfficeOrder == true ? "Official" : "Personal";
                                     var isApprove = item.IsApproved;
                                     var orderFor = item.IsOfficeOrder == true ? _context.Office.Where(x => x.Id == item.OfficeId).FirstOrDefault().Name :
-                                        _context.Users.Where(x => x.Id == item.UserId).FirstOrDefault().BUPFullName;
-                                    var orderBy = _context.Users.Where(x => x.Id == item.UserId).FirstOrDefault().BUPFullName;
-                                    var bearBy = item.BearerId == null ? "-" : _context.Users.Where(x => x.Id == item.BearerId).FirstOrDefault().BUPFullName;
+                                    _context.Users.Where(x => x.Id == item.UserId).FirstOrDefault().BUPNumber + '-' +   
+                                    _context.Users.Where(x => x.Id == item.UserId).FirstOrDefault().BUPFullName;
+                                                                var orderBy = item.CreatedBy == null ? "-" : _context.Users.Where(x => x.Id == item.CreatedBy).FirstOrDefault().BUPFullName;
+    
+                                //var orderBy = _context.Users.Where(x => x.Id == item.UserId).FirstOrDefault().BUPNumber + '-' + _context.Users.Where(x => x.Id == item.UserId).FirstOrDefault().BUPFullName;
+                                    var bearBy = item.BearerId == null ? "-" : _context.Users.Where(x => x.Id == item.BearerId).FirstOrDefault().BUPNumber + '-'+ _context.Users.Where(x => x.Id == item.BearerId).FirstOrDefault().BUPFullName;
                                     var ind = 0;
                                     var onSpotDetailList = _context.CustomerChoiceV2.Where(x => x.OnSpotParentId == item.Id).ToList();
                                     if (onSpotDetailList.Count > 0)
@@ -1971,10 +2005,11 @@
                                                 @onSpotDetailList.ElementAt(0).quantity
                                             </td>
                                             <td rowspan="@onSpotDetailList.Count">
-                                                @*<a asp-action="EditOnSpotItem" asp-route-id="@onSpotDetailList.ElementAt(0).Id"><i class="far fa-edit"></i></a>*@
-                                                <button class="btn btn-sm btn-danger" style="padding:3px;" onclick="editOrder(@item.Id)"> Edit </button>
-
-                                            </td>
+                                                @if (!isApprove)
+                                                {@*<a asp-action="EditOnSpotItem" asp-route-id="@onSpotDetailList.ElementAt(0).Id"><i class="far fa-edit"></i></a>*@
+                                                                        <button class="btn btn-sm btn-danger" style="padding:3px;" onclick="editOrder(@item.Id)"> Edit </button>
+                                                }
+                                                                                            </td>
                                             <td rowspan="@onSpotDetailList.Count">
                                                 @if (!isApprove)
                                                 {
@@ -2152,7 +2187,7 @@
                                             {
                                                 if (lastUpdate == 1)
                                                 {
-                                                    var PersonList = _userManager.Users.Where(x => x.BUPFullName.Contains(personNamePartial)).ToList();
+                                                    var PersonList = _userManager.Users.Where(x => x.BUPFullName.Contains(personNamePartial) || x.BUPNumber.Contains(personNamePartial)).ToList();
 
                                                     var pr = from p in PersonList
                                                              join o in DistinConsumerListBrk
@@ -2181,19 +2216,48 @@
 
                                                         //  var specificPersonChoiceList = ConsumerDtlListBrk.Where(x => x.UserId == p).ToList();
                                                         string ItemDetail = "";
-                                                        <tr>
-                                                            <td>@_userManager.Users.Where(x => x.Id == p).FirstOrDefault().BUPFullName;</td>
-                                                            @foreach (var spo in liIQ)
+                                                    var usr = _userManager.Users.Where(x => x.Id == p).FirstOrDefault();
+                                                    <tr>
+                                                        <td>@usr.BUPNumber-@usr.BUPFullName;</td>
+                                                        @foreach (var spo in liIQ)
                                                             {
                                                                 long storeOutItemId = _db.ExtraItem.Where(x => x.Id == spo.Name).FirstOrDefault().StoreOutItemId;
                                                                 var storeOutItemName = _db.StoreOutItem.Where(x => x.Id == storeOutItemId).FirstOrDefault().Name;
                                                                 ItemDetail += storeOutItemName + " - " + spo.Amount + " , ";
+
+                                                                   if(brkTotalItemDict.ContainsKey(storeOutItemName))
+                                                                {
+                                                                    brkTotalItemDict[storeOutItemName] = (Int32.Parse(brkTotalItemDict[storeOutItemName])
+                                                                        + spo.Amount).ToString();
+                                                                }
+                                                                else
+                                                                {
+                                                                    brkTotalItemDict.Add(storeOutItemName, spo.Amount.ToString());
+                                                                }
                                                             }
 
-                                                            <td>@ItemDetail</td>
+                                                        <td>@ItemDetail</td>
 
 
+                                                    </tr>
+                                                    }
+
+                                                    @{
+                                                            var indexB = 0;
+
+                                                            foreach (var i in brkTotalItemDict)
+                                                            {
+                                                        <tr>
+                                                            @if (indexB++ == 0)
+                                                                    {
+                                                            <td rowspan="@brkTotalItemDict.Count">Total </td>
+                                                                    }
+
+                                                            <td> @i.Key - @i.Value   </td>
                                                         </tr>
+
+
+                                                            }
                                                     }
 
 
@@ -2376,7 +2440,7 @@
                                                 {
                                                     if (lastUpdate == 3)
                                                     {
-                                                        var PersonList = _userManager.Users.Where(x => x.BUPFullName.Contains(personNamePartial)).ToList();
+                                                        var PersonList = _userManager.Users.Where(x => x.BUPFullName.Contains(personNamePartial) || x.BUPNumber.Contains(personNamePartial)).ToList();
 
                                                         var pr = from p in PersonList
                                                                  join o in DistinConsumerListTBrk
@@ -2403,19 +2467,49 @@
                                                         .ToList();
                                                         //var specificPersonChoiceList = ConsumerDtlListTBrk.Where(x => x.UserId == p).ToList();
                                                         string ItemDetail = "";
-                                                        <tr>
-                                                            <td>@_userManager.Users.Where(x => x.Id == p).FirstOrDefault().BUPFullName;</td>
-                                                            @foreach (var spo in liIQ)
+                                                        var usr = _userManager.Users.Where(x => x.Id == p).FirstOrDefault();
+                                                    <tr>
+                                                        <td>@usr.BUPNumber-@usr.BUPFullName</td>
+                                                        @foreach (var spo in liIQ)
                                                             {
                                                                 long storeOutItemId = _db.ExtraItem.Where(x => x.Id == spo.Name).FirstOrDefault().StoreOutItemId;
                                                                 var storeOutItemName = _db.StoreOutItem.Where(x => x.Id == storeOutItemId).FirstOrDefault().Name;
                                                                 ItemDetail += storeOutItemName + " - " + spo.Amount + " , ";
+                                                                if(tbrkTotalItemDict.ContainsKey(storeOutItemName))
+                                                                {
+                                                                    tbrkTotalItemDict[storeOutItemName] = (Int32.Parse(tbrkTotalItemDict[storeOutItemName])
+                                                                        + spo.Amount).ToString();
+                                                                }
+                                                                else
+                                                                {
+                                                                    tbrkTotalItemDict.Add(storeOutItemName, spo.Amount.ToString());
+                                                                }
+
                                                             }
 
-                                                            <td>@ItemDetail</td>
+
+                                                        <td>@ItemDetail</td>
 
 
+                                                    </tr>
+                                                    }
+
+                                                    @{
+                                                            var indexT = 0;
+
+                                                            foreach (var i in tbrkTotalItemDict)
+                                                            {
+                                                        <tr>
+                                                            @if (indexT++ == 0)
+                                                                    {
+                                                            <td rowspan="@tbrkTotalItemDict.Count">Total </td>
+                                                                    }
+
+                                                            <td> @i.Key - @i.Value   </td>
                                                         </tr>
+
+
+                                                            }
                                                     }
 
 
@@ -2596,7 +2690,7 @@
                                                 {
                                                     if (lastUpdate == 2)
                                                     {
-                                                        var PersonList = _userManager.Users.Where(x => x.BUPFullName.Contains(personNamePartial)).ToList();
+                                                        var PersonList = _userManager.Users.Where(x => x.BUPFullName.Contains(personNamePartial) || x.BUPNumber.Contains(personNamePartial)).ToList();
 
                                                         var pr = from p in PersonList
                                                                  join o in DistinConsumerListLnch
@@ -2623,19 +2717,48 @@
                                                     .ToList();
                                                         //  var specificPersonChoiceList = ConsumerDtlListLnch.Where(x => x.UserId == p).ToList();
                                                         string ItemDetail = "";
-                                                        <tr>
-                                                            <td>@_userManager.Users.Where(x => x.Id == p).FirstOrDefault().BUPFullName;</td>
-                                                            @foreach (var spo in liIQ)
+                                                    var usr = _userManager.Users.Where(x => x.Id == p).FirstOrDefault();
+                                                    <tr>
+                                                        <td>@usr.BUPNumber-@usr.BUPFullName</td>
+
+                                                        @foreach (var spo in liIQ)
                                                             {
                                                                 long storeOutItemId = _db.ExtraItem.Where(x => x.Id == spo.Name).FirstOrDefault().StoreOutItemId;
                                                                 var storeOutItemName = _db.StoreOutItem.Where(x => x.Id == storeOutItemId).FirstOrDefault().Name;
                                                                 ItemDetail += storeOutItemName + " - " + spo.Amount + " , ";
+                                                                if(lnTotalItemDict.ContainsKey(storeOutItemName))
+                                                                {
+                                                                    lnTotalItemDict[storeOutItemName] = (Int32.Parse(lnTotalItemDict[storeOutItemName])
+                                                                        + spo.Amount).ToString();
+                                                                }
+                                                                else
+                                                                {
+                                                                    lnTotalItemDict.Add(storeOutItemName, spo.Amount.ToString());
+                                                                }
                                                             }
 
-                                                            <td>@ItemDetail</td>
+                                                        <td>@ItemDetail</td>
 
 
+                                                    </tr>
+                                                    }
+
+                                                    @{
+                                                            var indexLn = 0;
+
+                                                            foreach (var i in lnTotalItemDict)
+                                                            {
+                                                        <tr>
+                                                            @if (indexLn++ == 0)
+                                                                    {
+                                                            <td rowspan="@lnTotalItemDict.Count">Total </td>
+                                                                    }
+
+                                                            <td> @i.Key - @i.Value   </td>
                                                         </tr>
+
+
+                                                            }
                                                     }
 
 
@@ -2800,7 +2923,7 @@
                                                 {
                                                     if (lastUpdate == 10005)
                                                     {
-                                                        var PersonList = _userManager.Users.Where(x => x.BUPFullName.Contains(personNamePartial)).ToList();
+                                                        var PersonList = _userManager.Users.Where(x => x.BUPFullName.Contains(personNamePartial) || x.BUPNumber.Contains(personNamePartial)).ToList();
 
                                                         var pr = from p in PersonList
                                                                  join o in DistinConsumerListEC
@@ -2826,13 +2949,24 @@
                                                         .ToList();
                                                         // var specificPersonChoiceList = ConsumerDtlListEC.Where(x => x.UserId == p).ToList();
                                                         string ItemDetail = "";
+                                                    var usr = _userManager.Users.Where(x => x.Id == p).FirstOrDefault();
                                                         <tr>
-                                                            <td>@_userManager.Users.Where(x => x.Id == p).FirstOrDefault().BUPFullName;</td>
+                                                            <td>@usr.BUPNumber-@usr.BUPFullName</td>
                                                             @foreach (var spo in liIQ)
                                                             {
                                                                 //long storeOutItemId = _db.ExtraItem.Where(x => x.Id == spo.Name).FirstOrDefault().StoreOutItemId;
                                                                 var storeOutItemName = _db.StoreOutItem.Where(x => x.Id == spo.Name).FirstOrDefault().Name;
                                                                 ItemDetail += storeOutItemName + " - " + spo.Amount + " , ";
+                                                                if(echitTotalItemDict.ContainsKey(storeOutItemName))
+                                                                {
+                                                                    echitTotalItemDict[storeOutItemName] = (Int32.Parse(echitTotalItemDict[storeOutItemName])
+                                                                        + spo.Amount).ToString();
+                                                                }
+                                                                else
+                                                                {
+                                                                    echitTotalItemDict.Add(storeOutItemName, spo.Amount.ToString());
+                                                                }
+
                                                             }
 
                                                             <td>@ItemDetail</td>
@@ -2840,7 +2974,25 @@
 
                                                         </tr>
                                                     }
+                                               
+                                                        @{
+                                                            var index = 0;
 
+                                                            foreach (var i in echitTotalItemDict)
+                                                            {
+                                                                <tr>
+                                                                    @if (index++ == 0)
+                                                                    {
+                                                                 <td rowspan="@echitTotalItemDict.Count">Total </td>
+                                                                    }
+
+                                                                 <td> @i.Key - @i.Value   </td>
+                                                                </tr>
+
+
+                                                            }
+                                                        }
+                                                    
 
                                                 </tbody>
                                             </table>
@@ -3108,6 +3260,16 @@
                 model.style.display = "none";
             }
 
+        }
+        function printPreModal(mealId) {
+            var mywindow = window.open('', 'PRINT', 'height=' + 1000 + ',width=' + 800);
+            mywindow.document.write('<html><head></head><body>');
+            mywindow.document.write(document.getElementById(mealId).innerHTML);
+            mywindow.document.write('</body></html>');
+            mywindow.document.close(); // necessary for IE >= 10
+            mywindow.focus(); // necessary for IE >= 10*/
+
+            mywindow.print();
         }
 
 
@@ -3593,19 +3755,19 @@
             autoclose: true
         });
 
-        $("#person").on('change input', function () {
-            fetchPerson();
+        //$("#person").on('change input', function () {
+        //    fetchPerson();
 
-        });
-        $("#person2").on('change input', function () {
-            fetchPerson2();
-        });
-        $("#person3").on('change input', function () {
-            fetchPerson3();
-        });
-        $("#person4").on('change input', function () {
-            fetchPerson4();
-        });
+        //});
+        //$("#person2").on('change input', function () {
+        //    fetchPerson2();
+        //});
+        //$("#person3").on('change input', function () {
+        //    fetchPerson3();
+        //});
+        //$("#person4").on('change input', function () {
+        //    fetchPerson4();
+        //});
 
         //   $('.clockpicker').clockpicker({
         //  'default': 'now',
@@ -4662,37 +4824,41 @@
             $('#FetchPersonOrder4').submit();
         }
 
-        $("#item").on('change input', function () {
-            fetchItem();
-        });
-        $("#item2").on('change input', function () {
-            fetchItem2();
-        });
-        $("#item3").on('change input', function () {
-            fetchItem3();
-        });
+        //$("#item").on('change input', function () {
+        //    fetchItem();
+        //});
+        //$("#item2").on('change input', function () {
+        //    fetchItem2();
+        //});
+        //$("#item3").on('change input', function () {
+        //    fetchItem3();
+        //});
 
-        $("#item4").on('change input', function () {
-            fetchItem4();
-        });
+        //$("#item4").on('change input', function () {
+        //    fetchItem4();
+        //});
         function Print(id, height, width, meal, day, month, year) {
+
+
 
 
             var mywindow = window.open('', 'PRINT', 'height=' + height + ',width=' + width);
             mywindow.document.write('<html>    ');
             mywindow.document.write('<head> <style>  td {    border-style: solid;border-width: thin;border-color:grey }</style> <head>')
 
-
-            console.log(day);
-            console.log(month);
-            console.log(year);
+            var currentDate = new Date();
+            cd = currentDate.toString();
+            curDate = cd.split(' ');
+          
 
 
 
             //mywindow.document.write(headerhtml.toString());
             mywindow.document.write('<body style="text-align: center; padding:1em;">');
+            mywindow.document.write('<img src="../../images/bup_logo.png" height="50" />');
+
             mywindow.document.write('<h2>' + meal + '</h2>');
-            mywindow.document.write('<h3>' + day + '.' + month + '.' + year + '</h3>');
+            mywindow.document.write('<h3>' + curDate[1] + ' ' + curDate[2] + ', ' + curDate[3] + '</h3>');
             //mywindow.document.write('<table><tr><td>Session </td><td>' + s.toString() + '</td></tr><tr><td>Program </td><td>' + p.toString() + '</td></tr><tr><td>Course </td><td>' + c.toString() + '</td></tr></table></br>');
             //mywindow.document.write('<table><tr><td>Mean Marks </td><td>' + meanmark + '</td></tr><tr><td>Mean Grade Point </td><td>' + meanGradePOint + '</td></tr><tr><td>Faculty Performance Index </td><td>' + facultyPerformanceIndex + '</td></tr><tr><td>Standard Deviation Of Marks </td><td>' + stdDeviationMark + '</td></tr><tr><td>Standard Grade Points </td><td>' + stadGradePoint + '</td></tr><tr><td>Course Evaluation Score </td><td>' + courseEvaluationScore + '</td></tr><tr><td>Threshold Value </td><td>' + parsed.ThresholdValue +'</td></tr><tr><td>CO Level </td><td>'+LblCourseOutcomeValue + '</td></tr></table></br>')
             mywindow.document.write(document.getElementById(id).innerHTML);
@@ -4701,11 +4867,9 @@
 
             mywindow.document.write('</body></html>');
 
-            mywindow.document.close(); // necessary for IE >= 10
-            mywindow.focus(); // necessary for IE >= 10*/
-
+            mywindow.document.close();
+            mywindow.focus();
             mywindow.print();
-            mywindow.close();
 
 
         }

@@ -238,6 +238,8 @@ namespace Mess_Management_System_Alpha_V2.Data.Migrations
 
                     b.Property<DateTime>("CreatedDate");
 
+                    b.Property<bool>("IsMessage");
+
                     b.Property<string>("LastModifiedBy");
 
                     b.Property<DateTime>("LastModifiedDate");
@@ -446,6 +448,66 @@ namespace Mess_Management_System_Alpha_V2.Data.Migrations
                     b.ToTable("ConsumerMonthlyBillRecord");
                 });
 
+            modelBuilder.Entity("Mess_Management_System_Alpha_V2.Models.MessModels.ConsumerOthersBill", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<double>("Amount");
+
+                    b.Property<DateTime>("BillDate");
+
+                    b.Property<long>("ConsumerOthersBillParentId");
+
+                    b.Property<string>("CreatedBy");
+
+                    b.Property<DateTime>("CreatedDate");
+
+                    b.Property<string>("LastModifiedBy");
+
+                    b.Property<DateTime>("LastModifiedDate");
+
+                    b.Property<string>("Remarks");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate();
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ConsumerOthersBillParentId");
+
+                    b.ToTable("ConsumerOthersBill");
+                });
+
+            modelBuilder.Entity("Mess_Management_System_Alpha_V2.Models.MessModels.ConsumerOthersBillParent", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("CreatedBy");
+
+                    b.Property<DateTime>("CreatedDate");
+
+                    b.Property<string>("LastModifiedBy");
+
+                    b.Property<DateTime>("LastModifiedDate");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate();
+
+                    b.Property<string>("UserId");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("ConsumerOthersBillParent");
+                });
+
             modelBuilder.Entity("Mess_Management_System_Alpha_V2.Models.MessModels.ConsumerPaymentAttachment", b =>
                 {
                     b.Property<long>("Id")
@@ -597,7 +659,7 @@ namespace Mess_Management_System_Alpha_V2.Data.Migrations
 
                     b.Property<DateTime>("Date");
 
-                    b.Property<long>("ExtraChitParentId");
+                    b.Property<long?>("ExtraChitParentId");
 
                     b.Property<long?>("ExtraItemId");
 
@@ -607,7 +669,7 @@ namespace Mess_Management_System_Alpha_V2.Data.Migrations
 
                     b.Property<long>("MealTypeId");
 
-                    b.Property<long>("OnSpotParentId");
+                    b.Property<long?>("OnSpotParentId");
 
                     b.Property<long>("OrderTypeId");
 
@@ -1006,11 +1068,17 @@ namespace Mess_Management_System_Alpha_V2.Data.Migrations
 
                     b.Property<bool>("IsApproved");
 
+                    b.Property<bool>("IsMessageSeen");
+
+                    b.Property<bool>("IsMessageSent");
+
                     b.Property<bool>("IsOfficeOrder");
 
                     b.Property<string>("LastModifiedBy");
 
                     b.Property<DateTime>("LastModifiedDate");
+
+                    b.Property<long?>("MessageId");
 
                     b.Property<long?>("OfficeId");
 
@@ -1021,6 +1089,8 @@ namespace Mess_Management_System_Alpha_V2.Data.Migrations
                     b.Property<string>("UserId");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("MessageId");
 
                     b.HasIndex("OfficeId");
 
@@ -1941,6 +2011,22 @@ namespace Mess_Management_System_Alpha_V2.Data.Migrations
                         .OnDelete(DeleteBehavior.Restrict);
                 });
 
+            modelBuilder.Entity("Mess_Management_System_Alpha_V2.Models.MessModels.ConsumerOthersBill", b =>
+                {
+                    b.HasOne("Mess_Management_System_Alpha_V2.Models.MessModels.ConsumerOthersBillParent", "ConsumerOthersBillParent")
+                        .WithMany("ConsumerOthersBillList")
+                        .HasForeignKey("ConsumerOthersBillParentId")
+                        .OnDelete(DeleteBehavior.Restrict);
+                });
+
+            modelBuilder.Entity("Mess_Management_System_Alpha_V2.Models.MessModels.ConsumerOthersBillParent", b =>
+                {
+                    b.HasOne("Mess_Management_System_Alpha_V2.Data.ApplicationUser", "ApplicationUser")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+                });
+
             modelBuilder.Entity("Mess_Management_System_Alpha_V2.Models.MessModels.ConsumerPaymentAttachment", b =>
                 {
                     b.HasOne("Mess_Management_System_Alpha_V2.Models.MessModels.ConsumerBillParent", "ConsumerBillParent")
@@ -2128,6 +2214,11 @@ namespace Mess_Management_System_Alpha_V2.Data.Migrations
 
             modelBuilder.Entity("Mess_Management_System_Alpha_V2.Models.MessModels.OnSpotParent", b =>
                 {
+                    b.HasOne("Mess_Management_System_Alpha_V2.Models.MessModels.Constants", "Constants")
+                        .WithMany("OnSpotParentList")
+                        .HasForeignKey("MessageId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("Mess_Management_System_Alpha_V2.Models.MessModels.Office", "Office")
                         .WithMany("OnSpotParentList")
                         .HasForeignKey("OfficeId")

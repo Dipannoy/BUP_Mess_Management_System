@@ -42,11 +42,11 @@ namespace Mess_Management_System_Alpha_V2.Models.MessModels
         public virtual MealType MealType { get; set; }
 
         [ForeignKey("OnSpotParent")]
-        public long OnSpotParentId { get; set; }
+        public long? OnSpotParentId { get; set; }
         public virtual OnSpotParent OnSpotParent { get; set; }
 
         [ForeignKey("ExtraChitParent")]
-        public long ExtraChitParentId { get; set; }
+        public long? ExtraChitParentId { get; set; }
         public virtual ExtraChitParent ExtraChitParent { get; set; }
 
 

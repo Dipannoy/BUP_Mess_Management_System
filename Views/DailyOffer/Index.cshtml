@@ -521,6 +521,10 @@
 
                 numOfEdittedOptions = data[1].length;
                 for (var i = 0; i < data[1].length; i++) {
+
+                    var padTop = i == 0 ? "35px" : "63px";
+                    var checkDiv = document.createElement('div');
+                    checkDiv.setAttribute("Id", "checkDiv_" + (i + 1));
                     var x = document.createElement("INPUT");
                     x.setAttribute("type", "checkbox");
                     x.setAttribute("class", "form-check-input");
@@ -528,14 +532,18 @@
                     x.setAttribute("Id", "CheckBox_" + (i + 1));
                     //x.setAttribute("class", "selectStl");
                     var checkParent = document.getElementById("removeCheck");
-                    checkParent.appendChild(x);
-                    document.getElementById("CheckBox_" + (i + 1)).style.marginTop = "35px";
+                    checkParent.appendChild(checkDiv);
+                    document.getElementById("checkDiv_" + (i + 1)).style.paddingTop = padTop;
 
-                    $("#" + "removeCheck").append('</br>');
+                    var checkParent2 = document.getElementById("checkDiv_" + (i + 1));
+                    checkParent2.appendChild(x);
+                    //document.getElementById("CheckBox_" + (i + 1)).style.marginTop = "35px";
+
+                    //$("#" + "removeCheck").append('</br>');
                     $("#" + "CheckBox_" + (i + 1)).val(data[1][i].Id.toString());
 
 
-                    $("#" + "removeLabel").append('<div><label class="labelStl" for="name">Remove Item</label></div>');
+                    $("#" + "removeLabel").append('<div style="margin-top:35px"><label class="labelStl" for="name">Remove Item</label></div>');
 
                     $("#" + "itemFld").append('<div><label for="name">Item</label></div>');
 

@@ -75,7 +75,7 @@ function createMealDateInput(mealId,
     var moreBtn = document.createElement("button");
     moreBtn.setAttribute('id', moreButtonId);
     moreBtn.setAttribute('name', moreButtonId);
-    moreBtn.setAttribute('class', 'btn btn-success');
+    moreBtn.setAttribute('class', 'btn btn');
     moreBtn.textContent = 'Add More';
     moreBtn.onclick = function () {
 
@@ -118,12 +118,14 @@ function createMealDateInput(mealId,
         var input3 = document.createElement("button");
         input3.setAttribute('id', mealDateButtonId);
         input3.setAttribute('name', mealDateButtonId);
-        input3.setAttribute('class', 'btn btn-success');
+        input3.setAttribute('class', 'btn btn');
         input3.textContent = 'Submit';
         input3.onclick = function () { submitMealDate(mealId); };
 
         var parent3 = document.getElementById(mealDateButtonSpace);
         parent3.appendChild(input3);
+
+        //$("#" + mealCheckBoxSpace).append('<div class="row" style="padding-top:10px;">Check on in case of active meal.</div>');
 
     }
 
@@ -226,9 +228,11 @@ function submitMealDate(mealId) {
 }
 
 function deleteDate(dateDetailId) {
+
+    $("#ConfirmDelete").empty();
     var input3 = document.createElement("button");
    
-    input3.setAttribute('class', 'btn btn-success');
+    input3.setAttribute('class', 'btn btn');
     input3.textContent = 'Yes';
     input3.onclick = function () { confirmDelete(dateDetailId); };
 
@@ -303,8 +307,14 @@ function OnOffModify(MealId) {
 
             } else {
                 // DoSomethingElse()
-                alert(response.responseText);
-                window.location.href = "https://ucam.bup.edu.bd/Security/LogOut.aspx";
+                if (response.responseText == "Expire") {
+                    window.location.href = "https://ucam.bup.edu.bd/Security/LogOut.aspx";
+                }
+                else {
+                    alert(response.responseText);
+                    window.location.reload(true);
+
+                }
             }
         }
 
@@ -1014,7 +1024,7 @@ function AddMoreExtra(type,parentID, selectID, inputParentID, inputID,buttonPare
             var input3 = document.createElement("button");
             input3.setAttribute('id', buttonID + count);
             input3.setAttribute('name', buttonID + count);
-            input3.setAttribute('class', 'btn btn-success');
+            input3.setAttribute('class', 'btn btn');
             input3.textContent = 'Add More';
             input3.onclick = function () { AddMoreExtra(type, parentID, selectID, inputParentID, inputID, buttonParentId, buttonID, btnParent, extraChitDrop); };
 

@@ -129,10 +129,14 @@ namespace Mess_Management_System_Alpha_V2.Services.Drop_Down_List_Helper
         {
             var list = new Dictionary<string, string>();
             _db.StoreOutItem.Where(x=>x.IsOpen == true)
+                .OrderBy(x=>x.Name)
                 .Include(x=> x.UnitType)
                 .Include(x => x.StoreOutItemCategory)
                 .ToList()
                 .ForEach(a => list.Add(a.Id.ToString(), a.Name.ToString()));
+
+            //Array.Sort(list, (x, y) => String.Compare(x.Name, y.Name));
+            //list.so
             return list;
         }
 

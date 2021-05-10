@@ -495,11 +495,32 @@ namespace Mess_Management_System_Alpha_V2.Controllers.Admin
                 DateTime date = DateTime.ParseExact(datesv, "M/d/yyyy", CultureInfo.InvariantCulture);
                 ViewBag.OrderDate = date;
                 ViewBag.FullName = await GetUserName();
+                var role = await GetLogInUserRoleObjectAsync();
+                var roleMenuList = _context.RoleMenu.Where(x => x.UserIdentityRoleId == role.Id).ToList();
+                var nevMenuList = _context.NavigationMenu.Where(x => x.Id > 0).ToList();
+                var pr = from r in roleMenuList
+                         join n in nevMenuList
+                         on r.NavigationMenuId equals n.Id
+                         // where o.LastModifiedDate.ToShortDateString() == OD.AddDays(-1).ToShortDateString() && o.MealTypeId == 1
+                         select n;
+                var filterMenuList = pr.ToList();
+                ViewBag.FilterMenuList = filterMenuList;
+            
                 return View("Dashboard");
             }
             catch(Exception ex)
             {
                 ViewBag.OrderDate = DateTime.Now;
+                var role = await GetLogInUserRoleObjectAsync();
+                var roleMenuList = _context.RoleMenu.Where(x => x.UserIdentityRoleId == role.Id).ToList();
+                var nevMenuList = _context.NavigationMenu.Where(x => x.Id > 0).ToList();
+                var pr = from r in roleMenuList
+                         join n in nevMenuList
+                         on r.NavigationMenuId equals n.Id
+                         // where o.LastModifiedDate.ToShortDateString() == OD.AddDays(-1).ToShortDateString() && o.MealTypeId == 1
+                         select n;
+                var filterMenuList = pr.ToList();
+                ViewBag.FilterMenuList = filterMenuList;
                 ViewBag.FullName = await GetUserName();
                 return View("Dashboard");
             }
@@ -552,7 +573,7 @@ namespace Mess_Management_System_Alpha_V2.Controllers.Admin
         [AutoValidateAntiforgeryToken]
         public async Task<IActionResult> OnSpotOrderCreate(string userid)
         {
-             int mealId = Int32.Parse(Request.Form["meal"]);
+            int mealId = Int32.Parse(Request.Form["meal"]);
             string person = Request.Form["searchInput"];
             string onSpotMessage = "";
             var prsndtl = _userManager.Users.Where(x => x.BUPFullName == person).FirstOrDefault();
@@ -784,10 +805,22 @@ namespace Mess_Management_System_Alpha_V2.Controllers.Admin
             ViewBag.MealId = MealId;
             ViewBag.SubMenuId = SubMenuId;
             ViewBag.FullName = await GetUserName();
+            var role = await GetLogInUserRoleObjectAsync();
+            var roleMenuList = _context.RoleMenu.Where(x => x.UserIdentityRoleId == role.Id).ToList();
+            var nevMenuList = _context.NavigationMenu.Where(x => x.Id > 0).ToList();
+            var pr = from r in roleMenuList
+                     join n in nevMenuList
+                     on r.NavigationMenuId equals n.Id
+                     // where o.LastModifiedDate.ToShortDateString() == OD.AddDays(-1).ToShortDateString() && o.MealTypeId == 1
+                     select n;
+            var filterMenuList = pr.ToList();
+            ViewBag.FilterMenuList = filterMenuList;
 
             return View("Dashboard");
 
         }
+
+        
 
         public async Task<ActionResult> FetchItemOrder(int MealId, int SubMenuId)
         {
@@ -814,6 +847,17 @@ namespace Mess_Management_System_Alpha_V2.Controllers.Admin
             ViewBag.MealId = MealId;
             ViewBag.SubMenuId = SubMenuId;
             ViewBag.FullName = await GetUserName();
+
+            var role = await GetLogInUserRoleObjectAsync();
+            var roleMenuList = _context.RoleMenu.Where(x => x.UserIdentityRoleId == role.Id).ToList();
+            var nevMenuList = _context.NavigationMenu.Where(x => x.Id > 0).ToList();
+            var pr = from r in roleMenuList
+                     join n in nevMenuList
+                     on r.NavigationMenuId equals n.Id
+                     // where o.LastModifiedDate.ToShortDateString() == OD.AddDays(-1).ToShortDateString() && o.MealTypeId == 1
+                     select n;
+            var filterMenuList = pr.ToList();
+            ViewBag.FilterMenuList = filterMenuList;
 
             return View("Dashboard");
 
@@ -970,6 +1014,9 @@ namespace Mess_Management_System_Alpha_V2.Controllers.Admin
                         osp.IsOfficeOrder = isOffice;
                         osp.CreatedBy = UserId;
                         osp.Date = DateTime.Now;
+
+                        osp.IsMessageSent = false;
+                        osp.IsMessageSeen = false;
                         
                         osp.CreatedDate = DateTime.Now;
                         _context.OnSpotParent.Add(osp);
@@ -983,6 +1030,8 @@ namespace Mess_Management_System_Alpha_V2.Controllers.Admin
                         osp.BearerId = bearerId;
                         osp.IsOfficeOrder = isOffice;
                         osp.Date = DateTime.Now;
+                        osp.IsMessageSent = false;
+                        osp.IsMessageSeen = false;
                         osp.CreatedBy = UserId;
                         osp.CreatedDate = DateTime.Now;
                         _context.OnSpotParent.Add(osp);
@@ -2299,10 +2348,6 @@ namespace Mess_Management_System_Alpha_V2.Controllers.Admin
 
 
             return json;
-
-
-
-
 
         }
 

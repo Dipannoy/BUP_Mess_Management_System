@@ -107,6 +107,8 @@ namespace Mess_Management_System_Alpha_V2.Data
         public DbSet<RoleMenu> RoleMenu { get; set; }
         public DbSet<DailyOfferItem> DailyOfferItem { get; set; }
 
+        public DbSet<ConsumerOthersBillParent> ConsumerOthersBillParent { get; set; }
+        public DbSet<ConsumerOthersBill> ConsumerOthersBill { get; set; }
 
         //public DbSet<ConsumerPaymentAttachment> ConsumerPaymentAttachment { get; set; }
 
@@ -374,13 +376,17 @@ namespace Mess_Management_System_Alpha_V2.Data
 .HasOne(o => o.UserDateChoiceMaster)
 .WithMany(m => m.UserDateChoiceDetailList).OnDelete(DeleteBehavior.Restrict);
 
-//            modelBuilder.Entity<ExtraChitParent>()
-//.HasOne(o => o.ApplicationUser)
-//.WithMany(m => m.ExtraChitParentList).OnDelete(DeleteBehavior.Restrict);
+            modelBuilder.Entity<OnSpotParent>()
+.HasOne(o => o.Constants)
+.WithMany(m => m.OnSpotParentList).OnDelete(DeleteBehavior.Restrict);
 
-//            modelBuilder.Entity<ExtraChitParent>()
-//.HasOne(o => o.Office)
-//.WithMany(m => m.ExtraChitParentList).OnDelete(DeleteBehavior.Restrict);
+            //            modelBuilder.Entity<ExtraChitParent>()
+            //.HasOne(o => o.ApplicationUser)
+            //.WithMany(m => m.ExtraChitParentList).OnDelete(DeleteBehavior.Restrict);
+
+            //            modelBuilder.Entity<ExtraChitParent>()
+            //.HasOne(o => o.Office)
+            //.WithMany(m => m.ExtraChitParentList).OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<OnSpotParent>()
 .HasOne(o => o.ApplicationUser)
@@ -456,6 +462,10 @@ namespace Mess_Management_System_Alpha_V2.Data
             modelBuilder.Entity<DailyOfferItem>()
 .HasOne(o => o.StoreOutItem)
 .WithMany(m => m.DailyOfferItemList).OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<ConsumerOthersBill>()
+.HasOne(o => o.ConsumerOthersBillParent)
+.WithMany(m => m.ConsumerOthersBillList).OnDelete(DeleteBehavior.Restrict);
             base.OnModelCreating(modelBuilder);
         }
 

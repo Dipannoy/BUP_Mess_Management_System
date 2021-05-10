@@ -29,9 +29,9 @@ namespace Mess_Management_System_Alpha_V2.Controllers.Admin
 
         private readonly ApplicationDbContext _context;
         private UserManager<ApplicationUser> _userManager;
-        private RoleManager<IdentityRole> _roleManager;
+        private RoleManager<UserIdentityRole> _roleManager;
 
-        public AdminMenuController(ApplicationDbContext context, UserManager<ApplicationUser> userManager, RoleManager<IdentityRole> roleManager)
+        public AdminMenuController(ApplicationDbContext context, UserManager<ApplicationUser> userManager, RoleManager<UserIdentityRole> roleManager)
         {
             _context = context;
             _userManager = userManager;
@@ -50,37 +50,41 @@ namespace Mess_Management_System_Alpha_V2.Controllers.Admin
         }
         public async Task<IActionResult> Menu()
         {
+
             if (SessionExist())
             {
                 if (await UserExistMess())
                 {
-                    if (await GetLogInUserRoleAsync() == "Admin" || await GetLogInUserRoleAsync() == "MessAdmin")
-                    {
-                        ViewBag.MealItemList = _context.StoreOutItem.ToList();
-                        ViewBag.ExtraItemList = _context.StoreOutItem.ToList();
-                        ViewBag.FullName = await GetUserName();
+                   
+                    var role2 = await GetLogInUserRoleObjectAsync();
+                    var roleMenuList2 = _context.RoleMenu.Where(x => x.UserIdentityRoleId == role2.Id).ToList();
+                    var nevMenuList2 = _context.NavigationMenu.Where(x => x.Id > 0).ToList();
+                    var pr2 = from r in roleMenuList2
+                              join n in nevMenuList2
+                              on r.NavigationMenuId equals n.Id
+                              // where o.LastModifiedDate.ToShortDateString() == OD.AddDays(-1).ToShortDateString() && o.MealTypeId == 1
+                              select n;
+                    var filterMenuList2 = pr2.ToList();
 
-                        return View();
-                    }
-                    else
-                    {
-                        return LocalRedirect("~/AccessCheck/Index");
+                    ViewBag.FilterMenuList = filterMenuList2;
+                    ViewBag.MealItemList = _context.StoreOutItem.ToList();
+                    ViewBag.ExtraItemList = _context.StoreOutItem.ToList();
+                    ViewBag.FullName = await GetUserName();
 
-                    }
+                    return View();
                 }
                 else
                 {
                     return LocalRedirect("~/AccessCheck/Index");
 
                 }
-
             }
             else
             {
                 return LocalRedirect("~/AccessCheck/Index");
 
             }
-       
+                  
         }
         public IActionResult Test()
         {
@@ -320,12 +324,32 @@ namespace Mess_Management_System_Alpha_V2.Controllers.Admin
 
             //var user = await _userManager.GetUserAsync(User);
             //var userID = user.Id;
-            var obj = _context.ExtraItem.Where(x => x.Day == Int32.Parse(Day) && x.MealTypeId == Int32.Parse(MealTypeId) && x.StoreOutItemId == Int32.Parse(Item)).FirstOrDefault();
-            if(obj != null)
-            {
-                return Json(new { success = false, responseText = "Item already exists" });
 
+            //var exObj = _context.ExtraItem.(x => x.Day == Int32.Parse(Day) && x.MealTypeId == Int32.Parse(MealTypeId) && x.StoreOutItemId == Int32.Parse(Item)).FirstOrDefault();
+            //if(exObj == null)
+            //{
+
+            //}
+
+            
+            
+            var menuList = _context.MenuItem.Where(x => x.Day == Int32.Parse(Day) && x.MealTypeId == Int32.Parse(MealTypeId)).ToList();
+            
+            foreach(var m in menuList)
+            {
+                var exObj = _context.ExtraItem.Where(x => x.Id == m.ExtraItemId).FirstOrDefault();
+                if(exObj.StoreOutItemId == Int32.Parse(Item))
+                {
+                    return Json(new { success = false, responseText = "Item already exists" });
+
+                }
+                
             }
+            //if(obj != null)
+            //{
+            //    return Json(new { success = false, responseText = "Item already exists" });
+
+            //}
 
             ExtraItem et = new ExtraItem();
 
@@ -612,6 +636,17 @@ namespace Mess_Management_System_Alpha_V2.Controllers.Admin
 
 
             return user.BUPFullName;
+        }
+
+        public async Task<UserIdentityRole> GetLogInUserRoleObjectAsync()
+        {
+            string usrName = SessionExtensions.GetString(HttpContext.Session, "user");
+            var user = await _userManager.FindByNameAsync(usrName);
+            var userrole = _context.UserRoles.Where(x => x.UserId == user.Id).FirstOrDefault();
+
+            var role = await _roleManager.FindByIdAsync(userrole.RoleId);
+
+            return role;
         }
 
     }

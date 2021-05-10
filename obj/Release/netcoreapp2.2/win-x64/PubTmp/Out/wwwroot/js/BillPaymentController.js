@@ -95,6 +95,47 @@ function ConfirmPayment() {
     else {
         amount = document.getElementById('cashAmount').value;
         receiver = document.getElementById('cashReceiver').value;
+        date = document.getElementById("cashDate").value;
+        $.ajax({
+            url: '/AdminBillGenerate/ConfirmPayment',
+            type: "POST",
+
+            dataType: "json",
+            data: {
+                BillParent: globalParent, Method: methodId,
+                Mobile: moblNum, TransId: transId, Bank: bankName, Account: accountNum,
+                Receiver: receiver, Amount: amount, Due: globalBill,
+                File: null,
+                FileExtension: null,
+                LinkUrl: null,
+                PaymentDate: date
+            },
+            success: function (response) {
+                if (response.success) {
+
+                    alert(response.responseText);
+                    window.location.reload(true);
+                    return;
+
+                } else {
+                    // DoSomethingElse()
+                    if (response.responseText == "Expire") {
+                        window.location.href = "https://ucam.bup.edu.bd/Security/LogOut.aspx";
+                        return;
+                    }
+                    else {
+                        alert(response.responseText);
+                        window.location.reload(true);
+                        return;
+
+                    }
+
+                }
+            },
+            error: function (xhr, status, error) {
+                alert(error);
+            }
+        });
 
     }
 
@@ -172,6 +213,11 @@ $("#bkashDate").datepicker({
 });
 
 $("#checkDate").datepicker({
+    dateFormat: "dd-mm-yy"
+    , duration: "fast"
+});
+
+$("#cashDate").datepicker({
     dateFormat: "dd-mm-yy"
     , duration: "fast"
 });
